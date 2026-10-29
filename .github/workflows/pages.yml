@@ -28,10 +28,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: |
-            /tmp/gh-arcade/package-lock.json
-            /tmp/vibe-basketball/package-lock.json
 
       - name: Build the Neon Arcade collection
         run: |
