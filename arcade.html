@@ -1,150 +1,34 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#10111b"><title>Mindspace Arcade</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090b18">
+<title>Mindspace Arcade</title>
 <style>
-:root{--bg:#10111b;--panel:#191b29;--line:#30334b;--text:#f4f5ff;--muted:#a5aac4;--mint:#9df3d0;--violet:#b6a6ff;--pink:#ff9cc7;--yellow:#ffdf8a}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% 0%,#25264b,transparent 38%),radial-gradient(ellipse at 95% 10%,#233d43,transparent 28%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
-.app{max-width:1100px;margin:auto;padding:24px 18px 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:25px}.brand{font-size:21px;font-weight:850}.brand span{color:var(--mint)}a.back{color:var(--mint);text-decoration:none;border:1px solid var(--line);padding:9px 13px;border-radius:12px}
-.hero{padding:25px;border-radius:22px;background:linear-gradient(120deg,#252744,#244442);border:1px solid #ffffff12;margin-bottom:20px}.eyebrow{color:var(--mint);font-size:11px;font-weight:850;letter-spacing:2px}.hero h1{font-size:clamp(30px,5vw,44px);letter-spacing:-1.5px;margin:8px 0}.hero p{color:#c4c8e0;margin:0}
-.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}.tile{font:inherit;text-align:left;color:var(--text);background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:13px;min-height:125px;cursor:pointer}.tile:hover{border-color:#77739d}.tile.active{border-color:var(--mint);background:#202b32}.emoji{font-size:27px;display:block;margin-bottom:7px}.tile strong{display:block}.tile small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
-.stage{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px}.stage-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.stage h2{margin:0;font-size:21px}.hint{font-size:12px;color:var(--muted);margin:4px 0 12px}.controls{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#ffffff0d;color:var(--text);border-radius:10px;padding:10px 14px;font-weight:750;cursor:pointer}.btn.primary{background:var(--mint);color:#151b25;border-color:transparent}.btn:focus-visible,.tile:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
-.playfield{display:flex;justify-content:center;align-items:center;background:#0c0d16;border-radius:14px;padding:10px;min-height:250px;overflow:hidden}canvas{display:block;width:min(100%,600px);height:auto;border-radius:8px;touch-action:manipulation}.status{text-align:center;color:var(--mint);font-weight:750;margin-top:10px;min-height:24px}.mobile{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}.mobile .btn{min-width:48px}.board2048{width:min(440px,100%);aspect-ratio:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:8px;background:#24263b;border-radius:14px;touch-action:pan-y}.cell2048{display:grid;place-items:center;border-radius:9px;font-weight:850;font-size:clamp(15px,4vw,29px);aspect-ratio:1;color:#10111b}.footer{text-align:center;color:#777d9b;font-size:11px;margin-top:25px}
-body.playing .app{max-width:none;min-height:100vh;padding:14px 16px 20px;display:flex;flex-direction:column}body.playing .hero,body.playing .games,body.playing .footer{display:none}body.playing .stage{margin-top:0;flex:1;display:flex;flex-direction:column}body.playing .playfield{flex:1;min-height:calc(100vh - 190px)}body.playing canvas{width:min(100%,1000px)}body.playing .top{margin-bottom:12px}body.playing .stage-head{margin-bottom:8px}@media(max-width:500px){.hero{padding:20px}.stage{padding:12px}.top{align-items:flex-start}}
-</style></head>
-<body><main class="app">
+:root{color-scheme:dark;--bg:#090b18;--panel:#151a30;--line:#30395b;--text:#f5f7ff;--muted:#a9b2d0;--cyan:#75f3e0;--violet:#a99cff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 12% 0%,#30336a 0,transparent 38%),radial-gradient(ellipse at 92% 18%,#125a62 0,transparent 30%),var(--bg);color:var(--text);font:16px/1.5 system-ui,Segoe UI,sans-serif}.wrap{width:min(1050px,calc(100% - 32px));margin:auto;padding:24px 0 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:14px}.brand{font-weight:900;letter-spacing:.3px}.brand span{color:var(--cyan)}a{color:inherit}.back{border:1px solid var(--line);padding:9px 13px;border-radius:12px;text-decoration:none}.hero{margin-top:42px;padding:clamp(25px,6vw,58px);border:1px solid #ffffff20;border-radius:28px;background:linear-gradient(130deg,#1d2547dd,#123b43dd);box-shadow:0 25px 90px #0006}.eyebrow{font-size:12px;letter-spacing:2.5px;font-weight:900;color:var(--cyan)}h1{font-size:clamp(36px,7vw,68px);line-height:1.02;letter-spacing:-2px;margin:13px 0}.hero p{max-width:650px;color:#c4cbe3;font-size:17px}.launch{display:inline-flex;align-items:center;gap:12px;margin-top:20px;padding:15px 22px;border-radius:14px;background:var(--cyan);color:#08151a;text-decoration:none;font-weight:900;box-shadow:0 10px 35px #75f3e044}.launch:hover{transform:translateY(-2px)}.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:18px}.feature{padding:18px;border:1px solid var(--line);border-radius:17px;background:#11172a}.feature b{display:block;margin-bottom:5px}.feature span{color:var(--muted);font-size:13px}.locked{margin-top:40px}.hidden{display:none!important}
+</style>
+</head>
+<body><main class="wrap">
 <header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><a class="back" href="./">← Back to study</a></header>
-<section class="hero"><div class="eyebrow">THE SECRET SIDE QUEST</div><h1>Pick a game. Press start.</h1><p>Choose a game below. The selection changes the game panel immediately, then press Start game to play.</p></section>
-<nav class="games" aria-label="Choose a game">
-<button class="tile active" data-game="snake"><span class="emoji">🐍</span><strong>Snake</strong><small>Arrow keys / WASD</small></button>
-<button class="tile" data-game="pong"><span class="emoji">🏓</span><strong>Pong</strong><small>Arrow keys / W and S</small></button>
-<button class="tile" data-game="flappy"><span class="emoji">🐤</span><strong>Flappy</strong><small>Space or tap</small></button>
-<button class="tile" data-game="tetris"><span class="emoji">🧱</span><strong>Tetris</strong><small>Arrow keys</small></button>
-<button class="tile" data-game="breakout"><span class="emoji">🪄</span><strong>Breakout</strong><small>Move with mouse / arrows</small></button>
-<button class="tile" data-game="2048"><span class="emoji">🔢</span><strong>2048</strong><small>Slide matching tiles</small></button>
-<button class="tile" data-game="hexgl"><span class="emoji">🏎️</span><strong>HexGL</strong><small>3D racing demo</small></button>
-<button class="tile" data-game="fablecities"><span class="emoji">🏙️</span><strong>Fable Cities</strong><small>3D city-building game</small></button>
-<button class="tile" data-game="cookieclicker"><span class="emoji">🍪</span><strong>Cookie Clicker</strong><small>Build your cookie empire</small></button>
-<a class="tile" href="./arcade-pro/" style="text-decoration:none;display:block"><span class="emoji">🕹️</span><strong>Neon Arcade Collection</strong><small>10 polished games · Snake, Pinball, shooters, racing, maze and more</small></a>
-<a class="tile" href="./arcade-pro/basketball/" style="text-decoration:none;display:block"><span class="emoji">🏀</span><strong>Vibe Basketball 3D</strong><small>3D street basketball · 1v1 and 3-point contest</small></a>
-</nav>
-<section class="stage"><div class="stage-head"><div><h2 id="gameTitle">Snake</h2><p class="hint" id="gameHint">Eat the glowing dots and don't hit yourself.</p></div><div class="controls"><button class="btn primary" id="start">▶ Start game</button><button class="btn" id="restart">↻ Restart</button></div></div>
-<div class="playfield" id="playfield"><canvas id="screen" width="600" height="400" aria-label="Game screen"></canvas></div><div class="status" id="status" role="status">Snake selected. Press Start game.</div>
-<div class="mobile" id="mobile"><button class="btn" data-dir="up">▲</button><button class="btn" data-dir="left">◀</button><button class="btn" data-dir="down">▼</button><button class="btn" data-dir="right">▶</button><button class="btn" id="flap">FLAP</button></div></section>
-<footer class="footer">Mindspace Arcade · A little play between big ideas.</footer></main>
+<section class="hero"><div class="eyebrow">THE SECRET SIDE QUEST</div><h1>Welcome to the arcade.</h1><p>A proper collection of ten neon arcade games, with polished menus, responsive controls, sound, high scores, two-player modes and controller support.</p><a class="launch" href="./arcade-pro/">ENTER THE ARCADE <span>↗</span></a></section>
+<section class="features">
+<div class="feature"><b>⚡ Fast action</b><span>Astro Blaster, Star Siege and Neon Runner.</span></div>
+<div class="feature"><b>🧠 Puzzles</b><span>Neon Stack, Snake and Neon Maze.</span></div>
+<div class="feature"><b>🎮 Multiplayer</b><span>Two-player Snake and Pong, plus co-op shooter mode.</span></div>
+<div class="feature"><b>🏆 Progress</b><span>Saved high scores, trophies and settings.</span></div>
+</section>
+<p style="color:#7f89a8;font-size:12px;text-align:center;margin-top:32px">Mindspace Arcade · Built from open-source game projects.</p>
+</main>
 <script>
 (function(){
-"use strict";
-var unlocked=false;
-try{unlocked=localStorage.getItem("ms-arcade-unlocked")==="yes"}catch(e){}
-if(!unlocked){
- document.querySelector(".app").innerHTML='<header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><a class="back" href="./">← Back to study</a></header><section class="hero"><div class="eyebrow">LOCKED</div><h1>The arcade is still asleep.</h1><p>Create a study deck named <strong>Library</strong> on the Mindspace dashboard, or press Enter three times there to unlock it.</p><p style="margin-top:18px"><a class="back" href="./">Return to Mindspace</a></p></section>';
- return;
-}
-var $=function(s){return document.querySelector(s)}, $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
-var canvas=$("#screen"),ctx=canvas.getContext("2d"),field=$("#playfield"),game="snake",running=false,ended=false,timer=null,state={},score=0,keys={},touchStart=null;
-var info={
- snake:["Snake","Eat the glowing dots and don't hit yourself.","Arrow keys or WASD. On mobile, use the direction buttons."],
- pong:["Pong","Beat the computer by getting the ball past its paddle.","Use ↑/↓ or W/S. First to five points wins."],
- flappy:["Flappy","Fly through the gaps without hitting the pipes.","Press Space, click the game area, or tap FLAP."],
- tetris:["Tetris","Stack the falling blocks and clear rows.","←/→ move, ↑ rotate, ↓ drop, Space hard drop."],
- breakout:["Breakout","Bounce the ball into every brick.","Move the paddle with mouse or ←/→."],
- "2048":["2048","Combine matching numbers until you reach 2048.","Use the arrow keys or swipe the board."],
- hexgl:["HexGL Racer","A local futuristic racing game. Dodge traffic and survive.","Use ←/→ or A/D to steer. Avoid the blocks and collect energy."],
- fablecities:["Fable Cities","A local city-building game. Grow your city one building at a time.","Choose a building, then click an empty tile. Earn income from homes and shops."],
- cookieclicker:["Cookie Clicker","A local cookie-clicking game. Build your cookie empire.","Click the big cookie, then buy upgrades. Your cookies stay saved on this device."]
-};
-function status(s){$("#status").textContent=s}
-function stop(){running=false;if(timer){clearInterval(timer);timer=null}}
-function clearField(){field.innerHTML="";field.style.minHeight="250px"}
-function addCanvas(w,h){clearField();canvas=document.createElement("canvas");canvas.id="screen";canvas.width=w;canvas.height=h;canvas.setAttribute("aria-label","Game screen");field.appendChild(canvas);ctx=canvas.getContext("2d");canvas.addEventListener("pointerdown",function(){if(game==="flappy")flap()});canvas.addEventListener("pointermove",function(e){if(game!=="breakout")return;var r=canvas.getBoundingClientRect();state.paddle=Math.max(0,Math.min(500,(e.clientX-r.left)*canvas.width/r.width-50));if(!running)draw()});canvas.addEventListener("click",function(e){if(game==="cookieclicker")clickCookie(e);else if(game==="fablecities")clickCity(e)});$("#mobile").style.display="flex";$("#start").style.display="inline-block";$("#restart").style.display="inline-block";$("#flap").style.display=game==="flappy"?"inline-block":"none"}
-function text(t,x,y,size,color){ctx.fillStyle=color||"#f4f5ff";ctx.font="bold "+size+"px system-ui";ctx.textAlign="center";ctx.fillText(t,x,y)}
-function background(){ctx.fillStyle="#0c0d16";ctx.fillRect(0,0,canvas.width,canvas.height)}
-function selectGame(g){
- stop();game=g;ended=false;score=0;$$(".tile").forEach(function(b){b.classList.toggle("active",b.dataset.game===g)});
- $("#gameTitle").textContent=info[g][0];$("#gameHint").textContent=info[g][2];$("#start").textContent="▶ Start game";$("#start").style.display=g==="2048"||g==="hexgl"?"none":"inline-block";$("#restart").style.display=g==="hexgl"?"none":"inline-block";
- if(g==="hexgl"||g==="fablecities"||g==="cookieclicker"){addCanvas(g==="hexgl"?600:600,g==="hexgl"?600:500);$("#mobile").style.display=g==="hexgl"?"flex":"none";$("#start").style.display=g==="fablecities"||g==="cookieclicker"?"none":"inline-block";$("#restart").style.display="inline-block";field.style.padding="10px";init();draw();if(g==="fablecities")drawCity();if(g==="cookieclicker")drawCookieClicker();status(info[g][0]+" ready. This game runs directly inside Mindspace, with no external website needed.");return}
- if(g==="2048"){show2048();return}
- addCanvas(g==="flappy"?400:g==="tetris"?300:600,g==="flappy"?600:g==="tetris"?600:400);init();draw();status(info[g][0]+" selected. Press Start game.");
-}
-function init(){
- score=0;ended=false;
- if(game==="snake"){state={snake:[{x:8,y:10},{x:7,y:10},{x:6,y:10}],dir:{x:1,y:0},next:{x:1,y:0},food:{x:18,y:10},acc:0};food()}
- if(game==="pong")state={py:160,cy:160,ball:{x:300,y:200,vx:4,vy:2},p:0,c:0}
- if(game==="flappy")state={bird:{x:90,y:280,vy:0},pipes:[],frame:0}
- if(game==="tetris"){state={grid:Array.from({length:20},function(){return Array(10).fill(0)}),piece:null,px:3,py:0,drop:0,lines:0};spawn()}
- if(game==="breakout"){state={paddle:250,ball:{x:300,y:330,vx:3,vy:-4},bricks:[],lives:3};for(var y=0;y<5;y++)for(var x=0;x<10;x++)state.bricks.push({x:35+x*53,y:35+y*23,on:true,color:y%4})}
- if(game==="hexgl"){state={car:280,road:[],obstacles:[],frame:0,energy:0,health:3};for(var i=0;i<5;i++)state.obstacles.push({x:Math.random()*500+50,y:-i*150-100})}
- if(game==="fablecities"){state={money:1200,population:0,buildings:Array(100).fill(""),selected:"home",tick:0};}
- if(game==="cookieclicker"){try{state.cookies=Number(localStorage.getItem("ms-cookies")||0);state.clickPower=Number(localStorage.getItem("ms-cookie-power")||1);state.upgradeCost=Number(localStorage.getItem("ms-cookie-cost")||25);state.autoCost=Number(localStorage.getItem("ms-cookie-auto-cost")||100);state.autos=Number(localStorage.getItem("ms-cookie-autos")||0)}catch(e){state.cookies=0;state.clickPower=1;state.upgradeCost=25;state.autoCost=100;state.autos=0}state.cookies=state.cookies||0;state.clickPower=state.clickPower||1;state.upgradeCost=state.upgradeCost||25;state.autoCost=state.autoCost||100;state.autos=state.autos||0;}
-}
-function food(){var p;do{p={x:Math.floor(Math.random()*30),y:Math.floor(Math.random()*20)}}while(state.snake.some(function(s){return s.x===p.x&&s.y===p.y}));state.food=p}
-var shapes=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]]];
-function spawn(){state.piece=shapes[Math.floor(Math.random()*shapes.length)].map(function(r){return r.slice()});state.px=3;state.py=0;if(collide(state.px,state.py,state.piece)){end("Game over · score "+score)}}
-function collide(px,py,p){for(var y=0;y<p.length;y++)for(var x=0;x<p[y].length;x++)if(p[y][x]){var gx=px+x,gy=py+y;if(gx<0||gx>=10||gy>=20||(gy>=0&&state.grid[gy][gx]))return true}return false}
-function lockPiece(){state.piece.forEach(function(r,y){r.forEach(function(v,x){if(v&&state.py+y>=0)state.grid[state.py+y][state.px+x]=1})});var kept=state.grid.filter(function(r){return r.some(function(v){return !v})});var n=20-kept.length;if(n){score+=[0,100,300,500,800][n]||1000;state.lines+=n}while(kept.length<20)kept.unshift(Array(10).fill(0));state.grid=kept;spawn()}
-function rotate(){var p=state.piece[0].map(function(_,i){return state.piece.map(function(r){return r[i]}).reverse()});if(!collide(state.px,state.py,p))state.piece=p}
-function draw(){
- background();
- if(game==="snake"){var c=20;ctx.strokeStyle="#1d2032";for(var x=0;x<600;x+=c){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,400);ctx.stroke()}for(var y=0;y<400;y+=c){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(600,y);ctx.stroke()}ctx.fillStyle="#ff9cc7";ctx.beginPath();ctx.arc(state.food.x*c+10,state.food.y*c+10,8,0,Math.PI*2);ctx.fill();state.snake.forEach(function(s,i){ctx.fillStyle=i?"#53b99a":"#9df3d0";ctx.fillRect(s.x*c+2,s.y*c+2,c-4,c-4)});text("SCORE "+score,520,24,13)}
- if(game==="pong"){ctx.strokeStyle="#42445e";ctx.setLineDash([8,8]);ctx.beginPath();ctx.moveTo(300,0);ctx.lineTo(300,400);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#9df3d0";ctx.fillRect(20,state.py,12,80);ctx.fillStyle="#b6a6ff";ctx.fillRect(568,state.cy,12,80);ctx.fillStyle="#ffdf8a";ctx.beginPath();ctx.arc(state.ball.x,state.ball.y,8,0,Math.PI*2);ctx.fill();text(state.p+" : "+state.c,300,35,25)}
- if(game==="flappy"){ctx.fillStyle="#172238";ctx.fillRect(0,0,400,600);state.pipes.forEach(function(p){ctx.fillStyle="#9df3d0";ctx.fillRect(p.x,0,52,p.gap);ctx.fillRect(p.x,p.gap+145,52,575-p.gap-145)});ctx.fillStyle="#ffdf8a";ctx.beginPath();ctx.arc(state.bird.x,state.bird.y,13,0,Math.PI*2);ctx.fill();ctx.fillStyle="#ff9cc7";ctx.fillRect(0,575,400,25);text("SCORE "+score,200,35,18)}
- if(game==="tetris"){var cw=30;ctx.strokeStyle="#202236";for(var y=0;y<20;y++)for(var x=0;x<10;x++){ctx.strokeRect(x*cw,y*cw,cw,cw);if(state.grid[y][x]){ctx.fillStyle="#b6a6ff";ctx.fillRect(x*cw+2,y*cw+2,cw-4,cw-4)}}if(state.piece)state.piece.forEach(function(r,y){r.forEach(function(v,x){if(v){ctx.fillStyle="#9df3d0";ctx.fillRect((state.px+x)*cw+2,(state.py+y)*cw+2,cw-4,cw-4)}})});text("LINES "+state.lines,150,590,14)}
- if(game==="breakout"){state.bricks.forEach(function(b){if(b.on){ctx.fillStyle=["#9df3d0","#b6a6ff","#ff9cc7","#ffdf8a"][b.color];ctx.fillRect(b.x,b.y,46,15)}});ctx.fillStyle="#9df3d0";ctx.fillRect(state.paddle,370,100,12);ctx.fillStyle="#ffdf8a";ctx.beginPath();ctx.arc(state.ball.x,state.ball.y,7,0,Math.PI*2);ctx.fill();text("SCORE "+score+"  LIVES "+state.lives,300,395,13)}
- if(game==="hexgl"){drawRacer()}
- if(game==="fablecities"){drawCity()}
- if(game==="cookieclicker"){drawCookieClicker()}
- if(ended){ctx.fillStyle="#0c0d16d9";ctx.fillRect(0,0,canvas.width,canvas.height);text("GAME OVER",canvas.width/2,canvas.height/2-8,30,"#ff9cc7");text("Score: "+score,canvas.width/2,canvas.height/2+25,17)}
-}
-function end(message){stop();ended=true;status(message||"Game over · score "+score);$("#start").textContent="▶ Play again";draw()}
-function update(){
- if(game==="snake"){state.acc+=1;if(state.acc<7)return;state.acc=0;state.dir=state.next;var h={x:state.snake[0].x+state.dir.x,y:state.snake[0].y+state.dir.y};if(h.x<0||h.y<0||h.x>=30||h.y>=20||state.snake.some(function(s){return s.x===h.x&&s.y===h.y})){end("Crash! Score: "+score);return}state.snake.unshift(h);if(h.x===state.food.x&&h.y===state.food.y){score+=10;food();status("Score: "+score)}else state.snake.pop()}
- if(game==="pong"){var b=state.ball;b.x+=b.vx;b.y+=b.vy;if(b.y<8||b.y>392)b.vy*=-1;if(b.vx<0&&b.x<35&&b.y>state.py&&b.y<state.py+80){b.vx=Math.abs(b.vx)*1.04;b.vy+=(b.y-state.py-40)*.08}if(b.vx>0&&b.x>565&&b.y>state.cy&&b.y<state.cy+80)b.vx=-Math.abs(b.vx)*1.04;state.cy+=((b.y-40)-state.cy)*.055;state.cy=Math.max(0,Math.min(320,state.cy));if(b.x<0||b.x>600){if(b.x<0)state.c++;else state.p++;if(state.p>=5||state.c>=5){end((state.p>state.c?"You win! ":"Computer wins! ")+state.p+" : "+state.c);return}b.x=300;b.y=200;b.vx=state.p>state.c?-4:4;b.vy=(Math.random()-.5)*5}}
- if(game==="flappy"){var f=state.bird;state.frame++;f.vy+=.32;f.y+=f.vy;if(state.frame%92===1)state.pipes.push({x:410,gap:100+Math.random()*290,passed:false});state.pipes.forEach(function(p){p.x-=2.7;if(!p.passed&&p.x<f.x){p.passed=true;score++;status("Score: "+score)}if(f.x+10>p.x&&f.x-10<p.x+52&&(f.y-10<p.gap||f.y+10>p.gap+145))end("Pipe collision · score "+score)});state.pipes=state.pipes.filter(function(p){return p.x>-60});if(f.y>565||f.y<0)end("Flight ended · score "+score)}
- if(game==="tetris"){state.drop++;if(state.drop>30){state.drop=0;if(!collide(state.px,state.py+1,state.piece))state.py++;else lockPiece()}}
- if(game==="breakout"){var b=state.ball;b.x+=b.vx;b.y+=b.vy;if(b.x<7||b.x>593)b.vx*=-1;if(b.y<7)b.vy=Math.abs(b.vy);if(b.y>360&&b.y<390&&b.x>state.paddle&&b.x<state.paddle+100){b.vy=-Math.abs(b.vy);b.vx+=(b.x-(state.paddle+50))*.06}for(var i=0;i<state.bricks.length;i++){var br=state.bricks[i];if(br.on&&b.x>br.x&&b.x<br.x+46&&b.y>br.y&&b.y<br.y+15){br.on=false;b.vy*=-1;score+=10;break}}if(b.y>405){state.lives--;if(state.lives<=0){end("Out of lives · score "+score);return}b.x=300;b.y=330;b.vy=-4}if(state.bricks.every(function(b){return !b.on}))end("You cleared the bricks! Score "+score)}
- if(game==="hexgl"){state.frame++;state.obstacles.forEach(function(o){o.y+=5+Math.min(5,state.frame/400);if(o.y>620){o.y=-Math.random()*250-60;o.x=Math.random()*500+50;state.energy+=1;score+=5}if(o.y>455&&o.y<545&&Math.abs(o.x-state.car)<45){state.health--;o.y=-100;if(state.health<=0){end("Race over! Energy collected: "+state.energy);return}}});}
- if(game==="fablecities"){state.tick++;if(state.tick%20===0){state.money+=state.buildings.filter(function(b){return b==="home"}).length*2+state.buildings.filter(function(b){return b==="shop"}).length*5;state.population=state.buildings.filter(function(b){return b==="home"}).length*4}}
- if(game==="cookieclicker"){state.cookies+=state.autos*.05;try{localStorage.setItem("ms-cookies",String(state.cookies));localStorage.setItem("ms-cookie-power",String(state.clickPower));localStorage.setItem("ms-cookie-cost",String(state.upgradeCost));localStorage.setItem("ms-cookie-auto-cost",String(state.autoCost));localStorage.setItem("ms-cookie-autos",String(state.autos))}catch(e){}}
- draw();
-}
-function start(){if(game==="2048"||game==="fablecities"||game==="cookieclicker")return;if(running){stop();$("#start").textContent="▶ Resume";status("Paused.");return}if(ended){init();draw();ended=false}running=true;$("#start").textContent="⏸ Pause";status("Game running!");timer=setInterval(update,45)}
-function restart(){stop();ended=false;score=0;if(game==="2048"){init2048();return}init();draw();$("#start").textContent="▶ Start game";status(info[game][0]+" reset. Press Start game.")}
-function key(e){var k=e.key;if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].indexOf(k)>=0&&game!=="2048")e.preventDefault();if(game==="snake"){if((k==="ArrowUp"||k.toLowerCase()==="w")&&state.dir.y!==1)state.next={x:0,y:-1};if((k==="ArrowDown"||k.toLowerCase()==="s")&&state.dir.y!==-1)state.next={x:0,y:1};if((k==="ArrowLeft"||k.toLowerCase()==="a")&&state.dir.x!==1)state.next={x:-1,y:0};if((k==="ArrowRight"||k.toLowerCase()==="d")&&state.dir.x!==-1)state.next={x:1,y:0}}
- if(game==="pong"){if(k==="ArrowUp"||k.toLowerCase()==="w")state.py=Math.max(0,state.py-22);if(k==="ArrowDown"||k.toLowerCase()==="s")state.py=Math.min(320,state.py+22)}
- if(game==="flappy"&&k===" "){e.preventDefault();flap()}
- if(game==="tetris"&&state.piece){if(k==="ArrowLeft"&&!collide(state.px-1,state.py,state.piece))state.px--;if(k==="ArrowRight"&&!collide(state.px+1,state.py,state.piece))state.px++;if(k==="ArrowDown"){if(!collide(state.px,state.py+1,state.piece))state.py++;else lockPiece()}if(k==="ArrowUp")rotate();if(k===" "){while(!collide(state.px,state.py+1,state.piece))state.py++;lockPiece()}}
- if(game==="breakout"){if(k==="ArrowLeft")state.paddle=Math.max(0,state.paddle-25);if(k==="ArrowRight")state.paddle=Math.min(500,state.paddle+25)}
- if(game==="2048"){var map={ArrowLeft:"left",ArrowRight:"right",ArrowUp:"up",ArrowDown:"down"};if(map[k]){e.preventDefault();move2048(map[k])}}
- if(game==="hexgl"){if(k==="ArrowLeft"||k.toLowerCase()==="a")state.car=Math.max(80,state.car-24);if(k==="ArrowRight"||k.toLowerCase()==="d")state.car=Math.min(520,state.car+24)}
- if(game!=="2048"&&game!=="fablecities"&&game!=="cookieclicker")draw();
-}
-function drawRacer(){var w=canvas.width,h=canvas.height;ctx.fillStyle="#11182a";ctx.fillRect(0,0,w,h);ctx.fillStyle="#202e43";ctx.fillRect(0,0,w,h*.48);ctx.fillStyle="#263c32";ctx.fillRect(0,h*.48,w,h*.52);ctx.fillStyle="#34394c";ctx.beginPath();ctx.moveTo(w*.34,0);ctx.lineTo(w*.66,0);ctx.lineTo(w*.96,h);ctx.lineTo(w*.04,h);ctx.closePath();ctx.fill();ctx.strokeStyle="#9df3d0";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(w*.34,0);ctx.lineTo(w*.04,h);ctx.moveTo(w*.66,0);ctx.lineTo(w*.96,h);ctx.stroke();for(var i=0;i<8;i++){var y=((i*90+state.frame*7)%(h+90))-40;var x=w/2+(i%2?1:-1)*(30+y*.25);ctx.fillStyle=i%2?"#ff9cc7":"#b6a6ff";ctx.fillRect(x-3,y,6,35)}state.obstacles.forEach(function(o){ctx.fillStyle="#ff9cc7";ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(o.x+30,o.y+35);ctx.lineTo(o.x-30,o.y+35);ctx.closePath();ctx.fill()});ctx.fillStyle="#9df3d0";ctx.beginPath();ctx.moveTo(state.car,h-115);ctx.lineTo(state.car-28,h-55);ctx.lineTo(state.car+28,h-55);ctx.closePath();ctx.fill();text("ENERGY "+state.energy+"   HULL "+state.health,300,25,16);text("SCORE "+score,300,48,13)}
-function drawCity(){background();var colors={home:"#9df3d0",shop:"#ffdf8a",park:"#73c99b",factory:"#b6a6ff"};text("FABLE CITIES",300,28,20);text("Funds: $"+Math.floor(state.money)+"   Population: "+state.population,300,53,15);for(var i=0;i<100;i++){var x=25+(i%10)*55,y=75+Math.floor(i/10)*40;ctx.fillStyle="#23283a";ctx.fillRect(x,y,48,34);ctx.strokeStyle="#3b4560";ctx.strokeRect(x,y,48,34);var b=state.buildings[i];if(b){ctx.fillStyle=colors[b];if(b==="home"){ctx.fillRect(x+12,y+12,24,20);ctx.beginPath();ctx.moveTo(x+8,y+13);ctx.lineTo(x+24,y+2);ctx.lineTo(x+40,y+13);ctx.fill()}else if(b==="shop"){ctx.fillRect(x+8,y+10,32,22);ctx.fillStyle="#ff9cc7";ctx.fillRect(x+8,y+10,32,7)}else if(b==="park"){ctx.beginPath();ctx.arc(x+24,y+14,10,0,Math.PI*2);ctx.fill();ctx.fillRect(x+21,y+18,6,12)}else{ctx.fillRect(x+8,y+10,32,22);ctx.fillRect(x+12,y+2,6,10);ctx.fillRect(x+25,y,6,12)}}}text("Selected: "+state.selected+" | Home $100 · Shop $250 · Park $150 · Factory $400",300,490,12)}
-function drawCookieClicker(){background();text("COOKIE EMPIRE",300,32,22);text(Math.floor(state.cookies)+" cookies",300,75,27);ctx.fillStyle="#b9783f";ctx.beginPath();ctx.arc(300,235,100,0,Math.PI*2);ctx.fill();ctx.fillStyle="#e6b878";ctx.beginPath();ctx.arc(300,230,88,0,Math.PI*2);ctx.fill();[[270,200],[325,185],[345,240],[285,265],[320,285],[260,235],[300,220]].forEach(function(p){ctx.fillStyle="#68402b";ctx.beginPath();ctx.arc(p[0],p[1],7,0,Math.PI*2);ctx.fill()});text("Click the cookie to bake!",300,365,16);text("Click power: "+state.clickPower+"  ·  Auto bakers: "+state.autos,300,395,14);text("Upgrade click: "+state.upgradeCost+" cookies",300,435,13);text("Buy auto baker: "+state.autoCost+" cookies",300,460,13)}
-function clickCookie(e){if(game!=="cookieclicker")return;var r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*canvas.width/r.width,y=(e.clientY-r.top)*canvas.height/r.height;if(Math.hypot(x-300,y-235)<105){state.cookies+=state.clickPower;status("Yum! "+Math.floor(state.cookies)+" cookies")}else if(y>410&&y<450&&state.cookies>=state.upgradeCost){state.cookies-=state.upgradeCost;state.clickPower++;state.upgradeCost=Math.ceil(state.upgradeCost*1.8);status("Click power upgraded!")}else if(y>=450&&state.cookies>=state.autoCost){state.cookies-=state.autoCost;state.autos++;state.autoCost=Math.ceil(state.autoCost*1.7);status("Auto baker purchased!")}drawCookieClicker()}
-function clickCity(e){if(game!=="fablecities")return;var r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*canvas.width/r.width,y=(e.clientY-r.top)*canvas.height/r.height;if(y>75&&y<475){var col=Math.floor((x-25)/55),row=Math.floor((y-75)/40),i=row*10+col;if(col>=0&&col<10&&row>=0&&row<10&&i<100&&!state.buildings[i]){var costs={home:100,shop:250,park:150,factory:400};if(state.money>=costs[state.selected]){state.money-=costs[state.selected];state.buildings[i]=state.selected;drawCity();status(state.selected+" built!")}else status("Not enough funds for that building.")}}else if(y>=455){var choices=["home","shop","park","factory"];state.selected=choices[Math.max(0,Math.min(3,Math.floor(x/150)))];drawCity();status("Selected "+state.selected)}}
-function flap(){if(game==="flappy"&&running&&!ended)state.bird.vy=-6.5}
-document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".tile[data-game]");if(!b)return;e.preventDefault();window.location.href=window.location.pathname+"?game="+encodeURIComponent(b.dataset.game)},true);
-$("#start").addEventListener("click",start);$("#restart").addEventListener("click",restart);$("#flap").addEventListener("click",flap);
-$$("[data-dir]").forEach(function(b){b.addEventListener("click",function(){var d=b.dataset.dir;if(game==="snake"){var dirs={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}},n=dirs[d];if(n.x!==-state.dir.x||n.y!==-state.dir.y)state.next=n}else if(game==="pong"){if(d==="up")state.py=Math.max(0,state.py-25);if(d==="down")state.py=Math.min(320,state.py+25)}else if(game==="breakout"){if(d==="left")state.paddle=Math.max(0,state.paddle-25);if(d==="right")state.paddle=Math.min(500,state.paddle+25)}else if(game==="tetris"){if(d==="left"&&!collide(state.px-1,state.py,state.piece))state.px--;if(d==="right"&&!collide(state.px+1,state.py,state.piece))state.px++;if(d==="down"&&!collide(state.px,state.py+1,state.piece))state.py++;if(d==="up")rotate()}draw()})});
-window.addEventListener("keydown",key);canvas.addEventListener("click",function(e){if(game==="cookieclicker")clickCookie(e);else if(game==="fablecities")clickCity(e)});
-function show2048(){clearField();$("#mobile").style.display="none";$("#start").style.display="none";$("#restart").style.display="inline-block";field.innerHTML='<div class="board2048" id="board2048" aria-label="2048 board"></div>';init2048();status("Use your arrow keys or swipe the board.")}
-function init2048(){state.tiles=Array(16).fill(0);score=0;addTile();addTile();render2048();}
-function addTile(){var empty=state.tiles.map(function(v,i){return v===0?i:-1}).filter(function(i){return i>=0});if(empty.length){var i=empty[Math.floor(Math.random()*empty.length)];state.tiles[i]=Math.random()<.9?2:4}}
-function render2048(){var board=$("#board2048");if(!board)return;board.innerHTML="";var colors={0:"#191b29",2:"#eee9df",4:"#e9dfc8",8:"#f4b36a",16:"#f18a61",32:"#ec6d64",64:"#db4f57",128:"#c6bd66",256:"#b7b75c",512:"#a1b653",1024:"#87b65c",2048:"#9df3d0"};state.tiles.forEach(function(v){var c=document.createElement("div");c.className="cell2048";c.style.background=colors[v]||"#b6a6ff";c.style.color=v&&v<=4?"#363344":"#10111b";c.textContent=v||"";board.appendChild(c)});status("2048 · Score: "+score)}
-function move2048(dir){if(game!=="2048")return;var before=state.tiles.join(",");for(var line=0;line<4;line++){var ids=[];for(var n=0;n<4;n++){var r,c;if(dir==="left"){r=line;c=n}else if(dir==="right"){r=line;c=3-n}else if(dir==="up"){r=n;c=line}else{r=3-n;c=line}ids.push(r*4+c)}var vals=ids.map(function(i){return state.tiles[i]}).filter(function(v){return v});for(var j=0;j<vals.length-1;j++)if(vals[j]===vals[j+1]){vals[j]*=2;score+=vals[j];vals.splice(j+1,1)}while(vals.length<4)vals.push(0);ids.forEach(function(id,n){state.tiles[id]=vals[n]})}if(before!==state.tiles.join(",")){addTile();render2048();if(state.tiles.indexOf(2048)>=0)status("🎉 2048 reached! Score: "+score);else if(!state.tiles.includes(0)&&!canMove())status("No moves left. Press Restart.")}}
-function canMove(){for(var r=0;r<4;r++)for(var c=0;c<4;c++){var v=state.tiles[r*4+c];if(!v||c<3&&v===state.tiles[r*4+c+1]||r<3&&v===state.tiles[(r+1)*4+c])return true}return false}
-field.addEventListener("touchstart",function(e){if(game==="2048"&&e.touches.length)touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});
-field.addEventListener("touchend",function(e){if(game!=="2048"||!touchStart||!e.changedTouches.length)return;var dx=e.changedTouches[0].clientX-touchStart.x,dy=e.changedTouches[0].clientY-touchStart.y;if(Math.max(Math.abs(dx),Math.abs(dy))>25)move2048(Math.abs(dx)>Math.abs(dy)?(dx>0?"right":"left"):(dy>0?"down":"up"));touchStart=null},{passive:true});
-var params=new URLSearchParams(window.location.search),requested=params.get("game");
-var enterCount=0,lastEnter=0;document.addEventListener("keydown",function(e){if(e.key!=="Enter"||e.repeat)return;var now=Date.now();if(now-lastEnter>2000)enterCount=0;lastEnter=now;enterCount++;if(enterCount>=3){window.location.href="./";enterCount=0}},true);
-if(requested&&info[requested]){
- document.body.classList.add("playing");
- var back=$(".back");back.href="./arcade.html";back.textContent="← All games";
- var study=document.createElement("a");study.className="back";study.href="./";study.textContent="← Mindspace";$(".top").appendChild(study);
- selectGame(requested);
-}else{selectGame("snake")}
+ let unlocked=false;
+ try{unlocked=localStorage.getItem("ms-arcade-unlocked")==="yes"}catch(e){}
+ if(!unlocked){
+  document.querySelector(".hero").innerHTML='<div class="eyebrow">LOCKED</div><h1>The arcade is still asleep.</h1><p>Create a study deck named <strong>Library</strong> on the Mindspace dashboard, or press Enter three times there to unlock it.</p><a class="back" href="./">Return to Mindspace</a>';
+  document.querySelector(".features").classList.add("hidden");
+ }
 })();
-</script></body></html>
+</script>
+</body></html>
