@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -23,18 +23,34 @@ jobs:
     steps:
       - name: Checkout Mindspace
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Copy and build the complete Neon Arcade source
+      - name: Download and copy the game source into Mindspace
         run: |
           git clone --depth 1 https://github.com/TMHSDigital/GH-Arcade.git /tmp/gh-arcade
-          mkdir -p "$GITHUB_WORKSPACE/arcade-pro/source/gh-arcade"
-          cp -R /tmp/gh-arcade/. "$GITHUB_WORKSPACE/arcade-pro/source/gh-arcade/"
-          cd "$GITHUB_WORKSPACE/arcade-pro/source/gh-arcade"
+          git clone --depth 1 https://github.com/stateloop-connected/source-vibe-basketball.git /tmp/vibe-basketball
+          mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball
+          cp -R /tmp/gh-arcade/. arcade-pro/source/gh-arcade/
+          cp -R /tmp/vibe-basketball/. arcade-pro/source/vibe-basketball/
+          rm -rf arcade-pro/source/gh-arcade/.git arcade-pro/source/vibe-basketball/.git
+          rm -rf arcade-pro/source/gh-arcade/node_modules arcade-pro/source/vibe-basketball/node_modules
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball
+          if ! git diff --cached --quiet; then
+            git commit -m "Copy arcade game source into Mindspace"
+            git push
+          fi
+
+      - name: Type-check and build the copied Neon Arcade source
+        run: |
+          cd arcade-pro/source/gh-arcade
           sed -i "s|const BASE = '/GH-Arcade/';|const BASE = '/mindspace/arcade-pro/';|" vite.config.ts
           npm ci
           npm run typecheck
@@ -42,12 +58,9 @@ jobs:
           cp -R dist/. "$GITHUB_WORKSPACE/arcade-pro/"
           cp LICENSE "$GITHUB_WORKSPACE/arcade-pro/NEON-ARCADE-LICENSE.txt"
 
-      - name: Copy and build the 3D basketball source
+      - name: Build the copied 3D basketball source
         run: |
-          git clone --depth 1 https://github.com/stateloop-connected/source-vibe-basketball.git /tmp/vibe-basketball
-          mkdir -p "$GITHUB_WORKSPACE/arcade-pro/source/vibe-basketball"
-          cp -R /tmp/vibe-basketball/. "$GITHUB_WORKSPACE/arcade-pro/source/vibe-basketball/"
-          cd "$GITHUB_WORKSPACE/arcade-pro/source/vibe-basketball"
+          cd arcade-pro/source/vibe-basketball
           npm ci
           npm run build -- --base=./
           mkdir -p "$GITHUB_WORKSPACE/arcade-pro/basketball"
