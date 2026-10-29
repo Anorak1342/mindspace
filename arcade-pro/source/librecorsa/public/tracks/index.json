@@ -1,0 +1,59 @@
+[
+  {
+    "id": "suzuka",
+    "name": "Suzuka Circuit",
+    "layout": "2001 layout",
+    "country": "Japan",
+    "city": "Suzuka",
+    "lengthM": 5826.71,
+    "turns": 17,
+    "direction": "clockwise",
+    "dataUrl": "/tracks/suzuka/track_data.json",
+    "credit": {
+      "title": "Suzuka Circuit 2001 layout",
+      "author": "Dave",
+      "url": "https://sketchfab.com/3d-models/suzuka-circuit-2001-layout-0b1085d93dfa4e81aab2c83c26bf185b",
+      "short": "https://skfb.ly/pLorW",
+      "license": "CC BY 4.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+    }
+  },
+  {
+    "id": "shanghai",
+    "name": "Shanghai International Circuit",
+    "layout": "2018 layout",
+    "country": "China",
+    "city": "Shanghai",
+    "lengthM": 5435.88,
+    "turns": 11,
+    "direction": "clockwise",
+    "dataUrl": "/tracks/shanghai/track_data.json",
+    "credit": {
+      "title": "Shanghai International Circuit 2018 layout",
+      "author": "Dave",
+      "url": "https://sketchfab.com/3d-models/shanghai-international-circuit-2018-layout-4d3365f4de6442a5ae56e8807c518c4f",
+      "short": "https://skfb.ly/pLqvL",
+      "license": "CC BY 4.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+    }
+  },
+  {
+    "id": "motegi",
+    "name": "Mobility Resort Motegi",
+    "layout": "Road course",
+    "country": "Japan",
+    "city": "Motegi",
+    "lengthM": 4782.65,
+    "turns": 12,
+    "direction": "clockwise",
+    "dataUrl": "/tracks/motegi/track_data.json",
+    "credit": {
+      "title": "Mobility Resort Motegi (Twin Ring)",
+      "author": "Kevin Love SketchFab",
+      "url": "https://sketchfab.com/3d-models/mobility-resort-motegi-twin-ring-c58a54bc35bc4c52984e3cbef912e3a3",
+      "short": "https://skfb.ly/pMIoS",
+      "license": "CC BY 4.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+    }
+  }
+]
