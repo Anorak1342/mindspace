@@ -36,15 +36,17 @@ jobs:
           git clone --depth 1 https://github.com/TMHSDigital/GH-Arcade.git /tmp/gh-arcade
           git clone --depth 1 https://github.com/stateloop-connected/source-vibe-basketball.git /tmp/vibe-basketball
           git clone --depth 1 https://github.com/Anorak1342/F-15-Flight-Sim-.git /tmp/f15-flight-sim
-          mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim
+          git clone --depth 1 https://github.com/KhazP/librecorsa.git /tmp/librecorsa
+          mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim arcade-pro/source/librecorsa
           cp -R /tmp/gh-arcade/. arcade-pro/source/gh-arcade/
           cp -R /tmp/vibe-basketball/. arcade-pro/source/vibe-basketball/
           cp -R /tmp/f15-flight-sim/. arcade-pro/source/f15-flight-sim/
-          rm -rf arcade-pro/source/gh-arcade/.git arcade-pro/source/vibe-basketball/.git arcade-pro/source/f15-flight-sim/.git
-          rm -rf arcade-pro/source/gh-arcade/node_modules arcade-pro/source/vibe-basketball/node_modules arcade-pro/source/f15-flight-sim/node_modules
+          cp -R /tmp/librecorsa/. arcade-pro/source/librecorsa/
+          rm -rf arcade-pro/source/gh-arcade/.git arcade-pro/source/vibe-basketball/.git arcade-pro/source/f15-flight-sim/.git arcade-pro/source/librecorsa/.git
+          rm -rf arcade-pro/source/gh-arcade/node_modules arcade-pro/source/vibe-basketball/node_modules arcade-pro/source/f15-flight-sim/node_modules arcade-pro/source/librecorsa/node_modules arcade-pro/source/librecorsa/.next arcade-pro/source/librecorsa/out
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim
+          git add arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim arcade-pro/source/librecorsa
           if ! git diff --cached --quiet; then
             git commit -m "Copy arcade game source into Mindspace"
             git push
@@ -74,6 +76,16 @@ jobs:
         run: |
           mkdir -p arcade-pro/f15-flight-sim
           cp arcade-pro/source/f15-flight-sim/F-15_Eagle_Flight_Simulator_v7.html arcade-pro/f15-flight-sim/index.html
+
+      - name: Build LibreCorsa racing simulator
+        run: |
+          cd arcade-pro/source/librecorsa
+          npm ci
+          NEXT_PUBLIC_BASE_PATH=/mindspace/arcade-pro/librecorsa npm run build
+          mkdir -p "$GITHUB_WORKSPACE/arcade-pro/librecorsa"
+          cp -R out/. "$GITHUB_WORKSPACE/arcade-pro/librecorsa/"
+          cp LICENSE "$GITHUB_WORKSPACE/arcade-pro/librecorsa/LICENSE.txt"
+          cp CREDITS.md "$GITHUB_WORKSPACE/arcade-pro/librecorsa/CREDITS.md"
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
