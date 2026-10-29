@@ -35,14 +35,16 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/TMHSDigital/GH-Arcade.git /tmp/gh-arcade
           git clone --depth 1 https://github.com/stateloop-connected/source-vibe-basketball.git /tmp/vibe-basketball
-          mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball
+          git clone --depth 1 https://github.com/Anorak1342/F-15-Flight-Sim-.git /tmp/f15-flight-sim
+          mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim
           cp -R /tmp/gh-arcade/. arcade-pro/source/gh-arcade/
           cp -R /tmp/vibe-basketball/. arcade-pro/source/vibe-basketball/
-          rm -rf arcade-pro/source/gh-arcade/.git arcade-pro/source/vibe-basketball/.git
-          rm -rf arcade-pro/source/gh-arcade/node_modules arcade-pro/source/vibe-basketball/node_modules
+          cp -R /tmp/f15-flight-sim/. arcade-pro/source/f15-flight-sim/
+          rm -rf arcade-pro/source/gh-arcade/.git arcade-pro/source/vibe-basketball/.git arcade-pro/source/f15-flight-sim/.git
+          rm -rf arcade-pro/source/gh-arcade/node_modules arcade-pro/source/vibe-basketball/node_modules arcade-pro/source/f15-flight-sim/node_modules
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball
+          git add arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim
           if ! git diff --cached --quiet; then
             git commit -m "Copy arcade game source into Mindspace"
             git push
@@ -67,6 +69,11 @@ jobs:
           cp -R dist/. "$GITHUB_WORKSPACE/arcade-pro/basketball/"
           cp LICENSE "$GITHUB_WORKSPACE/arcade-pro/basketball/LICENSE.txt"
           cp THIRD_PARTY_NOTICES.md "$GITHUB_WORKSPACE/arcade-pro/basketball/THIRD_PARTY_NOTICES.md"
+
+      - name: Publish the F-15 Flight Sim locally
+        run: |
+          mkdir -p arcade-pro/f15-flight-sim
+          cp arcade-pro/source/f15-flight-sim/F-15_Eagle_Flight_Simulator_v7.html arcade-pro/f15-flight-sim/index.html
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
