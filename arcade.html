@@ -120,11 +120,11 @@ function canMove(){for(var r=0;r<4;r++)for(var c=0;c<4;c++){var v=state.tiles[r*
 field.addEventListener("touchstart",function(e){if(game==="2048"&&e.touches.length)touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});
 field.addEventListener("touchend",function(e){if(game!=="2048"||!touchStart||!e.changedTouches.length)return;var dx=e.changedTouches[0].clientX-touchStart.x,dy=e.changedTouches[0].clientY-touchStart.y;if(Math.max(Math.abs(dx),Math.abs(dy))>25)move2048(Math.abs(dx)>Math.abs(dy)?(dx>0?"right":"left"):(dy>0?"down":"up"));touchStart=null},{passive:true});
 var params=new URLSearchParams(window.location.search),requested=params.get("game");
+var enterCount=0,lastEnter=0;document.addEventListener("keydown",function(e){if(e.key!=="Enter"||e.repeat)return;var now=Date.now();if(now-lastEnter>2000)enterCount=0;lastEnter=now;enterCount++;if(enterCount>=3){window.location.href="./";enterCount=0}},true);
 if(requested&&info[requested]&&requested!=="hexgl"&&requested!=="fablecities"){
  document.body.classList.add("playing");
  var back=$(".back");back.href="./arcade.html";back.textContent="← All games";
  var study=document.createElement("a");study.className="back";study.href="./";study.textContent="← Mindspace";$(".top").appendChild(study);
- var enterCount=0,lastEnter=0;document.addEventListener("keydown",function(e){if(e.key!=="Enter"||e.repeat)return;var now=Date.now();if(now-lastEnter>2000)enterCount=0;lastEnter=now;enterCount++;if(enterCount>=3){window.location.href="./";enterCount=0}},true);
  selectGame(requested);
 }else{selectGame("snake")}
 })();
