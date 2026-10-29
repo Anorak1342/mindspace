@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A growing arcade of free browser games." />
+    <meta name="theme-color" content="#05050d" />
+    <title>GH Arcade</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="scanlines" aria-hidden="true"></div>
+    <nav class="topbar" aria-label="Arcade options">
+      <button id="open-trophies" class="topbar-button" type="button">Trophies</button>
+      <button id="open-settings" class="topbar-button" type="button">Settings</button>
+    </nav>
+    <header class="marquee">
+      <p class="eyebrow">Insert coin</p>
+      <h1 class="title">GH<span>Arcade</span></h1>
+      <p class="tagline">Free browser games. No accounts, no ads. Just play.</p>
+      <button id="install" class="install" type="button" hidden>Install the arcade <span>plays offline</span></button>
+    </header>
+
+    <main>
+      <div class="toolbar">
+        <h2 class="section-title">Cabinets <span id="game-count" class="count"></span></h2>
+        <div id="filters" class="filters" role="group" aria-label="Filter by tag"></div>
+      </div>
+      <ul id="game-grid" class="grid"></ul>
+    </main>
+
+    <footer class="footer">
+      <p class="nav-tip">Tip: browse with the arrow keys or a gamepad, and press Enter or A to play.</p>
+      <a href="https://github.com/TMHSDigital/GH-Arcade">Source on GitHub</a>
+    </footer>
+
+    <dialog id="trophies" class="panel wide" aria-labelledby="trophies-title">
+      <div class="panel-inner">
+        <div class="panel-head">
+          <h2 id="trophies-title">Trophies</h2>
+          <button id="close-trophies" class="close" type="button" aria-label="Close trophies">Close</button>
+        </div>
+        <p id="trophy-summary" class="hint"></p>
+        <div id="trophy-list"></div>
+        <div class="panel-foot">
+          <p class="hint">Trophies and stats are saved on this device.</p>
+          <button id="reset-trophies" class="text-button" type="button">Reset trophies and stats</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="settings" class="panel" aria-labelledby="settings-title">
+      <div class="panel-inner">
+        <div class="panel-head">
+          <h2 id="settings-title">Settings</h2>
+          <button id="close-settings" class="close" type="button" aria-label="Close settings">Close</button>
+        </div>
+
+        <section>
+          <h3>Sound</h3>
+          <label class="row">
+            <span>Volume</span>
+            <input id="volume" type="range" min="0" max="100" step="5" />
+            <output id="volume-value" for="volume"></output>
+          </label>
+          <label class="row check"><input id="muted" type="checkbox" /> <span>Mute all sound</span></label>
+        </section>
+
+        <section>
+          <h3>Accessibility</h3>
+          <label class="row check">
+            <input id="reduced-motion" type="checkbox" />
+            <span>Reduced motion <small>No screen shake, flashes or decorative animation</small></span>
+          </label>
+          <label class="row check">
+            <input id="colorblind" type="checkbox" />
+            <span>Colorblind-friendly colors <small>A palette that stays distinct with color vision deficiencies</small></span>
+          </label>
+          <div id="swatches" class="swatches" aria-hidden="true"></div>
+        </section>
+
+        <section>
+          <h3>Keyboard controls</h3>
+          <p class="hint">Click Change, then press a new key (Esc cancels). Gamepad and game-specific keys stay the same.</p>
+          <table class="bindings">
+            <tbody id="bindings"></tbody>
+          </table>
+          <button id="reset-bindings" class="text-button" type="button">Reset controls</button>
+        </section>
+
+        <div class="panel-foot">
+          <p class="hint">Changes save automatically and apply the next time you start a game.</p>
+          <button id="reset-all" class="text-button" type="button">Reset all settings</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script type="module" src="/src/hub/main.ts"></script>
+  </body>
+</html>

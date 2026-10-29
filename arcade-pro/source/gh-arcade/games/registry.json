@@ -1,0 +1,124 @@
+[
+  {
+    "slug": "breakout",
+    "title": "Neon Breakout",
+    "description": "Smash glowing bricks, chase combos, and clear every level before your lives run out.",
+    "tags": [
+      "arcade",
+      "classic"
+    ],
+    "accent": "#00f0ff",
+    "controls": "Mouse / touch / ← →",
+    "thumbnail": "thumbs/breakout.jpg"
+  },
+  {
+    "slug": "snake",
+    "title": "Neon Snake",
+    "description": "Eat, grow and speed up. Grab the bonus stars before they fade, and don't bite your own tail.",
+    "tags": [
+      "classic",
+      "arcade",
+      "2-player"
+    ],
+    "accent": "#3dff8a",
+    "controls": "Arrows / swipe / d-pad",
+    "thumbnail": "thumbs/snake.jpg"
+  },
+  {
+    "slug": "stack",
+    "title": "Neon Stack",
+    "description": "Rotate, slide and drop falling blocks to clear lines. Hold a piece for later and chain combos as the speed climbs.",
+    "tags": [
+      "puzzle",
+      "classic"
+    ],
+    "accent": "#a45bff",
+    "controls": "Arrows + X/Z / drag and tap / gamepad",
+    "thumbnail": "thumbs/stack.jpg"
+  },
+  {
+    "slug": "astro",
+    "title": "Astro Blaster",
+    "description": "Thrust, drift and blast through waves of splitting space rocks. Watch out for the saucer from wave 3.",
+    "tags": [
+      "shooter",
+      "arcade"
+    ],
+    "accent": "#ff8a3d",
+    "controls": "Arrows + Space / touch stick / gamepad",
+    "thumbnail": "thumbs/astro.jpg"
+  },
+  {
+    "slug": "runner",
+    "title": "Neon Runner",
+    "description": "Sprint through a synthwave city. Jump, double jump and slide past barriers, drones and gaps as the pace keeps climbing.",
+    "tags": [
+      "endless",
+      "action"
+    ],
+    "accent": "#ff2e97",
+    "controls": "Tap + swipe / Space + Down / gamepad",
+    "thumbnail": "thumbs/runner.jpg"
+  },
+  {
+    "slug": "siege",
+    "title": "Star Siege",
+    "description": "Hold the line against marching alien waves. Duck behind shields, snipe the mothership, and team up with a friend in co-op.",
+    "tags": [
+      "shooter",
+      "classic",
+      "2-player"
+    ],
+    "accent": "#ffe45e",
+    "controls": "Arrows + Space / drag / gamepad",
+    "thumbnail": "thumbs/siege.jpg"
+  },
+  {
+    "slug": "hop",
+    "title": "Neon Hop",
+    "description": "Hop across four lanes of traffic and a river of drifting logs and diving turtles to fill all five docks before the timer runs out.",
+    "tags": [
+      "arcade",
+      "classic"
+    ],
+    "accent": "#3d7bff",
+    "controls": "Arrows / swipe / d-pad",
+    "thumbnail": "thumbs/hop.jpg"
+  },
+  {
+    "slug": "pong",
+    "title": "Neon Pong",
+    "description": "The original paddle duel with spin and speed-ups. Take on the CPU or a friend, first to 7.",
+    "tags": [
+      "classic",
+      "2-player"
+    ],
+    "accent": "#5ef2d0",
+    "controls": "Up / down / drag / gamepad",
+    "thumbnail": "thumbs/pong.jpg"
+  },
+  {
+    "slug": "maze",
+    "title": "Neon Maze",
+    "description": "Clear the maze while four chasers with their own tactics close in. Grab a power cell and turn the hunt around.",
+    "tags": [
+      "classic",
+      "arcade"
+    ],
+    "accent": "#ffe45e",
+    "controls": "Arrows / swipe / d-pad",
+    "thumbnail": "thumbs/maze.jpg"
+  },
+  {
+    "slug": "pinball",
+    "title": "Neon Pinball",
+    "description": "A glowing table of bumpers, slingshots, drop targets and rollover lanes. Build the multiplier to x5 across three balls.",
+    "tags": [
+      "arcade",
+      "action"
+    ],
+    "accent": "#ff2e97",
+    "controls": "Left / right / hold sides / gamepad",
+    "thumbnail": "thumbs/pinball.jpg"
+  }
+]
