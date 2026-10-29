@@ -1,26 +1,6 @@
 import type { Metadata } from "next";
-import { Titillium_Web, Orbitron, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { withBasePath } from "@/lib/base-path";
-
-const titillium = Titillium_Web({
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "900"],
-  style: ["normal", "italic"],
-  variable: "--font-titillium",
-});
-
-const orbitron = Orbitron({
-  subsets: ["latin"],
-  weight: ["700", "800", "900"],
-  variable: "--font-orbitron",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["500", "700", "800"],
-  variable: "--font-jetbrains",
-});
 
 export const metadata: Metadata = {
   title: "LibreCorsa — Open-Source 500Hz Motorsport Simulator",
@@ -44,7 +24,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${titillium.variable} ${orbitron.variable} ${jetbrainsMono.variable}`}
+      className="dark"
+      style={{
+        "--font-titillium": "Arial, Helvetica, sans-serif",
+        "--font-orbitron": "Arial, Helvetica, sans-serif",
+        "--font-jetbrains": "ui-monospace, SFMono-Regular, monospace",
+      } as React.CSSProperties}
     >
       <body className="antialiased bg-[#08090D] text-[#F5F7FA] selection:bg-[#CCFF00] selection:text-[#08090D]">
         {children}
@@ -52,4 +37,3 @@ export default function RootLayout({
     </html>
   );
 }
-
