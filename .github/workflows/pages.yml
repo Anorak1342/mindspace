@@ -44,13 +44,8 @@ jobs:
           cp -R /tmp/librecorsa/. arcade-pro/source/librecorsa/
           rm -rf arcade-pro/source/gh-arcade/.git arcade-pro/source/vibe-basketball/.git arcade-pro/source/f15-flight-sim/.git arcade-pro/source/librecorsa/.git
           rm -rf arcade-pro/source/gh-arcade/node_modules arcade-pro/source/vibe-basketball/node_modules arcade-pro/source/f15-flight-sim/node_modules arcade-pro/source/librecorsa/node_modules arcade-pro/source/librecorsa/.next arcade-pro/source/librecorsa/out
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim arcade-pro/source/librecorsa
-          if ! git diff --cached --quiet; then
-            git commit -m "Copy arcade game source into Mindspace"
-            git push
-          fi
+          # Keep downloaded upstream source in the build workspace only.
+          # Do not push it back to main: that creates a second deployment run.
 
       - name: Type-check and build the copied Neon Arcade source
         run: |
