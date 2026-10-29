@@ -21,14 +21,48 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Mindspace
         uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            /tmp/gh-arcade/package-lock.json
+            /tmp/vibe-basketball/package-lock.json
+
+      - name: Build the Neon Arcade collection
+        run: |
+          git clone --depth 1 https://github.com/TMHSDigital/GH-Arcade.git /tmp/gh-arcade
+          cd /tmp/gh-arcade
+          sed -i "s|const BASE = '/GH-Arcade/';|const BASE = '/mindspace/arcade-pro/';|" vite.config.ts
+          npm ci
+          npm run build
+          mkdir -p "$GITHUB_WORKSPACE/arcade-pro"
+          cp -R dist/. "$GITHUB_WORKSPACE/arcade-pro/"
+          cp LICENSE "$GITHUB_WORKSPACE/arcade-pro/NEON-ARCADE-LICENSE.txt"
+
+      - name: Build the 3D basketball game
+        run: |
+          git clone --depth 1 https://github.com/stateloop-connected/source-vibe-basketball.git /tmp/vibe-basketball
+          cd /tmp/vibe-basketball
+          npm ci
+          npm run build -- --base=./
+          mkdir -p "$GITHUB_WORKSPACE/arcade-pro/basketball"
+          cp -R dist/. "$GITHUB_WORKSPACE/arcade-pro/basketball/"
+          cp LICENSE "$GITHUB_WORKSPACE/arcade-pro/basketball/LICENSE.txt"
+          cp THIRD_PARTY_NOTICES.md "$GITHUB_WORKSPACE/arcade-pro/basketball/THIRD_PARTY_NOTICES.md"
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
+
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
+
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
