@@ -84,7 +84,7 @@ jobs:
           from pathlib import Path
           p = Path("src/app/layout.tsx")
           s = p.read_text()
-          s = s.replace('import { Titillium_Web, Orbitron, JetBrains_Mono } from "next/font/google";\\n', "")
+          s = s.replace('import { Titillium_Web, Orbitron, JetBrains_Mono } from "next/font/google";\n', "")
           start = s.index("const titillium = Titillium_Web({")
           end = s.index("export const metadata:", start)
           s = s[:start] + s[end:]
