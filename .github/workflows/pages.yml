@@ -29,21 +29,25 @@ jobs:
         with:
           node-version: 22
 
-      - name: Build the Neon Arcade collection
+      - name: Copy and build the complete Neon Arcade source
         run: |
           git clone --depth 1 https://github.com/TMHSDigital/GH-Arcade.git /tmp/gh-arcade
-          cd /tmp/gh-arcade
+          mkdir -p "$GITHUB_WORKSPACE/arcade-pro/source/gh-arcade"
+          cp -R /tmp/gh-arcade/. "$GITHUB_WORKSPACE/arcade-pro/source/gh-arcade/"
+          cd "$GITHUB_WORKSPACE/arcade-pro/source/gh-arcade"
           sed -i "s|const BASE = '/GH-Arcade/';|const BASE = '/mindspace/arcade-pro/';|" vite.config.ts
           npm ci
+          npm run typecheck
           npm run build
-          mkdir -p "$GITHUB_WORKSPACE/arcade-pro"
           cp -R dist/. "$GITHUB_WORKSPACE/arcade-pro/"
           cp LICENSE "$GITHUB_WORKSPACE/arcade-pro/NEON-ARCADE-LICENSE.txt"
 
-      - name: Build the 3D basketball game
+      - name: Copy and build the 3D basketball source
         run: |
           git clone --depth 1 https://github.com/stateloop-connected/source-vibe-basketball.git /tmp/vibe-basketball
-          cd /tmp/vibe-basketball
+          mkdir -p "$GITHUB_WORKSPACE/arcade-pro/source/vibe-basketball"
+          cp -R /tmp/vibe-basketball/. "$GITHUB_WORKSPACE/arcade-pro/source/vibe-basketball/"
+          cd "$GITHUB_WORKSPACE/arcade-pro/source/vibe-basketball"
           npm ci
           npm run build -- --base=./
           mkdir -p "$GITHUB_WORKSPACE/arcade-pro/basketball"
