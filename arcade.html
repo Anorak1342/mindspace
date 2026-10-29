@@ -11,7 +11,7 @@
 .games{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}.tile{font:inherit;text-align:left;color:var(--text);background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:13px;min-height:125px;cursor:pointer}.tile:hover{border-color:#77739d}.tile.active{border-color:var(--mint);background:#202b32}.emoji{font-size:27px;display:block;margin-bottom:7px}.tile strong{display:block}.tile small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
 .stage{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px}.stage-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.stage h2{margin:0;font-size:21px}.hint{font-size:12px;color:var(--muted);margin:4px 0 12px}.controls{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#ffffff0d;color:var(--text);border-radius:10px;padding:10px 14px;font-weight:750;cursor:pointer}.btn.primary{background:var(--mint);color:#151b25;border-color:transparent}.btn:focus-visible,.tile:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
 .playfield{display:flex;justify-content:center;align-items:center;background:#0c0d16;border-radius:14px;padding:10px;min-height:250px;overflow:hidden}canvas{display:block;width:min(100%,600px);height:auto;border-radius:8px;touch-action:manipulation}.status{text-align:center;color:var(--mint);font-weight:750;margin-top:10px;min-height:24px}.mobile{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}.mobile .btn{min-width:48px}.board2048{width:min(440px,100%);aspect-ratio:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:8px;background:#24263b;border-radius:14px;touch-action:pan-y}.cell2048{display:grid;place-items:center;border-radius:9px;font-weight:850;font-size:clamp(15px,4vw,29px);aspect-ratio:1;color:#10111b}.footer{text-align:center;color:#777d9b;font-size:11px;margin-top:25px}
-@media(max-width:500px){.hero{padding:20px}.stage{padding:12px}.top{align-items:flex-start}}
+body.playing .app{max-width:none;min-height:100vh;padding:14px 16px 20px;display:flex;flex-direction:column}body.playing .hero,body.playing .games,body.playing .footer{display:none}body.playing .stage{margin-top:0;flex:1;display:flex;flex-direction:column}body.playing .playfield{flex:1;min-height:calc(100vh - 190px)}body.playing canvas{width:min(100%,1000px)}body.playing .top{margin-bottom:12px}body.playing .stage-head{margin-bottom:8px}@media(max-width:500px){.hero{padding:20px}.stage{padding:12px}.top{align-items:flex-start}}
 </style></head>
 <body><main class="app">
 <header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><a class="back" href="./">← Back to study</a></header>
@@ -24,6 +24,7 @@
 <button class="tile" data-game="breakout"><span class="emoji">🪄</span><strong>Breakout</strong><small>Move with mouse / arrows</small></button>
 <button class="tile" data-game="2048"><span class="emoji">🔢</span><strong>2048</strong><small>Slide matching tiles</small></button>
 <button class="tile" data-game="hexgl"><span class="emoji">🏎️</span><strong>HexGL</strong><small>3D racing demo</small></button>
+<button class="tile" data-game="fablecities"><span class="emoji">🏙️</span><strong>Fable Cities</strong><small>3D city-building game · opens full screen</small></button>
 </nav>
 <section class="stage"><div class="stage-head"><div><h2 id="gameTitle">Snake</h2><p class="hint" id="gameHint">Eat the glowing dots and don't hit yourself.</p></div><div class="controls"><button class="btn primary" id="start">▶ Start game</button><button class="btn" id="restart">↻ Restart</button></div></div>
 <div class="playfield" id="playfield"><canvas id="screen" width="600" height="400" aria-label="Game screen"></canvas></div><div class="status" id="status" role="status">Snake selected. Press Start game.</div>
@@ -47,7 +48,8 @@ var info={
  tetris:["Tetris","Stack the falling blocks and clear rows.","←/→ move, ↑ rotate, ↓ drop, Space hard drop."],
  breakout:["Breakout","Bounce the ball into every brick.","Move the paddle with mouse or ←/→."],
  "2048":["2048","Combine matching numbers until you reach 2048.","Use the arrow keys or swipe the board."],
- hexgl:["HexGL","A futuristic 3D racing demo.","If the embedded demo does not load, the game host may block it."]
+ hexgl:["HexGL","A futuristic 3D racing demo.","Opens the racing game directly in its own page."],
+ fablecities:["Fable Cities","Build and manage a 3D city.","Opens the full browser city-builder. Desktop recommended; its first load is large."]
 };
 function status(s){$("#status").textContent=s}
 function stop(){running=false;if(timer){clearInterval(timer);timer=null}}
@@ -105,7 +107,7 @@ function key(e){var k=e.key;if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","
  if(game!=="2048"&&game!=="hexgl")draw();
 }
 function flap(){if(game==="flappy"&&running&&!ended)state.bird.vy=-6.5}
-document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".tile[data-game]");if(!b)return;e.preventDefault();try{selectGame(b.dataset.game);status(info[b.dataset.game][0]+" selected. Press Start game.")}catch(err){var panel=document.querySelector("#status");if(panel)panel.textContent="Couldn't open that game: "+err.message;console.error(err)}},true);
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".tile[data-game]");if(!b)return;e.preventDefault();var chosen=b.dataset.game;if(chosen==="hexgl"){window.location.href="https://hexgl.bkcore.com/";return}if(chosen==="fablecities"){window.location.href="https://fablecities.rawscollections.com";return}window.location.href=window.location.pathname+"?game="+encodeURIComponent(chosen)},true);
 $("#start").addEventListener("click",start);$("#restart").addEventListener("click",restart);$("#flap").addEventListener("click",flap);
 $$("[data-dir]").forEach(function(b){b.addEventListener("click",function(){var d=b.dataset.dir;if(game==="snake"){var dirs={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}},n=dirs[d];if(n.x!==-state.dir.x||n.y!==-state.dir.y)state.next=n}else if(game==="pong"){if(d==="up")state.py=Math.max(0,state.py-25);if(d==="down")state.py=Math.min(320,state.py+25)}else if(game==="breakout"){if(d==="left")state.paddle=Math.max(0,state.paddle-25);if(d==="right")state.paddle=Math.min(500,state.paddle+25)}else if(game==="tetris"){if(d==="left"&&!collide(state.px-1,state.py,state.piece))state.px--;if(d==="right"&&!collide(state.px+1,state.py,state.piece))state.px++;if(d==="down"&&!collide(state.px,state.py+1,state.piece))state.py++;if(d==="up")rotate()}draw()})});
 window.addEventListener("keydown",key);
@@ -117,6 +119,13 @@ function move2048(dir){if(game!=="2048")return;var before=state.tiles.join(",");
 function canMove(){for(var r=0;r<4;r++)for(var c=0;c<4;c++){var v=state.tiles[r*4+c];if(!v||c<3&&v===state.tiles[r*4+c+1]||r<3&&v===state.tiles[(r+1)*4+c])return true}return false}
 field.addEventListener("touchstart",function(e){if(game==="2048"&&e.touches.length)touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});
 field.addEventListener("touchend",function(e){if(game!=="2048"||!touchStart||!e.changedTouches.length)return;var dx=e.changedTouches[0].clientX-touchStart.x,dy=e.changedTouches[0].clientY-touchStart.y;if(Math.max(Math.abs(dx),Math.abs(dy))>25)move2048(Math.abs(dx)>Math.abs(dy)?(dx>0?"right":"left"):(dy>0?"down":"up"));touchStart=null},{passive:true});
-selectGame("snake");
+var params=new URLSearchParams(window.location.search),requested=params.get("game");
+if(requested&&info[requested]&&requested!=="hexgl"&&requested!=="fablecities"){
+ document.body.classList.add("playing");
+ var back=$(".back");back.href="./arcade.html";back.textContent="← All games";
+ var study=document.createElement("a");study.className="back";study.href="./";study.textContent="← Mindspace";$(".top").appendChild(study);
+ var enterCount=0,lastEnter=0;document.addEventListener("keydown",function(e){if(e.key!=="Enter"||e.repeat)return;var now=Date.now();if(now-lastEnter>2000)enterCount=0;lastEnter=now;enterCount++;if(enterCount>=3){window.location.href="./";enterCount=0}},true);
+ selectGame(requested);
+}else{selectGame("snake")}
 })();
 </script></body></html>
