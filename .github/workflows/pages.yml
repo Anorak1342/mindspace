@@ -148,6 +148,49 @@ jobs:
           cp LICENSE "$GITHUB_WORKSPACE/arcade-pro/librecorsa/LICENSE.txt"
           cp CREDITS.md "$GITHUB_WORKSPACE/arcade-pro/librecorsa/CREDITS.md"
 
+      - name: Add the three-Enter lock shortcut to every page
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          script = r'''<script id="mindspace-lock-shortcut">
+          (function () {
+            var countKey = "ms-enter-lock-count";
+            var timeKey = "ms-enter-lock-time";
+            document.addEventListener("keydown", function (event) {
+              if (event.key !== "Enter" || event.repeat) return;
+              var now = Date.now();
+              var previous = Number(sessionStorage.getItem(timeKey) || 0);
+              var count = previous && now - previous <= 2500
+                ? Number(sessionStorage.getItem(countKey) || 0) + 1
+                : 1;
+              sessionStorage.setItem(countKey, String(count));
+              sessionStorage.setItem(timeKey, String(now));
+              if (count >= 3) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                try {
+                  localStorage.removeItem("ms-arcade-unlocked");
+                  sessionStorage.removeItem(countKey);
+                  sessionStorage.removeItem(timeKey);
+                } catch (error) {}
+                window.location.href = "/mindspace/";
+              }
+            }, true);
+          })();
+          </script>'''
+          for page in Path(".").rglob("*.html"):
+              if ".git" in page.parts or "source" in page.parts:
+                  continue
+              content = page.read_text(encoding="utf-8")
+              if 'id="mindspace-lock-shortcut"' in content:
+                  continue
+              if "</body>" in content:
+                  content = content.replace("</body>", script + "\n</body>", 1)
+              else:
+                  content += script
+              page.write_text(content, encoding="utf-8")
+          PY
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
