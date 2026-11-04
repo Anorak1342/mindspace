@@ -43,6 +43,7 @@ jobs:
           git clone --depth 1 https://github.com/mgechev/mk.js.git /tmp/mkjs
           git clone --depth 1 --branch gh-pages https://github.com/lo-th/3d.city.git /tmp/3d-city
           git clone --depth 1 --branch gh-pages https://github.com/Hextris/hextris.git /tmp/hextris
+          git clone --depth 1 https://github.com/basicallydan/skifree.js.git /tmp/skifree
           git clone --depth 1 https://github.com/SamadiPour/snack-hole-game.git /tmp/snack-hole-game
           git -C /tmp/snack-hole-game checkout 2f1e5699eb08e19b6e6b76ab1e28055c9295a27b
           mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim arcade-pro/source/librecorsa arcade-pro/source/pacman arcade-pro/source/2048 arcade-pro/source/trex-runner
@@ -55,6 +56,11 @@ jobs:
           cp -R /tmp/trex-runner/. arcade-pro/source/trex-runner/
           mkdir -p arcade-pro/hextris
           cp -R /tmp/hextris/. arcade-pro/hextris/
+          mkdir -p arcade-pro/skifree
+          cp -R /tmp/skifree/index.html /tmp/skifree/css /tmp/skifree/dist /tmp/skifree/js /tmp/skifree/*.png /tmp/skifree/yeti-big.png arcade-pro/skifree/ 2>/dev/null || true
+          cp /tmp/skifree/license.md arcade-pro/skifree/LICENSE.txt
+          sed -i '/GoogleAnalyticsObject/,$d' arcade-pro/skifree/index.html
+          sed -i 's|</body>|<p style="position:fixed;bottom:8px;left:8px;background:#fff;color:#222;padding:5px 8px;font:12px sans-serif;z-index:99">SkiFree.js by Daniel Hough · MIT License</p></body>|' arcade-pro/skifree/index.html
           rm -rf arcade-pro/hextris/.git arcade-pro/hextris/.github
           mkdir -p arcade-pro/3d-city
           cp -R /tmp/3d-city/. arcade-pro/3d-city/
