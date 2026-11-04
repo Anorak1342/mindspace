@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090b18">
+<title>Mini Metro · Mindspace Arcade</title>
+<style>
+:root{color-scheme:dark;--bg:#090b18;--panel:#151a30;--line:#30395b;--text:#f5f7ff;--muted:#a9b2d0;--cyan:#75f3e0}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,Segoe UI,sans-serif}
+.top{height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 17px;background:#101529;border-bottom:1px solid var(--line)}
+.brand{font-weight:850;letter-spacing:.2px}.brand span{color:var(--cyan)}
+a{color:inherit;text-decoration:none}.back,.open{border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-weight:700}.open{background:var(--cyan);color:#08151a;border-color:transparent}
+main{height:calc(100% - 54px);position:relative}iframe{display:block;width:100%;height:100%;border:0;background:#10111b}
+.fallback{position:absolute;inset:auto 12px 12px auto;background:#101529eF;border:1px solid var(--line);padding:10px 12px;border-radius:12px;color:var(--muted);font-size:12px}
+@media(max-width:520px){.top{padding:0 10px}.brand{font-size:12px}.back,.open{padding:7px 9px;font-size:11px}}
+</style>
+</head>
+<body>
+<header class="top"><a class="back" href="./arcade.html">← Arcade</a><div class="brand">MINDSpace <span>✳ MINI METRO</span></div><a class="open" href="https://kaos599.github.io/mini-metro-js/" target="_blank" rel="noopener">Open game ↗</a></header>
+<main><iframe src="https://kaos599.github.io/mini-metro-js/" title="Mini Metro game" allow="fullscreen; autoplay" loading="eager"></iframe><div class="fallback">If the game doesn't load here, use “Open game ↗”.</div></main>
+</body>
+</html>
