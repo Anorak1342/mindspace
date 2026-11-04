@@ -1,0 +1,113 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function roomPath(roomId) {
+      return /databases/$(database)/documents/rooms/$(roomId);
+    }
+    function memberPath(roomId, uid) {
+      return /databases/$(database)/documents/rooms/$(roomId)/members/$(uid);
+    }
+    function codePath(code) {
+      return /databases/$(database)/documents/roomCodes/$(code);
+    }
+    function isMember(roomId) {
+      return signedIn() && exists(memberPath(roomId, request.auth.uid));
+    }
+    function isOwner(roomId) {
+      return isMember(roomId) && get(roomPath(roomId)).data.ownerId == request.auth.uid;
+    }
+
+    match /rooms/{roomId} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['name', 'ownerId', 'createdAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 40
+        && request.resource.data.ownerId == request.auth.uid;
+      allow get: if isMember(roomId);
+      allow list: if false;
+      allow update: if isOwner(roomId)
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 40;
+      allow delete: if isOwner(roomId);
+
+      match /members/{uid} {
+        allow get, list: if isMember(roomId)
+          && (uid == request.auth.uid || isOwner(roomId));
+        allow create: if signedIn()
+          && uid == request.auth.uid
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.displayName is string
+          && request.resource.data.displayName.size() > 0
+          && request.resource.data.displayName.size() <= 24
+          && request.resource.data.joinedAt == request.time
+          && (
+            (request.resource.data.role == 'owner'
+              && getAfter(roomPath(roomId)).data.ownerId == request.auth.uid)
+            ||
+            (request.resource.data.role == 'member'
+              && request.resource.data.joinCode is string
+              && get(codePath(request.resource.data.joinCode)).data.roomId == roomId)
+          );
+        allow update: if signedIn()
+          && uid == request.auth.uid
+          && isMember(roomId)
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.joinedAt == resource.data.joinedAt
+          && request.resource.data.displayName is string
+          && request.resource.data.displayName.size() > 0
+          && request.resource.data.displayName.size() <= 24;
+        allow delete: if signedIn() && uid == request.auth.uid
+          && resource.data.role == 'member';
+      }
+
+      match /messages/{messageId} {
+        allow get, list: if isMember(roomId);
+        allow create: if isMember(roomId)
+          && request.resource.data.keys().hasOnly(['uid', 'displayName', 'text', 'createdAt'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.displayName == get(memberPath(roomId, request.auth.uid)).data.displayName
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 1000
+          && request.resource.data.createdAt == request.time;
+        allow update, delete: if false;
+      }
+    }
+
+    match /roomCodes/{code} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['roomId', 'createdBy', 'createdAt'])
+        && request.resource.data.createdBy == request.auth.uid
+        && getAfter(roomPath(request.resource.data.roomId)).data.ownerId == request.auth.uid
+        && getAfter(memberPath(request.resource.data.roomId, request.auth.uid)).data.uid == request.auth.uid;
+      allow update, delete: if signedIn()
+        && get(roomPath(resource.data.roomId)).data.ownerId == request.auth.uid;
+    }
+
+    match /users/{uid}/rooms/{roomId} {
+      allow get, list: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.roomId == roomId
+        && getAfter(memberPath(roomId, uid)).data.uid == uid;
+      allow delete: if signedIn() && request.auth.uid == uid
+        && resource.data.uid == uid;
+      allow update: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
