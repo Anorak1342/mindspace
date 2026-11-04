@@ -41,6 +41,7 @@ jobs:
           git clone --depth 1 https://github.com/gabrielecirulli/2048.git /tmp/2048
           git clone --depth 1 --branch gh-pages https://github.com/wayou/t-rex-runner.git /tmp/trex-runner
           git clone --depth 1 https://github.com/mgechev/mk.js.git /tmp/mkjs
+          git clone --depth 1 --branch gh-pages https://github.com/lo-th/3d.city.git /tmp/3d-city
           mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim arcade-pro/source/librecorsa arcade-pro/source/pacman arcade-pro/source/2048 arcade-pro/source/trex-runner
           cp -R /tmp/gh-arcade/. arcade-pro/source/gh-arcade/
           cp -R /tmp/vibe-basketball/. arcade-pro/source/vibe-basketball/
@@ -49,6 +50,9 @@ jobs:
           cp -R /tmp/pacman/. arcade-pro/source/pacman/
           cp -R /tmp/2048/. arcade-pro/source/2048/
           cp -R /tmp/trex-runner/. arcade-pro/source/trex-runner/
+          mkdir -p arcade-pro/3d-city
+          cp -R /tmp/3d-city/. arcade-pro/3d-city/
+          rm -rf arcade-pro/3d-city/.git arcade-pro/3d-city/.github
           mkdir -p arcade-pro/mk-fighter
           cp -R /tmp/mkjs/game/. arcade-pro/mk-fighter/
           cp /tmp/mkjs/readme.md arcade-pro/mk-fighter/MKJS-README.md
