@@ -37,13 +37,19 @@ jobs:
           git clone --depth 1 https://github.com/stateloop-connected/source-vibe-basketball.git /tmp/vibe-basketball
           git clone --depth 1 https://github.com/Anorak1342/F-15-Flight-Sim-.git /tmp/f15-flight-sim
           git clone --depth 1 https://github.com/KhazP/librecorsa.git /tmp/librecorsa
-          mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim arcade-pro/source/librecorsa
+          git clone --depth 1 https://github.com/KamranBoroomand/PacMan.git /tmp/pacman
+          git clone --depth 1 https://github.com/gabrielecirulli/2048.git /tmp/2048
+          git clone --depth 1 --branch gh-pages https://github.com/wayou/t-rex-runner.git /tmp/trex-runner
+          mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim arcade-pro/source/librecorsa arcade-pro/source/pacman arcade-pro/source/2048 arcade-pro/source/trex-runner
           cp -R /tmp/gh-arcade/. arcade-pro/source/gh-arcade/
           cp -R /tmp/vibe-basketball/. arcade-pro/source/vibe-basketball/
           cp -R /tmp/f15-flight-sim/. arcade-pro/source/f15-flight-sim/
           cp -R /tmp/librecorsa/. arcade-pro/source/librecorsa/
-          rm -rf arcade-pro/source/gh-arcade/.git arcade-pro/source/vibe-basketball/.git arcade-pro/source/f15-flight-sim/.git arcade-pro/source/librecorsa/.git
-          rm -rf arcade-pro/source/gh-arcade/node_modules arcade-pro/source/vibe-basketball/node_modules arcade-pro/source/f15-flight-sim/node_modules arcade-pro/source/librecorsa/node_modules arcade-pro/source/librecorsa/.next arcade-pro/source/librecorsa/out
+          cp -R /tmp/pacman/. arcade-pro/source/pacman/
+          cp -R /tmp/2048/. arcade-pro/source/2048/
+          cp -R /tmp/trex-runner/. arcade-pro/source/trex-runner/
+          rm -rf arcade-pro/source/gh-arcade/.git arcade-pro/source/vibe-basketball/.git arcade-pro/source/f15-flight-sim/.git arcade-pro/source/librecorsa/.git arcade-pro/source/pacman/.git arcade-pro/source/2048/.git arcade-pro/source/trex-runner/.git
+          rm -rf arcade-pro/source/gh-arcade/node_modules arcade-pro/source/vibe-basketball/node_modules arcade-pro/source/f15-flight-sim/node_modules arcade-pro/source/librecorsa/node_modules arcade-pro/source/librecorsa/.next arcade-pro/source/librecorsa/out arcade-pro/source/pacman/node_modules
           # Keep downloaded upstream source in the build workspace only.
           # Do not push it back to main: that creates a second deployment run.
 
@@ -56,6 +62,29 @@ jobs:
           npm run build
           cp -R dist/. "$GITHUB_WORKSPACE/arcade-pro/"
           cp LICENSE "$GITHUB_WORKSPACE/arcade-pro/NEON-ARCADE-LICENSE.txt"
+
+      - name: Build Pac-Man
+        run: |
+          cd arcade-pro/source/pacman
+          npm ci
+          npm run check
+          npm run build
+          mkdir -p "$GITHUB_WORKSPACE/arcade-pro/pacman"
+          cp -R dist/. "$GITHUB_WORKSPACE/arcade-pro/pacman/"
+          cp LICENSE "$GITHUB_WORKSPACE/arcade-pro/pacman/LICENSE.txt"
+
+      - name: Publish 2048 locally
+        run: |
+          mkdir -p arcade-pro/2048
+          cp -R arcade-pro/source/2048/. arcade-pro/2048/
+
+      - name: Publish T-Rex Runner locally
+        run: |
+          mkdir -p arcade-pro/trex-runner
+          cp -R arcade-pro/source/trex-runner/. arcade-pro/trex-runner/
+          rm -rf arcade-pro/trex-runner/.github arcade-pro/trex-runner/.git
+          sed -i '/fonts.googleapis.com/d' arcade-pro/trex-runner/index.html
+          cp arcade-pro/source/trex-runner/LICENSE arcade-pro/trex-runner/LICENSE.txt
 
       - name: Build the copied 3D basketball source
         run: |
