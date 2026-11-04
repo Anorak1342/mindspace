@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#070b18">
+<title>Slope | Mindspace Arcade</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#070b18;font-family:Inter,system-ui,Segoe UI,sans-serif;color:#f4f7ff}canvas{display:block;width:100%;height:100%;touch-action:none}
+#hud{position:fixed;inset:0;pointer-events:none;padding:22px 26px;display:flex;justify-content:space-between;align-items:flex-start;text-shadow:0 2px 12px #000}
+.brand{font-size:12px;letter-spacing:4px;font-weight:900;color:#8deaff}.score{font-size:clamp(25px,5vw,42px);font-weight:900;line-height:1}.small{font-size:11px;letter-spacing:2px;color:#91a5c7;margin-top:7px}
+.right{text-align:right}.best{font-size:14px;color:#b6c6e4}
+#overlay{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(180deg,rgba(4,8,20,.25),rgba(4,8,20,.82));}
+.panel{text-align:center;width:min(480px,calc(100% - 36px));padding:34px 30px;border:1px solid rgba(120,220,255,.28);background:rgba(7,13,31,.88);box-shadow:0 0 80px #00bfff18;backdrop-filter:blur(12px)}
+.kicker{font-size:11px;letter-spacing:5px;color:#75e9ff;font-weight:900}h1{font-size:clamp(42px,10vw,76px);line-height:.9;letter-spacing:-4px;margin:16px 0 12px;font-weight:1000;font-style:italic}p{color:#aebbd4;line-height:1.6;font-size:14px}.controls{font-size:12px;color:#d6e5ff;line-height:1.9;margin:20px 0}
+button{pointer-events:auto;border:0;background:linear-gradient(100deg,#45dfff,#a4f7ff);color:#06101d;font-weight:1000;letter-spacing:2px;padding:15px 30px;border-radius:3px;cursor:pointer;box-shadow:0 0 28px #31d8ff55}
+.hidden{display:none!important}.foot{position:fixed;bottom:12px;left:0;right:0;text-align:center;color:#7283a5;font-size:10px;letter-spacing:2px;pointer-events:none}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="hud"><div><div class="brand">MINDSPACE / ARCADE</div><div style="margin-top:17px"><div class="score" id="score">0</div><div class="small">DISTANCE</div></div></div><div class="right"><div class="best" id="best">BEST 0</div><div class="small" id="speed">SPEED 1.0x</div></div></div>
+<div id="overlay"><div class="panel"><div class="kicker">ENDLESS NEON DESCENT</div><h1 id="title">SLOPE</h1><p id="message">The track gets faster the longer you survive. Keep your ball on the slope, weave between red blocks and chase your distance record.</p><div class="controls">← → or A / D to steer<br>On mobile: drag left or right<br>Collect cyan orbs for bonus points</div><button id="start">START RUN</button></div></div>
+<div class="foot">MINDSPACE ORIGINAL · BUILT FOR THE ARCADE</div>
+<script>
+(()=>{
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const overlay=document.getElementById('overlay'),startBtn=document.getElementById('start'),title=document.getElementById('title'),message=document.getElementById('message');
+const scoreEl=document.getElementById('score'),bestEl=document.getElementById('best'),speedEl=document.getElementById('speed');
+let W=0,H=0,dpr=1,playing=false,last=0,elapsed=0,distance=0,best=Number(localStorage.getItem('ms-slope-best')||0),speed=0.34,player=0,velocity=0,shake=0,obstacles=[],gems=[],spawn=0,gemSpawn=0,stars=[];
+bestEl.textContent='BEST '+best;
+function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);stars=Array.from({length:90},()=>({x:Math.random()*W,y:Math.random()*H*.55,r:Math.random()*1.5,a:.2+Math.random()*.6}));}
+addEventListener('resize',resize);resize();
+function reset(){elapsed=0;distance=0;speed=.34;player=0;velocity=0;shake=0;obstacles=[];gems=[];spawn=0;gemSpawn=0;playing=true;overlay.classList.add('hidden');last=performance.now();requestAnimationFrame(loop);}
+function project(x,z){const depth=1/(z*.82+0.16);const horizon=H*.28;const y=horizon+depth*H*.82;const half=(W*.43)*depth;return {x:W/2+x*half,y,half,scale:depth};}
+function drawBackground(){const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#081126');g.addColorStop(.48,'#14254b');g.addColorStop(1,'#050914');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ctx.save();for(const s of stars){ctx.globalAlpha=s.a;ctx.fillStyle='#bcecff';ctx.fillRect(s.x,s.y,s.r,s.r);}ctx.restore();
+const glow=ctx.createRadialGradient(W/2,H*.34,0,W/2,H*.34,W*.52);glow.addColorStop(0,'#1a9bc533');glow.addColorStop(1,'#07101a00');ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);}
+function drawTrack(){const segments=34;for(let i=segments;i>=0;i--){const z=i/segments;const bend=Math.sin((distance*.004)+(1-z)*2.8)*.13;const p=project(bend,z);const p2=project(bend,z+1/segments);const c1=project(bend-1,z),c2=project(bend+1,z);const c3=project(bend-1,z+1/segments),c4=project(bend+1,z+1/segments);
+ctx.fillStyle=i%2?'#172d51':'#1b355d';ctx.beginPath();ctx.moveTo(c1.x,c1.y);ctx.lineTo(c2.x,c2.y);ctx.lineTo(c4.x,c4.y);ctx.lineTo(c3.x,c3.y);ctx.closePath();ctx.fill();
+ctx.strokeStyle='rgba(104,218,255,'+(0.1+(1-z)*.35)+')';ctx.lineWidth=Math.max(.5,p.scale*2);ctx.beginPath();ctx.moveTo(c1.x,c1.y);ctx.lineTo(c3.x,c3.y);ctx.moveTo(c2.x,c2.y);ctx.lineTo(c4.x,c4.y);ctx.stroke();
+if(i%3===0){ctx.strokeStyle='rgba(113,220,255,'+(.08+(1-z)*.18)+')';ctx.lineWidth=Math.max(.5,p.scale);ctx.beginPath();ctx.moveTo(p.x-p.half*.96,p.y);ctx.lineTo(p.x+p.half*.96,p.y);ctx.stroke();}
+}
+}
+function drawObject(o,isGem){const p=project(o.x,o.z);if(p.y>H+60||p.y<H*.25)return;const size=Math.max(2,p.scale*(isGem?18:30));if(isGem){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(elapsed*2);ctx.shadowBlur=22;ctx.shadowColor='#53f5ff';ctx.fillStyle='#7df8ff';ctx.beginPath();ctx.moveTo(0,-size);ctx.lineTo(size*.65,0);ctx.lineTo(0,size);ctx.lineTo(-size*.65,0);ctx.closePath();ctx.fill();ctx.restore();}else{ctx.save();ctx.shadowBlur=18*p.scale;ctx.shadowColor='#ff2858';const w=size*(.9+o.w*.3),h=size*1.1;ctx.fillStyle='#ff294f';ctx.beginPath();ctx.moveTo(p.x-w/2,p.y-h);ctx.lineTo(p.x+w/2,p.y-h);ctx.lineTo(p.x+w/2,p.y);ctx.lineTo(p.x-w/2,p.y);ctx.closePath();ctx.fill();ctx.fillStyle='#ff9cae';ctx.globalAlpha=.45;ctx.fillRect(p.x-w/2,p.y-h,w*.16,h);ctx.restore();}}
+function drawBall(){const x=W/2+player*W*.29,y=H*.78,r=Math.min(22,Math.max(12,W*.018));ctx.save();ctx.shadowBlur=28;ctx.shadowColor='#39eaff';ctx.fillStyle='#5cecff';ctx.beginPath();ctx.ellipse(x,y+r*.7,r*1.3,r*.48,0,0,Math.PI*2);ctx.fill();const g=ctx.createRadialGradient(x-r*.35,y-r*.4,2,x,y,r);g.addColorStop(0,'#fff');g.addColorStop(.28,'#b9fbff');g.addColorStop(.65,'#42c8f2');g.addColorStop(1,'#11618f');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#d7ffff';ctx.globalAlpha=.65;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x-r*.2,y-r*.2,r*.52,-1.2,.8);ctx.stroke();ctx.restore();}
+function draw(){drawBackground();drawTrack();obstacles.slice().sort((a,b)=>b.z-a.z).forEach(o=>drawObject(o,false));gems.slice().sort((a,b)=>b.z-a.z).forEach(o=>drawObject(o,true));drawBall();}
+function spawnObstacle(){const lane=(Math.floor(Math.random()*5)-2)*.36;obstacles.push({x:lane,z:1.08,w:.7});}
+function loop(now){if(!playing)return;const dt=Math.min((now-last)/16.67,2);last=now;elapsed+=dt;speed=Math.min(.34+elapsed*.00085,.95);distance+=speed*dt*1.8;spawn-=dt;gemSpawn-=dt;if(spawn<=0){spawnObstacle();if(Math.random()<.42)spawnObstacle();spawn=Math.max(17,44-elapsed*.012)*(0.75+Math.random()*.55);}if(gemSpawn<=0){gems.push({x:(Math.floor(Math.random()*5)-2)*.36,z:1.1});gemSpawn=75+Math.random()*45;}
+velocity+=(input*0.012-velocity*.12)*dt;player+=velocity*dt;player=Math.max(-1.05,Math.min(1.05,player));obstacles.forEach(o=>o.z-=speed*.018*dt);gems.forEach(o=>o.z-=speed*.018*dt);
+for(const o of obstacles){if(o.z<.11&&o.z>.035&&Math.abs(o.x-player)<.19){endRun();return;}}
+gems=gems.filter(g=>{if(g.z<.12&&g.z>.035&&Math.abs(g.x-player)<.2){distance+=35;return false;}return g.z>-.1;});obstacles=obstacles.filter(o=>o.z>-.1);
+if(Math.abs(player)>1.02){endRun();return;}
+scoreEl.textContent=Math.floor(distance);speedEl.textContent='SPEED '+(speed/.34).toFixed(1)+'x';draw();requestAnimationFrame(loop);}
+function endRun(){playing=false;best=Math.max(best,Math.floor(distance));localStorage.setItem('ms-slope-best',best);bestEl.textContent='BEST '+best;title.textContent='WIPEOUT';message.textContent='You travelled '+Math.floor(distance)+' metres. The slope is waiting. Beat your best distance.';startBtn.textContent='TRY AGAIN';overlay.classList.remove('hidden');}
+let input=0;const keys=new Set();function syncInput(){input=(keys.has('ArrowLeft')||keys.has('a')||keys.has('A')?-1:0)+(keys.has('ArrowRight')||keys.has('d')||keys.has('D')?1:0);}
+addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();keys.add(e.key);syncInput();if(!playing&&e.key==='Enter')reset();});addEventListener('keyup',e=>{keys.delete(e.key);syncInput();});
+let pointer=null;canvas.addEventListener('pointerdown',e=>{pointer=e.clientX;});canvas.addEventListener('pointermove',e=>{if(pointer!==null){input=Math.max(-1,Math.min(1,(e.clientX-pointer)/(W*.22)));}});addEventListener('pointerup',()=>{pointer=null;input=0;});
+startBtn.addEventListener('click',reset);
+draw();
+})();
+</script>
+</body>
+</html>
