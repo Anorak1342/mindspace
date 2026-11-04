@@ -54,7 +54,7 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
  let unlocked=false;
  try{unlocked=localStorage.getItem("ms-arcade-unlocked")==="yes"}catch(e){}
  if(!unlocked){
-  document.querySelector(".hero").innerHTML='<div class="eyebrow">LOCKED</div><h1>The arcade is still asleep.</h1><p>Create a study deck named <strong>Library</strong> on the Mindspace dashboard, or press Enter three times there to unlock it.</p><a class="back" href="./">Return to Mindspace</a>';
+  document.querySelector(".hero").innerHTML='<div class="eyebrow">LOCKED</div><h1>The arcade is still asleep.</h1><p>Create a study deck named <strong>Library</strong> on the Mindspace dashboard, or press Enter three times on the front page to open the arcade.</p><a class="back" href="./">Return to Mindspace</a>';
   document.querySelector(".games").classList.add("hidden");
   document.querySelector(".note").classList.add("hidden");
  }
