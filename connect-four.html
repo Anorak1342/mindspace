@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090d18"><title>Connect Four | Mindspace Arcade</title>
+<style>
+:root{color-scheme:dark;--bg:#090d18;--panel:#111a2b;--line:#293751;--text:#f3f6ff;--muted:#9aa8c0;--red:#ff6375;--yellow:#ffd45d;--mint:#83e6bd}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#1b2c49 0,#090d18 60%);color:var(--text);font:15px/1.5 system-ui,Segoe UI,sans-serif}
+main{width:min(1000px,calc(100% - 28px));margin:auto;padding:20px 0 44px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:25px}.brand{font-weight:900;letter-spacing:.5px}.brand span{color:var(--mint)}a,.btn,select{color:inherit}.back,.btn,select{border:1px solid var(--line);background:#121d30;border-radius:9px;padding:9px 13px;text-decoration:none;font:inherit;cursor:pointer}.back:hover,.btn:hover{border-color:#6d86aa}.hero{text-align:center;margin-bottom:22px}.eyebrow{color:var(--mint);font-size:11px;letter-spacing:3px;font-weight:900}h1{font:700 clamp(34px,6vw,52px)/1.05 Georgia,serif;margin:8px 0}.hero p{color:var(--muted);margin:0}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 245px;gap:18px;align-items:start}.gamebox,.side{background:#101a2b;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 18px 50px #0005}
+.status{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 13px}.turn{font-weight:800;display:flex;align-items:center;gap:9px}.disc{width:15px;height:15px;border-radius:50%;display:inline-block;background:var(--red);box-shadow:inset 0 2px 3px #fff5,0 2px 8px #0006}.disc.yellow{background:var(--yellow)}
+.board{display:grid;grid-template-columns:repeat(7,1fr);gap:clamp(5px,1.2vw,11px);padding:clamp(8px,1.8vw,16px);background:linear-gradient(145deg,#2460a9,#123b77);border-radius:13px;box-shadow:inset 0 5px 15px #061a3c,0 8px 20px #0005;touch-action:manipulation}
+.slot{aspect-ratio:1;border:0;border-radius:50%;background:#08162b;box-shadow:inset 0 5px 9px #000b,0 1px 0 #ffffff20;cursor:pointer;padding:0;position:relative}.slot:focus-visible{outline:3px solid white;outline-offset:2px}.slot.red:after,.slot.yellow:after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--red);box-shadow:inset 0 3px 4px #fff8,0 3px 8px #0007}.slot.yellow:after{background:var(--yellow)}.slot.winner:after{outline:4px solid white;outline-offset:-2px;filter:brightness(1.2)}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.controls .btn.primary{background:var(--mint);color:#082016;border-color:var(--mint);font-weight:900}.side h2{font:700 21px Georgia,serif;margin:0 0 12px}.side label{display:block;color:var(--muted);font-size:12px;margin:13px 0 5px}.side select{width:100%}.score{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}.score div{background:#0b1423;border:1px solid var(--line);border-radius:10px;padding:10px}.score small{display:block;color:var(--muted)}.score strong{font-size:22px}.tip{font-size:12px;color:var(--muted);margin-top:14px}.foot{text-align:center;color:#66748d;font-size:12px;margin-top:20px}
+@media(max-width:700px){.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.side h2,.score,.tip{grid-column:1/-1}.gamebox{padding:10px}.board{gap:5px;padding:8px}.status{font-size:13px}}
+</style></head>
+<body><main>
+<header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><a class="back" href="../../arcade.html">← Arcade</a></header>
+<section class="hero"><div class="eyebrow">CLASSIC STRATEGY</div><h1>Connect Four</h1><p>Drop four in a row. Block your opponent. Think one move ahead.</p></section>
+<div class="layout"><section class="gamebox">
+<div class="status"><div class="turn" id="turn"><i class="disc"></i> Red's turn</div><span id="message" aria-live="polite">Choose a column</span></div>
+<div class="board" id="board" role="group" aria-label="Connect Four board"></div>
+<div class="controls"><button class="btn primary" id="new">New game</button><button class="btn" id="undo">Undo move</button><button class="btn" id="hint">Hint</button></div>
+</section><aside class="side"><h2>Game settings</h2>
+<label for="mode">Game mode</label><select id="mode"><option value="cpu">Play against computer</option><option value="local">Two players, same screen</option></select>
+<label for="difficulty">Computer difficulty</label><select id="difficulty"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
+<div class="score"><div><small>Red wins</small><strong id="redScore">0</strong></div><div><small>Yellow wins</small><strong id="yellowScore">0</strong></div></div>
+<div class="tip">Tip: the centre column is powerful because it gives you more ways to make a line. You can also use number keys 1–7 to drop a disc.</div></aside></div>
+<div class="foot">Mindspace Arcade · Connect Four</div>
+</main>
+<script>
+(()=>{
+const W=7,H=6,EMPTY=0,RED=1,YELLOW=2;
+let board,turn,over,history=[],scores=[0,0],winning=[],thinking=false;
+const $=id=>document.getElementById(id), boardEl=$('board');
+const dirs=[[1,0],[0,1],[1,1],[1,-1]];
+function fresh(){board=Array.from({length:H},()=>Array(W).fill(EMPTY));turn=RED;over=false;history=[];winning=[];thinking=false;render();status('Red to move');}
+function status(msg){$('message').textContent=msg;$('turn').innerHTML='<i class="disc '+(turn===YELLOW?'yellow':'')+'"></i> '+(turn===RED?'Red':'Yellow')+(thinking?' · thinking':'')+' turn';}
+function legal(c){return c>=0&&c<W&&board[0][c]===EMPTY}
+function drop(c,p){if(!legal(c)||over)return false;let r=H-1;while(r>=0&&board[r][c]!==EMPTY)r--;if(r<0)return false;board[r][c]=p;history.push({r,c,p});const line=winLine(r,c,p);if(line){winning=line;over=true;scores[p-1]++;$('redScore').textContent=scores[0];$('yellowScore').textContent=scores[1];render();status((p===RED?'Red':'Yellow')+' wins!');$('message').textContent='Four connected. Well played!';return true;}if(board.every(row=>row.every(v=>v))){over=true;render();status('Draw game');$('message').textContent='The board is full.';return true;}turn=3-p;render();status('Your move');if($('mode').value==='cpu'&&turn===YELLOW&&!over){thinking=true;status('');setTimeout(cpuMove,260);}return true;}
+function winLine(r,c,p){for(const [dr,dc] of dirs){let cells=[[r,c]];for(const s of [-1,1]){let rr=r+s*dr,cc=c+s*dc;while(rr>=0&&rr<H&&cc>=0&&cc<W&&board[rr][cc]===p){cells.push([rr,cc]);rr+=s*dr;cc+=s*dc;}}if(cells.length>=4)return cells;}return null;}
+function render(){boardEl.innerHTML='';for(let r=0;r<H;r++)for(let c=0;c<W;c++){let b=document.createElement('button');b.className='slot'+(board[r][c]===RED?' red':board[r][c]===YELLOW?' yellow':'')+(winning.some(([rr,cc])=>rr===r&&cc===c)?' winner':'');b.setAttribute('aria-label','Column '+(c+1)+', row '+(r+1)+(board[r][c]?' occupied':' empty'));b.disabled=over||thinking||!legal(c)||( $('mode').value==='cpu'&&turn===YELLOW);b.addEventListener('click',()=>drop(c,turn));boardEl.appendChild(b);}}
+function evaluate(p){let total=0;for(let r=0;r<H;r++)for(let c=0;c<W;c++)if(board[r][c]===p)total+=(3-Math.abs(3-c));for(const [dr,dc] of dirs)for(let r=0;r<H;r++)for(let c=0;c<W;c++){let cells=[];for(let k=0;k<4;k++){let rr=r+dr*k,cc=c+dc*k;if(rr<0||rr>=H||cc<0||cc>=W){cells=[];break;}cells.push(board[rr][cc]);}if(cells.length){let own=cells.filter(x=>x===p).length,opp=cells.filter(x=>x===3-p).length,empty=cells.filter(x=>x===0).length;if(!opp)total+=own===4?100000:own===3&&empty===1?90:own===2&&empty===2?12:own===1?1:0;if(!own&&opp===3&&empty===1)total-=110;}}return total;}
+function terminal(){for(let r=0;r<H;r++)for(let c=0;c<W;c++)if(board[r][c]&&winLine(r,c,board[r][c]))return board[r][c]===YELLOW?100000:-100000;return 0;}
+function minimax(depth,alpha,beta,max){let t=terminal();if(Math.abs(t)>0||depth===0||board[0].every(Boolean))return t||evaluate(YELLOW)-evaluate(RED);let cols=[3,2,4,1,5,0,6].filter(legal);if(max){let best=-Infinity;for(let c of cols){let r=H-1;while(board[r][c])r--;board[r][c]=YELLOW;best=Math.max(best,minimax(depth-1,alpha,beta,false));board[r][c]=0;alpha=Math.max(alpha,best);if(beta<=alpha)break;}return best;}let best=Infinity;for(let c of cols){let r=H-1;while(board[r][c])r--;board[r][c]=RED;best=Math.min(best,minimax(depth-1,alpha,beta,true));board[r][c]=0;beta=Math.min(beta,best);if(beta<=alpha)break;}return best;}
+function cpuMove(){if(over||turn!==YELLOW)return;let depth=$('difficulty').value==='easy'?2:$('difficulty').value==='hard'?6:4;let best=-Infinity,choice=3;for(let c of [3,2,4,1,5,0,6].filter(legal)){let r=H-1;while(board[r][c])r--;board[r][c]=YELLOW;let score=minimax(depth-1,-Infinity,Infinity,false);board[r][c]=0;if(score>best){best=score;choice=c;}}thinking=false;drop(choice,YELLOW);}
+function undo(){if(!history.length)return;let n=$('mode').value==='cpu'?Math.min(2,history.length):1;while(n--&&history.length){let m=history.pop();board[m.r][m.c]=0;}turn=history.length?3-history[history.length-1].p:RED;over=false;winning=[];thinking=false;render();status('Move taken back');}
+function hint(){if(over||thinking)return;let p=turn,choice=3,best=-Infinity;for(let c of [3,2,4,1,5,0,6].filter(legal)){let r=H-1;while(board[r][c])r--;board[r][c]=p;let score=terminal();if(!score)score=evaluate(p)-evaluate(3-p);board[r][c]=0;if(score>best){best=score;choice=c;}}$('message').textContent='Try column '+(choice+1);}
+$('new').onclick=()=>fresh();$('undo').onclick=undo;$('hint').onclick=hint;
+$('mode').onchange=()=>{fresh();$('difficulty').disabled=$('mode').value==='local';};
+$('difficulty').onchange=()=>fresh();
+window.addEventListener('keydown',e=>{if(/^[1-7]$/.test(e.key)&&!e.repeat){let c=Number(e.key)-1;if($('mode').value==='cpu'&&turn===YELLOW)return;drop(c,turn);}});
+fresh();
+})();
+</script></body></html>
