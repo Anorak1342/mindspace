@@ -41,6 +41,7 @@ jobs:
           git clone --depth 1 https://github.com/gabrielecirulli/2048.git /tmp/2048
           git clone --depth 1 --branch gh-pages https://github.com/wayou/t-rex-runner.git /tmp/trex-runner
           git clone --depth 1 https://github.com/mgechev/mk.js.git /tmp/mkjs
+          git clone --depth 1 https://github.com/nicupavel/openpanzer.git /tmp/openpanzer
           mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim arcade-pro/source/librecorsa arcade-pro/source/pacman arcade-pro/source/2048 arcade-pro/source/trex-runner
           cp -R /tmp/gh-arcade/. arcade-pro/source/gh-arcade/
           cp -R /tmp/vibe-basketball/. arcade-pro/source/vibe-basketball/
@@ -53,6 +54,10 @@ jobs:
           cp -R /tmp/mkjs/game/. arcade-pro/mk-fighter/
           cp /tmp/mkjs/readme.md arcade-pro/mk-fighter/MKJS-README.md
           cp mk-fighter/index.html arcade-pro/mk-fighter/index.html
+          mkdir -p arcade-pro/openpanzer
+          cp -R /tmp/openpanzer/. arcade-pro/openpanzer/
+          rm -rf arcade-pro/openpanzer/.git arcade-pro/openpanzer/.github
+          cp /tmp/openpanzer/README.md arcade-pro/openpanzer/OPENPANZER-README.md
           rm -rf arcade-pro/source/gh-arcade/.git arcade-pro/source/vibe-basketball/.git arcade-pro/source/f15-flight-sim/.git arcade-pro/source/librecorsa/.git arcade-pro/source/pacman/.git arcade-pro/source/2048/.git arcade-pro/source/trex-runner/.git
           rm -rf arcade-pro/source/gh-arcade/node_modules arcade-pro/source/vibe-basketball/node_modules arcade-pro/source/f15-flight-sim/node_modules arcade-pro/source/librecorsa/node_modules arcade-pro/source/librecorsa/.next arcade-pro/source/librecorsa/out arcade-pro/source/pacman/node_modules
           # Keep downloaded upstream source in the build workspace only.
