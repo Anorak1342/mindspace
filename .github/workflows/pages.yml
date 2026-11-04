@@ -58,6 +58,33 @@ jobs:
           cp -R /tmp/openpanzer/. arcade-pro/openpanzer/
           rm -rf arcade-pro/openpanzer/.git arcade-pro/openpanzer/.github
           cp /tmp/openpanzer/README.md arcade-pro/openpanzer/OPENPANZER-README.md
+          # Make the original title menu reliably clickable when hosted as a nested GitHub Pages app.
+          sed -i 's|<link rel="icon" href="resources/ui/page/icon/icon.png" type="image/png"/>|<link rel="icon" type="image/svg+xml" href="../../brain.svg"/>|' arcade-pro/openpanzer/index.html
+          cat >> arcade-pro/openpanzer/index.html <<'OPENPANZER_MENU_FIX'
+          <style>
+            #startmenu { z-index: 10000; pointer-events: auto; }
+            #startmenu *, #smButtons, #smButtons * { pointer-events: auto; }
+            #smButtons .smMainButton, #smButtons .smMainButtonCenter { cursor: pointer; }
+          </style>
+          <script>
+          (function () {
+            document.addEventListener('click', function (event) {
+              var button = event.target.closest('#smButtons .smMainButton, #smButtons .smMainButtonCenter');
+              if (!button) return;
+              event.preventDefault();
+              event.stopImmediatePropagation();
+              if (!window.game || !game.ui) return;
+              if (button.id === 'help') {
+                if (window.UIBuilder && UIBuilder.message) {
+                  UIBuilder.message('Open Panzer Help', 'Choose New Campaign to begin a campaign, or New Scenario to play an individual battle. Select a scenario and press the checkmark to start. Use the mouse to select units and choose movement or attack destinations.');
+                }
+                return;
+              }
+              game.ui.startMenuButton(button.id);
+            }, true);
+          })();
+          </script>
+          OPENPANZER_MENU_FIX
           rm -rf arcade-pro/source/gh-arcade/.git arcade-pro/source/vibe-basketball/.git arcade-pro/source/f15-flight-sim/.git arcade-pro/source/librecorsa/.git arcade-pro/source/pacman/.git arcade-pro/source/2048/.git arcade-pro/source/trex-runner/.git
           rm -rf arcade-pro/source/gh-arcade/node_modules arcade-pro/source/vibe-basketball/node_modules arcade-pro/source/f15-flight-sim/node_modules arcade-pro/source/librecorsa/node_modules arcade-pro/source/librecorsa/.next arcade-pro/source/librecorsa/out arcade-pro/source/pacman/node_modules
           # Keep downloaded upstream source in the build workspace only.
