@@ -169,9 +169,16 @@ jobs:
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 try {
-                  localStorage.removeItem("ms-arcade-unlocked");
                   sessionStorage.removeItem(countKey);
                   sessionStorage.removeItem(timeKey);
+                  var isFrontPage = window.location.pathname === "/mindspace/" ||
+                    window.location.pathname === "/mindspace/index.html";
+                  if (isFrontPage) {
+                    localStorage.setItem("ms-arcade-unlocked", "yes");
+                    window.location.href = "/mindspace/arcade.html";
+                    return;
+                  }
+                  localStorage.removeItem("ms-arcade-unlocked");
                 } catch (error) {}
                 window.location.href = "/mindspace/";
               }
