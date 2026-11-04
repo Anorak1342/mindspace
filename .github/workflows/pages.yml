@@ -59,7 +59,14 @@ jobs:
           mkdir -p arcade-pro/skifree
           cp -R /tmp/skifree/index.html /tmp/skifree/css /tmp/skifree/dist /tmp/skifree/js /tmp/skifree/*.png /tmp/skifree/yeti-big.png arcade-pro/skifree/ 2>/dev/null || true
           cp /tmp/skifree/license.md arcade-pro/skifree/LICENSE.txt
-          sed -i '/GoogleAnalyticsObject/,$d' arcade-pro/skifree/index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('arcade-pro/skifree/index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = '<script src="dist/skifree.js"></script>'
+          s = s[:s.index(marker) + len(marker)] + '\\n    </body>\\n</html>\\n'
+          p.write_text(s, encoding='utf-8')
+          PY
           sed -i 's|</body>|<p style="position:fixed;bottom:8px;left:8px;background:#fff;color:#222;padding:5px 8px;font:12px sans-serif;z-index:99">SkiFree.js by Daniel Hough · MIT License</p></body>|' arcade-pro/skifree/index.html
           rm -rf arcade-pro/hextris/.git arcade-pro/hextris/.github
           mkdir -p arcade-pro/3d-city
