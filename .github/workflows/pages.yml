@@ -122,33 +122,27 @@ jobs:
           from pathlib import Path
           script = r'''<script id="mindspace-lock-shortcut">
           (function () {
-            var countKey = "ms-enter-lock-count";
-            var timeKey = "ms-enter-lock-time";
-            document.addEventListener("keydown", function (event) {
-              if (event.key !== "Enter" || event.repeat) return;
+            var count = 0;
+            var lastPress = 0;
+            window.addEventListener("keydown", function (event) {
+              if (event.key !== "Enter" || event.repeat || event.isComposing) return;
               var now = Date.now();
-              var previous = Number(sessionStorage.getItem(timeKey) || 0);
-              var count = previous && now - previous <= 2500
-                ? Number(sessionStorage.getItem(countKey) || 0) + 1
-                : 1;
-              sessionStorage.setItem(countKey, String(count));
-              sessionStorage.setItem(timeKey, String(now));
-              if (count >= 3) {
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                try {
-                  sessionStorage.removeItem(countKey);
-                  sessionStorage.removeItem(timeKey);
-                  var isFrontPage = window.location.pathname === "/mindspace/" ||
-                    window.location.pathname === "/mindspace/index.html";
-                  if (isFrontPage) {
-                    localStorage.setItem("ms-arcade-unlocked", "yes");
-                    window.location.href = "/mindspace/arcade.html";
-                    return;
-                  }
-                  localStorage.removeItem("ms-arcade-unlocked");
-                } catch (error) {}
-                window.location.href = "/mindspace/";
+              count = now - lastPress <= 3000 ? count + 1 : 1;
+              lastPress = now;
+              event.preventDefault();
+              if (count < 3) return;
+              count = 0;
+              event.stopPropagation();
+              event.stopImmediatePropagation();
+              var path = window.location.pathname;
+              var base = path === "/mindspace" || path.indexOf("/mindspace/") === 0 ? "/mindspace/" : "/";
+              var home = path === base || path === base + "index.html";
+              if (home) {
+                try { localStorage.setItem("ms-arcade-unlocked", "yes"); } catch (error) {}
+                window.location.assign(base + "arcade.html");
+              } else {
+                try { localStorage.removeItem("ms-arcade-unlocked"); } catch (error) {}
+                window.location.assign(base);
               }
             }, true);
           })();
