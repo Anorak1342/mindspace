@@ -86,9 +86,13 @@ service cloud.firestore {
       allow get: if signedIn();
       allow list: if false;
       allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['roomId', 'createdBy', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['roomId', 'roomName', 'createdBy', 'createdAt'])
+        && request.resource.data.roomName is string
+        && request.resource.data.roomName.size() > 0
+        && request.resource.data.roomName.size() <= 40
         && request.resource.data.createdBy == request.auth.uid
         && getAfter(roomPath(request.resource.data.roomId)).data.ownerId == request.auth.uid
+        && getAfter(roomPath(request.resource.data.roomId)).data.name == request.resource.data.roomName
         && getAfter(memberPath(request.resource.data.roomId, request.auth.uid)).data.uid == request.auth.uid;
       allow update, delete: if signedIn()
         && get(roomPath(resource.data.roomId)).data.ownerId == request.auth.uid;
