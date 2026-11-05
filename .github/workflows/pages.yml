@@ -45,6 +45,9 @@ jobs:
           git clone --depth 1 --branch gh-pages https://github.com/Hextris/hextris.git /tmp/hextris
           git clone --depth 1 https://github.com/basicallydan/skifree.js.git /tmp/skifree
           git clone --depth 1 https://github.com/SamadiPour/snack-hole-game.git /tmp/snack-hole-game
+          git clone --depth 1 https://github.com/doublespeakgames/adarkroom.git /tmp/adarkroom
+          git clone --depth 1 https://github.com/operasoftware/Emberwind.git /tmp/emberwind
+          git clone --depth 1 https://github.com/KonradLinkowski/Stack.git /tmp/stack-game
           git -C /tmp/snack-hole-game checkout 2f1e5699eb08e19b6e6b76ab1e28055c9295a27b
           mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim arcade-pro/source/librecorsa arcade-pro/source/pacman arcade-pro/source/2048 arcade-pro/source/trex-runner
           cp -R /tmp/gh-arcade/. arcade-pro/source/gh-arcade/
@@ -54,6 +57,32 @@ jobs:
           cp -R /tmp/pacman/. arcade-pro/source/pacman/
           cp -R /tmp/2048/. arcade-pro/source/2048/
           cp -R /tmp/trex-runner/. arcade-pro/source/trex-runner/
+          mkdir -p arcade-pro/dark-room arcade-pro/emberwind
+          cp -R /tmp/adarkroom/. arcade-pro/dark-room/
+          cp /tmp/adarkroom/LICENSE.md arcade-pro/dark-room/LICENSE.txt
+          rm -rf arcade-pro/dark-room/.git arcade-pro/dark-room/.github
+          cp -R /tmp/emberwind/. arcade-pro/emberwind/
+          rm -rf arcade-pro/emberwind/.git arcade-pro/emberwind/.github
+          cp /tmp/emberwind/LICENSE arcade-pro/emberwind/LICENSE.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('arcade-pro/dark-room/index.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('\\t<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>', '')
+          s = re.sub(r'\\s*<!-- Google tag \(gtag.js\) -->.*?</script>\\s*<script>.*?gtag\\(.*?</script>', '', s, flags=re.S)
+          p.write_text(s, encoding='utf-8')
+          p = Path('arcade-pro/emberwind/index.html')
+          s = p.read_text(encoding='utf-8').replace('http://fonts.googleapis.com', 'https://fonts.googleapis.com')
+          p.write_text(s, encoding='utf-8')
+          PY
+          mkdir -p arcade-pro/stack
+          cd /tmp/stack-game
+          npm install --no-audit --no-fund
+          npm run build
+          cp -R dist/. "$GITHUB_WORKSPACE/arcade-pro/stack/"
+          cp LICENSE "$GITHUB_WORKSPACE/arcade-pro/stack/LICENSE.txt"
+          cd "$GITHUB_WORKSPACE"
           mkdir -p arcade-pro/hextris
           cp -R /tmp/hextris/. arcade-pro/hextris/
           mkdir -p arcade-pro/skifree
