@@ -105,6 +105,8 @@ jobs:
           mkdir -p arcade-pro/evolve
           cd /tmp/evolve
           npm ci --no-audit --no-fund
+          # This project lists Node 16 as a runtime dependency; remove its local shim so the build uses the Node 22 runner.
+          rm -rf node_modules/node node_modules/.bin/node
           npm run build
           cp index.html save.html wiki.html evolved.ico evolved-light.ico LICENSE "$GITHUB_WORKSPACE/arcade-pro/evolve/"
           cp -R evolve lib font strings wiki "$GITHUB_WORKSPACE/arcade-pro/evolve/"
