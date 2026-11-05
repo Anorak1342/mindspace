@@ -1,87 +1,74 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dune Dash | Flashcard.com</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#17100b">
+<title>Dune Dash | Mindspace Arcade</title>
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080808;color:#eee;font-family:"Courier New",monospace}
-#game{width:100%;height:100%;display:flex;flex-direction:column}
-header{height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#101010;border-bottom:1px solid #292929}
-h1{font-size:16px;margin:0}
-a,button{color:#eee;background:#181818;border:1px solid #444;padding:7px 12px;text-decoration:none;font:inherit;cursor:pointer}
-#stage{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center}
-#unity-canvas{width:100%;height:100%;display:block;background:#171717;outline:none}
-#loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#080808;text-align:center;padding:20px}
-#bar{width:min(320px,80%);height:8px;background:#292929}
-#progress{height:100%;width:0;background:#eee;transition:width .15s}
-#message{max-width:800px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
-#hint{font-size:12px;color:#aaa}
+:root{color-scheme:dark}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#17100b;color:#fff;font-family:system-ui,Segoe UI,sans-serif}
+#app{height:100%;display:flex;flex-direction:column;background:linear-gradient(#21170f,#392315)}
+header{height:52px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #ffffff22;background:#160f0bd9;z-index:2}
+.brand{font-weight:950;letter-spacing:2px;font-size:14px;color:#ffd28b}header a{color:#fff;text-decoration:none;border:1px solid #ffffff44;border-radius:6px;padding:7px 12px;font-size:13px}
+#stage{position:relative;flex:1;min-height:0;overflow:hidden}canvas{display:block;width:100%;height:100%}
+#hud{position:absolute;top:18px;left:20px;right:20px;display:flex;justify-content:space-between;pointer-events:none;text-shadow:0 2px 8px #28160d}
+.score{font-size:clamp(18px,3vw,28px);font-weight:900}.sub{font-size:11px;letter-spacing:2px;color:#ffe0b0;font-weight:800}
+#overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#1b120b66;padding:20px}
+.panel{width:min(440px,94vw);text-align:center;padding:30px 28px;border:1px solid #ffe0a455;border-radius:16px;background:linear-gradient(145deg,#382518f2,#1d140ff2);box-shadow:0 18px 80px #140b08aa}
+h1{font-size:clamp(34px,7vw,54px);line-height:1;margin:0 0 10px;letter-spacing:-2px;color:#ffcf83}.panel p{color:#f1d9bd;line-height:1.55;margin:10px 0 22px}
+button{border:0;border-radius:8px;background:#ffd18a;color:#301b0b;font-weight:950;font-size:14px;letter-spacing:1px;padding:13px 24px;cursor:pointer}button:active{transform:translateY(1px)}
+#touch{position:absolute;bottom:18px;left:18px;right:18px;display:none;justify-content:space-between;pointer-events:none}
+.touchbtn{pointer-events:auto;border:1px solid #fff7;background:#21170c99;color:#fff;border-radius:50%;width:68px;height:68px;font-size:12px;font-weight:900;touch-action:none}
+@media(pointer:coarse){#touch{display:flex}}
+@media(max-height:500px){header{height:42px}.panel{padding:18px}.panel p{margin:7px 0 12px}#touch{bottom:8px}.touchbtn{width:54px;height:54px}}
 </style>
 </head>
-<body>
-<div id="game">
-<header><h1>DUNE DASH</h1><a href="../../arcade.html">← HOME</a></header>
-<main id="stage">
-<canvas id="unity-canvas" tabindex="-1"></canvas>
-<div id="loading">
-<strong>LOADING DUNE DASH</strong>
-<div id="bar"><div id="progress"></div></div>
-<div id="message">Connecting to Unity game files…</div>
-<div id="hint">If loading fails, the game build may need its original configuration or compatible asset headers.</div>
-</div>
-</main>
-</div>
+<body><div id="app">
+<header><div class="brand">🏜️ DUNE DASH</div><a href="../../arcade.html">← ARCADE HOME</a></header>
+<main id="stage"><canvas id="game" aria-label="Dune Dash game"></canvas>
+<div id="hud"><div><div class="sub">DISTANCE</div><div class="score" id="score">0 m</div></div><div style="text-align:right"><div class="sub">BEST RUN</div><div class="score" id="best">0 m</div></div></div>
+<div id="overlay"><div class="panel"><div class="sub">MINDSPACE ARCADE ORIGINAL</div><h1 id="title">DUNE DASH</h1><p id="message">Race across the desert, leap over rocks and cacti, and see how far you can get.<br><b>SPACE / ↑</b> to jump · <b>↓</b> to duck</p><button id="start">START RUN</button></div></div>
+<div id="touch"><button class="touchbtn" id="jump">JUMP</button><button class="touchbtn" id="duck">DUCK</button></div>
+</main></div>
 <script>
-(() => {
-  const buildUrl = "https://cdn.jsdelivr.net/gh/KathleenAndrea/active@987cf3b8db590fcf991e08bfb879806977caf1b9/src/";
-  const canvas = document.getElementById("unity-canvas");
-  const loading = document.getElementById("loading");
-  const message = document.getElementById("message");
-  const progress = document.getElementById("progress");
-
-  const config = {
-    dataUrl: buildUrl + "data.br",
-    frameworkUrl: buildUrl + "framework.js",
-    codeUrl: buildUrl + "wasm.br",
-    streamingAssetsUrl: buildUrl + "StreamingAssets",
-    decompressionFallback: true,
-    companyName: "Unknown",
-    productName: "Dune Dash",
-    productVersion: "1.0"
-  };
-
-  function showError(error) {
-    message.textContent = "Dune Dash could not start.\n" +
-      (error && error.message ? error.message : String(error)) +
-      "\n\nThis test uses the asset URLs we found, but the Unity build may require different configuration or file paths.";
-    progress.style.width = "0%";
-  }
-
-  const loader = document.createElement("script");
-  loader.src = buildUrl + "loader.js";
-  loader.onload = () => {
-    if (typeof createUnityInstance !== "function") {
-      showError("The loader file loaded, but createUnityInstance was not found.");
-      return;
-    }
-
-    message.textContent = "Starting Unity…";
-    try {
-      createUnityInstance(canvas, config, value => {
-        progress.style.width = Math.round(value * 100) + "%";
-      }).then(() => {
-        loading.style.display = "none";
-        canvas.focus();
-      }).catch(showError);
-    } catch (error) {
-      showError(error);
-    }
-  };
-  loader.onerror = () => showError("Could not download loader.js from the asset host.");
-  document.head.appendChild(loader);
+(()=>{
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),stage=document.getElementById('stage');
+const scoreEl=document.getElementById('score'),bestEl=document.getElementById('best'),overlay=document.getElementById('overlay'),title=document.getElementById('title'),message=document.getElementById('message'),startBtn=document.getElementById('start');
+let w=0,h=0,dpr=1,last=0,playing=false,over=false,score=0,speed=390,spawn=0,ground=0,player,obstacles=[],particles=[],clouds=[];
+let best=0;try{best=+(localStorage.getItem('mindspace-dune-best')||0)}catch(e){}bestEl.textContent=best+' m';
+function resize(){const r=stage.getBoundingClientRect();w=r.width;h=r.height;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.floor(w*dpr);canvas.height=Math.floor(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);if(player)player.y=groundY()-player.h;}
+function groundY(){return h*.79}
+function reset(){score=0;speed=390;spawn=1;ground=0;obstacles=[];particles=[];player={x:w*.17,y:groundY()-54,w:34,h:54,vy:0,jumping:false,duck:false};scoreEl.textContent='0 m';}
+function begin(){reset();playing=true;over=false;overlay.style.display='none';last=performance.now();requestAnimationFrame(loop)}
+function jump(){if(!playing){if(!over)begin();return}if(!player.jumping){player.vy=-760;player.jumping=true;dust(player.x+12,groundY(),8)}}
+function duck(v){if(player)player.duck=v}
+function end(){playing=false;over=true;const n=Math.floor(score);if(n>best){best=n;try{localStorage.setItem('mindspace-dune-best',best)}catch(e){}bestEl.textContent=best+' m'}title.textContent='RUN OVER';message.innerHTML='You crossed <b>'+n+' metres</b> of desert.<br>Ready for another attempt?';startBtn.textContent='RUN AGAIN';overlay.style.display='flex'}
+function dust(x,y,n){for(let i=0;i<n;i++)particles.push({x,y,vx:(Math.random()-.5)*180,vy:-Math.random()*140,life:.45,max:.45,r:2+Math.random()*4})}
+function spawnObstacle(){const type=Math.random()<.55?'cactus':'rock';const size=type==='cactus'?34+Math.random()*15:28+Math.random()*20;obstacles.push({type,x:w+50,w:size,h:type==='cactus'?size*1.45:size*.72})}
+function rounded(x,y,ww,hh,r){ctx.beginPath();ctx.roundRect(x,y,ww,hh,r);ctx.fill()}
+function draw(t){
+ const gy=groundY();const sky=ctx.createLinearGradient(0,0,0,h);sky.addColorStop(0,'#e99b58');sky.addColorStop(.55,'#f5c17c');sky.addColorStop(1,'#f7d49b');ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
+ const sunX=w*.78,sunY=h*.2;const glow=ctx.createRadialGradient(sunX,sunY,8,sunX,sunY,100);glow.addColorStop(0,'#fff2c8bb');glow.addColorStop(1,'#fff2c800');ctx.fillStyle=glow;ctx.fillRect(sunX-110,sunY-110,220,220);ctx.fillStyle='#fff0bf';ctx.beginPath();ctx.arc(sunX,sunY,30,0,Math.PI*2);ctx.fill();
+ // distant dunes
+ for(let layer=0;layer<3;layer++){const y=gy-(layer+1)*48,amp=26+layer*15,shift=(t*(12+layer*13))%(w+200);ctx.beginPath();ctx.moveTo(0,h);ctx.lineTo(0,y);for(let x=-100;x<=w+120;x+=8){const xx=x-shift;ctx.lineTo(x,y+Math.sin(xx*.006+layer)*amp+Math.sin(xx*.013+layer*2)*amp*.28)}ctx.lineTo(w,h);ctx.closePath();ctx.fillStyle=['#d88b50','#c87940','#b86b37'][layer];ctx.fill()}
+ ctx.fillStyle='#f0b96f';ctx.fillRect(0,gy,w,h-gy);ctx.fillStyle='#ffe0a1';ctx.fillRect(0,gy,w,3);
+ // ground ripples
+ ctx.strokeStyle='#d99553';ctx.lineWidth=2;for(let i=0;i<18;i++){let x=((i*137-ground*.65)%(w+100)+w+100)%(w+100)-40;let y=gy+18+(i*29)%Math.max(30,h-gy-25);ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+18,y-4,x+40,y);ctx.stroke()}
+ // obstacles
+ for(const o of obstacles){const y=gy-o.h;if(o.type==='cactus'){ctx.fillStyle='#426044';rounded(o.x+o.w*.35,y,o.w*.3,o.h,7);rounded(o.x,y+o.h*.42,o.w*.38,o.h*.12,5);rounded(o.x,y+o.h*.3,o.w*.16,o.h*.25,5);rounded(o.x+o.w*.62,y+o.h*.27,o.w*.16,o.h*.25,5);rounded(o.x+o.w*.62,y+o.h*.27,o.w*.28,o.h*.12,5);ctx.fillStyle='#73905a';ctx.fillRect(o.x+o.w*.45,y+8,3,o.h-16)}else{ctx.fillStyle='#875239';ctx.beginPath();ctx.moveTo(o.x,y+o.h);ctx.quadraticCurveTo(o.x+o.w*.08,y+o.h*.25,o.x+o.w*.48,y+o.h*.12);ctx.quadraticCurveTo(o.x+o.w*.8,y-o.h*.05,o.x+o.w,y+o.h);ctx.closePath();ctx.fill();ctx.fillStyle='#c4875a';ctx.beginPath();ctx.ellipse(o.x+o.w*.42,y+o.h*.42,o.w*.2,o.h*.12,-.4,0,Math.PI*2);ctx.fill()}}
+ // runner
+ if(player){const p=player,ducking=p.duck;const ph=ducking?29:p.h,py=gy-ph-(p.jumping?0:0);ctx.fillStyle='#57301d';ctx.beginPath();ctx.ellipse(p.x+17,gy+5,25,6,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#3c251a';ctx.lineWidth=7;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(p.x+12,py+ph-12);ctx.lineTo(p.x+8,gy-2);ctx.moveTo(p.x+23,py+ph-12);ctx.lineTo(p.x+31,gy-2);ctx.stroke();ctx.fillStyle='#a64d2d';rounded(p.x+7,py+13,24,ph-20,8);ctx.fillStyle='#f3c18a';ctx.beginPath();ctx.arc(p.x+23,py+9,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#39271c';ctx.beginPath();ctx.arc(p.x+21,py+5,11,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(p.x+27,py+8,3,3);ctx.strokeStyle='#f3c18a';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(p.x+11,py+22);ctx.lineTo(p.x+1,py+ph-15);ctx.moveTo(p.x+29,py+22);ctx.lineTo(p.x+37,py+ph-16);ctx.stroke()}
+ for(const p of particles){ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle='#f5d5a0';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
+}
+function loop(now){if(!playing)return;const dt=Math.min((now-last)/1000,.032);last=now;score+=speed*dt/12;speed=Math.min(760,390+score*1.25);ground+=speed*dt;spawn-=dt;if(spawn<=0){spawnObstacle();spawn= Math.max(.72,1.45-(speed-390)/650)+Math.random()*.5}
+ const gy=groundY();player.vy+=1900*dt;player.y+=player.vy*dt;if(player.y>=gy-player.h){player.y=gy-player.h;player.vy=0;player.jumping=false}
+ obstacles.forEach(o=>o.x-=speed*dt);obstacles=obstacles.filter(o=>o.x+o.w>-20);
+ particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=350*dt;p.life-=dt});particles=particles.filter(p=>p.life>0);
+ const ph=player.duck?29:player.h,py=gy-ph;for(const o of obstacles){const ox=player.x+7,ow=player.duck?32:24,oy=player.duck?gy-25:player.y+7,oh=player.duck?18:player.h-10;if(ox+ow>o.x+5&&ox<o.x+o.w-5&&oy+oh>gy-o.h+5&&oy<gy-2){end();break}}
+ scoreEl.textContent=Math.floor(score)+' m';draw(ground);if(playing)requestAnimationFrame(loop)}
+window.addEventListener('keydown',e=>{if(['Space','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW')jump();if(e.code==='ArrowDown'||e.code==='KeyS')duck(true);if(e.code==='Enter'&&over)begin()});
+window.addEventListener('keyup',e=>{if(e.code==='ArrowDown'||e.code==='KeyS')duck(false)});
+startBtn.addEventListener('click',begin);document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});document.getElementById('duck').addEventListener('pointerdown',e=>{e.preventDefault();duck(true)});['pointerup','pointercancel','pointerleave'].forEach(ev=>document.getElementById('duck').addEventListener(ev,()=>duck(false)));
+new ResizeObserver(resize).observe(stage);resize();reset();draw(0);
 })();
-</script>
-</body>
-</html>
+</script></body></html>
