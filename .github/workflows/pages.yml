@@ -47,6 +47,8 @@ jobs:
           git clone --depth 1 https://github.com/SamadiPour/snack-hole-game.git /tmp/snack-hole-game
           git clone --depth 1 https://github.com/doublespeakgames/adarkroom.git /tmp/adarkroom
           git clone --depth 1 https://github.com/KonradLinkowski/Stack.git /tmp/stack-game
+          git clone --depth 1 https://github.com/Trimps/Trimps.github.io.git /tmp/trimps
+          git clone --depth 1 https://github.com/Cirrial/SharkGame.git /tmp/shark-game
           git -C /tmp/snack-hole-game checkout 2f1e5699eb08e19b6e6b76ab1e28055c9295a27b
           mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim arcade-pro/source/librecorsa arcade-pro/source/pacman arcade-pro/source/2048 arcade-pro/source/trex-runner
           cp -R /tmp/gh-arcade/. arcade-pro/source/gh-arcade/
@@ -71,6 +73,23 @@ jobs:
               end = s.find('</script>', config_start)
               if end != -1:
                   s = s[:start] + s[end + len('</script>'):]
+          p.write_text(s, encoding='utf-8')
+          PY
+          mkdir -p arcade-pro/trimps
+          cp -R /tmp/trimps/. arcade-pro/trimps/
+          cp /tmp/trimps/license.txt arcade-pro/trimps/LICENSE.txt
+          rm -rf arcade-pro/trimps/.git arcade-pro/trimps/.github
+          mkdir -p arcade-pro/shark-game
+          cp -R /tmp/shark-game/. arcade-pro/shark-game/
+          cp /tmp/shark-game/LICENSE.md arcade-pro/shark-game/LICENSE.txt
+          rm -rf arcade-pro/shark-game/.git arcade-pro/shark-game/.github
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('arcade-pro/shark-game/index.html')
+          s = p.read_text(encoding='utf-8')
+          s = re.sub(r'<script[^>]*>.*?GoogleAnalyticsObject.*?</script>', '', s, flags=re.I | re.S)
+          s = re.sub(r'<!--\\[if lt IE 9\\]>.*?<!\\[endif\\]-->', '', s, flags=re.I | re.S)
           p.write_text(s, encoding='utf-8')
           PY
           mkdir -p arcade-pro/stack
