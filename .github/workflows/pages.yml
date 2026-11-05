@@ -72,7 +72,7 @@ jobs:
           start = s.find('\\t<!-- Google tag (gtag.js) -->')
           if start != -1:
               config_start = s.find('gtag(', start)
-    end = s.find('</script>', config_start)
+              end = s.find('</script>', config_start)
               if end != -1:
                   s = s[:start] + s[end + len('</script>'):]
           p.write_text(s, encoding='utf-8')
