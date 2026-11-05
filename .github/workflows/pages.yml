@@ -52,6 +52,7 @@ jobs:
           git clone --depth 1 https://github.com/doublespeakgames/gridland.git /tmp/gridland
           git clone --depth 1 https://github.com/ihtasham42/progress-knight.git /tmp/progress-knight
           git clone --depth 1 https://github.com/pmotschmann/Evolve.git /tmp/evolve
+          git clone --depth 1 https://github.com/ThatOneMop/study-desk.git /tmp/study-desk
           git -C /tmp/snack-hole-game checkout 2f1e5699eb08e19b6e6b76ab1e28055c9295a27b
           mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim arcade-pro/source/librecorsa arcade-pro/source/pacman arcade-pro/source/2048 arcade-pro/source/trex-runner
           cp -R /tmp/gh-arcade/. arcade-pro/source/gh-arcade/
@@ -102,6 +103,30 @@ jobs:
           cp -R /tmp/progress-knight/. arcade-pro/progress-knight/
           rm -rf arcade-pro/progress-knight/.git
           cp /tmp/progress-knight/LICENSE arcade-pro/progress-knight/LICENSE.txt
+          mkdir -p arcade-pro/sloper arcade-pro/traffic-lane
+          cp -R /tmp/study-desk/games/winterfold/. arcade-pro/sloper/
+          cp -R /tmp/study-desk/games/lanewright/. arcade-pro/traffic-lane/
+          cp /tmp/study-desk/bridge.js arcade-pro/bridge.js
+          cp /tmp/study-desk/LICENSE arcade-pro/STUDY-DESK-BRIDGE-LICENSE.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          replacements = {
+              'arcade-pro/sloper/index.html': [('Winterfold — Study Desk', 'Sloper · Mindspace'), ('<h1>Winter<i>fold</i></h1>', '<h1>Sloper</h1>'), ('<h2>Winterfold</h2>', '<h2>Sloper</h2>'), ('Winterfold save', 'Sloper save'), ('../../bridge.js', '../bridge.js')],
+              'arcade-pro/sloper/engine.js': [('study-desk-winterfold-v1', 'mindspace-sloper-v1')],
+              'arcade-pro/sloper/game.js': [('Winterfold', 'Sloper')],
+              'arcade-pro/sloper/CREDITS.md': [('# Winterfold credits', '# Sloper credits'), ('Winterfold is an original game made for Study Desk.', 'Sloper is an original game, adapted for Mindspace with permission from its original collaborators.')],
+              'arcade-pro/traffic-lane/index.html': [('Lanewright — Study Desk', 'Traffic Lane · Mindspace'), ('Lanewright', 'Traffic Lane'), ('lane that shares its colour', 'lane that shares its colour'), ('Lanewright save', 'Traffic Lane save'), ('../../bridge.js', '../bridge.js')],
+              'arcade-pro/traffic-lane/engine.js': [('study-desk-lanewright-v1', 'mindspace-traffic-lane-v1')],
+              'arcade-pro/traffic-lane/game.js': [('Lanewright', 'Traffic Lane')],
+              'arcade-pro/traffic-lane/CREDITS.md': [('# Lanewright credits', '# Traffic Lane credits'), ('Lanewright is an original game made for Study Desk.', 'Traffic Lane is an original game, adapted for Mindspace with permission from its original collaborators.'), ('study-desk-lanewright-v1', 'mindspace-traffic-lane-v1')]
+          }
+          for name, pairs in replacements.items():
+              p = Path(name)
+              s = p.read_text(encoding='utf-8')
+              for old, new in pairs:
+                  s = s.replace(old, new)
+              p.write_text(s, encoding='utf-8')
+          PY
           mkdir -p arcade-pro/evolve
           cd /tmp/evolve
           npm ci --no-audit --no-fund
