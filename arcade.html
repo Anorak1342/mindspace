@@ -30,31 +30,27 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 @media(max-width:1050px){.games{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:720px){.games{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.game{padding:19px 17px;min-height:235px}h2{font-size:20px}.wrap{width:calc(100% - 24px)}}
 @media(max-width:430px){.games{grid-template-columns:1fr 1fr}.game{padding:15px 13px;min-height:220px}.icon{font-size:35px}h2{font-size:17px}.desc{font-size:11px}}
+
+.controls{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:12px;margin:24px 0 18px}
+.controls input,.controls select{width:100%;background:#141414;border:1px solid #444;color:#f5f2ed;padding:14px 16px;border-radius:7px;font:inherit}
+.controls input:focus,.controls select:focus{outline:2px solid var(--mint);outline-offset:2px}
+.daily{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 23px;margin:22px 0 8px;border:1px solid #665b38;background:linear-gradient(110deg,#201d15,#171713);border-radius:10px}
+.daily-label{font:900 10px ui-monospace,monospace;letter-spacing:2px;color:var(--gold)}
+.daily h2{margin:5px 0;font-size:25px}.daily p{margin:0;color:#aaa;font:13px ui-monospace,monospace}
+.daily .play{min-width:150px;max-width:190px}
+.toplinks{display:flex;gap:10px;align-items:center}
+@media(max-width:600px){.controls{grid-template-columns:1fr}.daily{align-items:flex-start;flex-direction:column}.daily .play{max-width:none;width:100%}.toplinks{flex-wrap:wrap;justify-content:flex-end}}
+
 </style>
 </head>
 <body><main class="wrap">
-<header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><a class="back" href="./">← Back to study</a></header>
+<header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><nav class="toplinks"><a class="back" href="./whats-new.html">✦ What’s new</a><a class="back" href="./">← Back to study</a></nav></header>
 <section class="hero"><div class="eyebrow">THE SECRET SIDE QUEST</div><h1>Pick your game.</h1><p>Big games, tiny games, racing, puzzles and city-building. Choose a tile and jump in.</p></section>
+<section class="daily" id="daily-feature"><div><div class="daily-label">✦ GAME OF THE DAY</div><h2 id="daily-title">Choosing today’s game…</h2><p id="daily-desc">A fresh pick from the Mindspace arcade.</p></div><a class="play gold" id="daily-link" href="./arcade-pro/">PLAY TODAY’S PICK ↗</a></section>
+<div class="controls"><input id="game-search" type="search" placeholder="Search games by name or description…" aria-label="Search games"><select id="genre-filter" aria-label="Filter games by genre"><option value="all">All genres</option><option value="action">Action</option><option value="arcade">Arcade</option><option value="puzzle">Puzzle</option><option value="racing">Racing</option><option value="simulation">Simulation</option><option value="sports">Sports</option><option value="strategy">Strategy</option></select></div>
+<p id="results-count" class="note" aria-live="polite">Showing all games</p>
 <section class="games">
-<article class="game"><div class="icon">🎮</div><h2>CLASSIC ARCADE</h2><p class="desc">Pong, Snake, Tetris, Flappy Bird and more quick-fire favourites.</p><a class="play" href="./arcade-pro/">PLAY ARCADE ↗</a></article>
-<article class="game"><div class="icon">🏎️</div><h2>LIBRECORSA</h2><p class="desc">A full 3D racing experience with cars, circuits and driving.</p><a class="play gold" href="./arcade-pro/librecorsa/">PLAY LIBRECORSA ↗</a></article>
-<article class="game"><div class="icon">✈️</div><h2>F-15 FLIGHT SIM</h2><p class="desc">Climb into the cockpit and take a fighter jet into the skies.</p><a class="play" href="./arcade-pro/f15-flight-sim/">PLAY FLIGHT SIM ↗</a></article>
-<article class="game"><div class="icon">🚇</div><h2>MINI METRO</h2><p class="desc">Draw railway lines, connect stations and keep a growing city moving.</p><a class="play" href="./mini-metro.html">PLAY MINI METRO ↗</a></article>
-<article class="game"><div class="icon">🚗</div><h2>TINY TRAFFIC TOWN</h2><p class="desc">A Mini Motorways-style traffic puzzle. Connect colourful homes and businesses, then beat the gridlock.</p><a class="play gold" href="./tiny-traffic-town.html">PLAY TRAFFIC TOWN ↗</a></article>
-<article class="game"><div class="icon">👾</div><h2>PAC-MAN</h2><p class="desc">Four maps, clever ghost personalities, daily challenges and arcade-style maze runs.</p><a class="play gold" href="./arcade-pro/pacman/">PLAY PAC-MAN ↗</a></article>
-<article class="game"><div class="icon">🔢</div><h2>2048</h2><p class="desc">Slide, combine and chain number tiles. Reach 2048 without filling the board.</p><a class="play" href="./arcade-pro/2048/">PLAY 2048 ↗</a></article>
-<article class="game"><div class="icon">🦖</div><h2>T-REX RUNNER</h2><p class="desc">The classic endless desert dash. Jump cacti, duck under birds and chase a new high score.</p><a class="play gold" href="./arcade-pro/trex-runner/">PLAY T-REX ↗</a></article>
-<article class="game"><div class="icon">⬡</div><h2>HEXTRIS</h2><p class="desc">Rotate a hexagon to catch falling coloured blocks. Match colours, clear combos and survive the rising stack.</p><a class="play" href="./arcade-pro/hextris/">PLAY HEXTRIS ↗</a></article>
-<article class="game"><div class="icon">⛷️</div><h2>SKIFREE</h2><p class="desc">Ski down an endless mountain, dodge trees and rocks, and try to outrun the monster.</p><a class="play gold" href="./arcade-pro/skifree/">PLAY SKIFREE ↗</a></article>
-<article class="game"><div class="icon">🕳️</div><h2>SNACK HOLE</h2><p class="desc">Control a hungry hole in a colourful 3D city. Swallow bigger objects, earn upgrades and grow into a world-eating void.</p><a class="play" href="./arcade-pro/snack-hole/">PLAY SNACK HOLE ↗</a></article>
-<article class="game"><div class="icon">🔴</div><h2>SLOPE</h2><p class="desc">Steer a rolling ball down an endless neon track. Dodge red blocks, collect cyan orbs and beat your distance record.</p><a class="play gold" href="./arcade-pro/slope/">PLAY SLOPE ↗</a></article>
-<article class="game"><div class="icon">🥊</div><h2>MK FIGHTER</h2><p class="desc">A retro arcade fighting game. Challenge a friend in local two-player combat with animated fighters.</p><a class="play gold" href="./arcade-pro/mk-fighter/">PLAY MK FIGHTER ↗</a></article>
-<article class="game"><div class="icon">🔴</div><h2>CONNECT FOUR</h2><p class="desc">A polished strategy classic. Play the computer or challenge a friend on the same screen.</p><a class="play" href="./connect-four.html">PLAY CONNECT FOUR ↗</a></article>
-<article class="game"><div class="icon">💬</div><h2>MINDSPACE CHAT</h2><p class="desc">Private chat rooms. Create a room, share its secret join code and talk with friends.</p><a class="play gold" href="./chat.html">OPEN CHAT ↗</a></article>
-<article class="game"><div class="icon">🏙️</div><h2>3D.CITY</h2><p class="desc">Build and manage a living 3D city in your browser, inspired by classic city simulators.</p><a class="play gold" href="./arcade-pro/3d-city/index.html">BUILD YOUR CITY ↗</a></article>
-<article class="game"><div class="icon">🔥</div><h2>A DARK ROOM</h2><p class="desc">Begin beside a dying fire. Gather wood, build a village, explore the wilderness and uncover a strange world.</p><a class="play gold" href="./arcade-pro/dark-room/">PLAY A DARK ROOM ↗</a></article>
-<article class="game"><div class="icon">🧚</div><h2>EMBERWIND</h2><p class="desc">A colourful fantasy platform adventure. Jump, fight enemies, explore caves and rescue the villagers.</p><a class="play" href="./arcade-pro/emberwind/">PLAY EMBERWIND ↗</a></article>
-<article class="game"><div class="icon">🧱</div><h2>STACK</h2><p class="desc">Build the tallest tower you can. Time each moving block perfectly or watch your tower get narrower.</p><a class="play gold" href="./arcade-pro/stack/">PLAY STACK ↗</a></article>
+<article class="game" data-genres="arcade puzzle"><div class="icon">🧱</div><h2>STACK</h2><p class="desc">Build the tallest tower you can. Time each moving block perfectly or watch your tower get narrower.</p><a class="play gold" href="./arcade-pro/stack/">PLAY STACK ↗</a></article>
 </section>
 <p class="note">Mindspace Arcade · Select a game to play. Your study-library unlock stays in place.</p>
 </main>
@@ -68,5 +64,47 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
   document.querySelector(".note").classList.add("hidden");
  }
 })();
+
+(function(){
+ const cards=[...document.querySelectorAll(".game")];
+ const search=document.getElementById("game-search");
+ const filter=document.getElementById("genre-filter");
+ const count=document.getElementById("results-count");
+ const dailyTitle=document.getElementById("daily-title");
+ const dailyDesc=document.getElementById("daily-desc");
+ const dailyLink=document.getElementById("daily-link");
+ const playable=cards.filter(card=>!card.dataset.genres.includes("chat"));
+ if(playable.length){
+   const today=new Date();
+   const key="mindspace-game-of-day-"+today.getFullYear()+"-"+(today.getMonth()+1)+"-"+today.getDate();
+   let chosen=-1;
+   try{chosen=Number(localStorage.getItem(key));}catch(e){}
+   if(!Number.isInteger(chosen)||chosen<0||chosen>=playable.length){
+     chosen=Math.floor(Math.random()*playable.length);
+     try{localStorage.setItem(key,String(chosen));}catch(e){}
+   }
+   const card=playable[chosen];
+   dailyTitle.textContent=card.querySelector("h2").textContent;
+   dailyDesc.textContent=card.querySelector(".desc")?.textContent||"Today's featured game.";
+   dailyLink.href=card.querySelector(".play").href;
+ }
+ function apply(){
+   const q=search.value.trim().toLowerCase();
+   const genre=filter.value;
+   let shown=0;
+   cards.forEach(card=>{
+     const text=card.textContent.toLowerCase();
+     const genres=(card.dataset.genres||"").split(/\s+/);
+     const visible=(!q||text.includes(q))&&(genre==="all"||genres.includes(genre));
+     card.classList.toggle("hidden",!visible);
+     if(visible)shown++;
+   });
+   count.textContent="Showing "+shown+" of "+cards.length+" games";
+ }
+ search.addEventListener("input",apply);
+ filter.addEventListener("change",apply);
+ apply();
+})();
+
 </script>
 </body></html>
