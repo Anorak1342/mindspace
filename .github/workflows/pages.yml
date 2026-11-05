@@ -107,7 +107,6 @@ jobs:
           cp -R /tmp/study-desk/games/winterfold/. arcade-pro/sloper/
           cp -R /tmp/study-desk/games/lanewright/. arcade-pro/traffic-lane/
           cp /tmp/study-desk/bridge.js arcade-pro/bridge.js
-          cp /tmp/study-desk/LICENSE arcade-pro/STUDY-DESK-BRIDGE-LICENSE.txt
           python3 - <<'PY'
           from pathlib import Path
           replacements = {
