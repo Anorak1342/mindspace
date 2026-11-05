@@ -70,7 +70,11 @@ jobs:
           p = Path('arcade-pro/dark-room/index.html')
           s = p.read_text(encoding='utf-8')
           s = s.replace('<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>', '')
-          s = re.sub(r'\\s*<!-- Google tag \(gtag.js\) -->.*?</script>\\s*<script>.*?gtag\\(.*?</script>', '', s, flags=re.S)
+          start = s.find('\\t<!-- Google tag (gtag.js) -->')
+          if start != -1:
+              end = s.find('</script>', s.find('gtag(\\'config\\'', start))
+              if end != -1:
+                  s = s[:start] + s[end + len('</script>'):]
           p.write_text(s, encoding='utf-8')
           p = Path('arcade-pro/emberwind/index.html')
           s = p.read_text(encoding='utf-8').replace('http://fonts.googleapis.com', 'https://fonts.googleapis.com')
