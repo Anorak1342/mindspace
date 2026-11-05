@@ -49,6 +49,9 @@ jobs:
           git clone --depth 1 https://github.com/KonradLinkowski/Stack.git /tmp/stack-game
           git clone --depth 1 https://github.com/Trimps/Trimps.github.io.git /tmp/trimps
           git clone --depth 1 https://github.com/Cirrial/SharkGame.git /tmp/shark-game
+          git clone --depth 1 https://github.com/doublespeakgames/gridland.git /tmp/gridland
+          git clone --depth 1 https://github.com/ihtasham42/progress-knight.git /tmp/progress-knight
+          git clone --depth 1 https://github.com/pmotschmann/Evolve.git /tmp/evolve
           git -C /tmp/snack-hole-game checkout 2f1e5699eb08e19b6e6b76ab1e28055c9295a27b
           mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim arcade-pro/source/librecorsa arcade-pro/source/pacman arcade-pro/source/2048 arcade-pro/source/trex-runner
           cp -R /tmp/gh-arcade/. arcade-pro/source/gh-arcade/
@@ -90,6 +93,32 @@ jobs:
           s = p.read_text(encoding='utf-8')
           s = re.sub(r'<script[^>]*>.*?GoogleAnalyticsObject.*?</script>', '', s, flags=re.I | re.S)
           s = re.sub(r'<!--\\[if lt IE 9\\]>.*?<!\\[endif\\]-->', '', s, flags=re.I | re.S)
+          p.write_text(s, encoding='utf-8')
+          PY
+          mkdir -p arcade-pro/gridland
+          cp -R /tmp/gridland/deploy/. arcade-pro/gridland/
+          cp /tmp/gridland/LICENSE arcade-pro/gridland/LICENSE.txt
+          mkdir -p arcade-pro/progress-knight
+          cp -R /tmp/progress-knight/. arcade-pro/progress-knight/
+          rm -rf arcade-pro/progress-knight/.git
+          cp /tmp/progress-knight/LICENSE arcade-pro/progress-knight/LICENSE.txt
+          mkdir -p arcade-pro/evolve
+          cd /tmp/evolve
+          npm ci --no-audit --no-fund
+          npm run build
+          cp index.html save.html wiki.html evolved.ico evolved-light.ico LICENSE "$GITHUB_WORKSPACE/arcade-pro/evolve/"
+          cp -R evolve lib font strings wiki "$GITHUB_WORKSPACE/arcade-pro/evolve/"
+          cd "$GITHUB_WORKSPACE"
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('arcade-pro/evolve/index.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CPC46V71CB"></script>\n', '')
+          start = s.find('    <script>\n        window.dataLayer')
+          if start != -1:
+              end = s.find('    </script>', start)
+              if end != -1:
+                  s = s[:start] + s[end + len('    </script>'):]
           p.write_text(s, encoding='utf-8')
           PY
           mkdir -p arcade-pro/stack
