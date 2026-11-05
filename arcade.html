@@ -67,10 +67,9 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 <article class="game" data-genres="chat"><div class="icon">💬</div><h2>MINDSPACE CHAT</h2><p class="desc">Private chat rooms. Create a room, share its secret join code and talk with friends.</p><a class="play gold" href="./chat.html">OPEN CHAT ↗</a></article>
 <article class="game" data-genres="simulation strategy"><div class="icon">🏙️</div><h2>3D.CITY</h2><p class="desc">Build and manage a living 3D city in your browser, inspired by classic city simulators.</p><a class="play gold" href="./arcade-pro/3d-city/index.html">BUILD YOUR CITY ↗</a></article>
 <article class="game" data-genres="strategy adventure"><div class="icon">🔥</div><h2>A DARK ROOM</h2><p class="desc">Begin beside a dying fire. Gather wood, build a village, explore the wilderness and uncover a strange world.</p><a class="play gold" href="./arcade-pro/dark-room/">PLAY A DARK ROOM ↗</a></article>
-<article class="game" data-genres="arcade"><div class="icon">🧚</div><h2>EMBERWIND</h2><p class="desc">A colourful fantasy platform adventure. Jump, fight enemies, explore caves and rescue the villagers.</p><a class="play" href="./arcade-pro/emberwind/">PLAY EMBERWIND ↗</a></article>
 <article class="game" data-genres="arcade puzzle"><div class="icon">🧱</div><h2>STACK</h2><p class="desc">Build the tallest tower you can. Time each moving block perfectly or watch your tower get narrower.</p><a class="play gold" href="./arcade-pro/stack/">PLAY STACK ↗</a></article>
 </section>
-<p class="note">Mindspace Arcade · Select a game to play. Your study-library unlock stays in place.</p>
+<p class="note" id="arcade-note">Mindspace Arcade · Select a game to play. Your study-library unlock stays in place.</p>
 </main>
 <script>
 (function(){
@@ -79,7 +78,8 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
  if(!unlocked){
   document.querySelector(".hero").innerHTML='<div class="eyebrow">LOCKED</div><h1>The arcade is still asleep.</h1><p>Create a study deck named <strong>Library</strong> on the Mindspace dashboard, or press Enter three times on the front page to open the arcade.</p><a class="back" href="./">Return to Mindspace</a>';
   document.querySelector(".games").classList.add("hidden");
-  document.querySelector(".note").classList.add("hidden");
+  document.querySelector("#results-count").classList.add("hidden");
+  document.querySelector("#arcade-note").classList.add("hidden");
  }
 })();
 
@@ -96,7 +96,7 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
    const today=new Date();
    const key="mindspace-game-of-day-"+today.getFullYear()+"-"+(today.getMonth()+1)+"-"+today.getDate();
    let chosen=-1;
-   try{chosen=Number(localStorage.getItem(key));}catch(e){}
+   try{const saved=localStorage.getItem(key);chosen=saved===null?-1:Number(saved);}catch(e){}
    if(!Number.isInteger(chosen)||chosen<0||chosen>=playable.length){
      chosen=Math.floor(Math.random()*playable.length);
      try{localStorage.setItem(key,String(chosen));}catch(e){}
