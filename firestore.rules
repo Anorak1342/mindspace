@@ -111,23 +111,6 @@ service cloud.firestore {
     }
 
 
-    match /publicComments/{commentId} {
-      // Anyone can read the public noticeboard.
-      allow get, list: if true;
-      // Only signed-in users can post a short comment under their own identity.
-      allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['uid', 'displayName', 'text', 'createdAt'])
-        && request.resource.data.uid == request.auth.uid
-        && request.resource.data.displayName is string
-        && request.resource.data.displayName.size() > 0
-        && request.resource.data.displayName.size() <= 24
-        && request.resource.data.text is string
-        && request.resource.data.text.size() > 0
-        && request.resource.data.text.size() <= 500
-        && request.resource.data.createdAt == request.time;
-      allow update, delete: if false;
-    }
-
     match /{document=**} {
       allow read, write: if false;
     }
