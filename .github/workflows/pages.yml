@@ -252,12 +252,25 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/Mohammed-Farzan-Javeed/gravity-forge.git /tmp/gravity-forge
           git clone --depth 1 https://github.com/VTvito/pixel-princess-platformer.git /tmp/pixel-princess
+          git clone --depth 1 https://github.com/isocialPractice/street-crime.git /tmp/street-crime
+          git clone --depth 1 https://github.com/mike007jd/voxel-musou.git /tmp/voxel-musou
           mkdir -p arcade-pro/gravity-forge arcade-pro/pixel-princess
           cp -R /tmp/gravity-forge/. arcade-pro/gravity-forge/
           cp /tmp/gravity-forge/LICENSE arcade-pro/gravity-forge/LICENSE.txt
           rm -rf arcade-pro/gravity-forge/.git arcade-pro/gravity-forge/.github
           cp -R /tmp/pixel-princess/. arcade-pro/pixel-princess/
           cp /tmp/pixel-princess/LICENSE arcade-pro/pixel-princess/LICENSE.txt
+          # Two MIT-licensed single-player combat games, hosted entirely inside Mindspace.
+          mkdir -p arcade-pro/street-crime arcade-pro/voxel-musou
+          cp -R /tmp/street-crime/. arcade-pro/street-crime/
+          cp /tmp/street-crime/LICENSE arcade-pro/street-crime/LICENSE.txt
+          rm -rf arcade-pro/street-crime/.git arcade-pro/street-crime/.github
+          # Hide developer/debug entries while leaving the original game code and menu wiring intact.
+          sed -i 's|</head>|<style>#btn-debug,#btn-debug-level,#btn-sandbox{display:none!important}</style></head>|' arcade-pro/street-crime/index.html
+          cp -R /tmp/voxel-musou/. arcade-pro/voxel-musou/
+          cp /tmp/voxel-musou/LICENSE arcade-pro/voxel-musou/LICENSE.txt
+          rm -rf arcade-pro/voxel-musou/.git arcade-pro/voxel-musou/.github arcade-pro/voxel-musou/checks arcade-pro/voxel-musou/media
+          rm -f arcade-pro/voxel-musou/.vercelignore
           rm -rf arcade-pro/pixel-princess/.git arcade-pro/pixel-princess/.github arcade-pro/pixel-princess/.claude arcade-pro/pixel-princess/api arcade-pro/pixel-princess/tools
           rm -f arcade-pro/pixel-princess/sw.js arcade-pro/pixel-princess/vercel.json arcade-pro/pixel-princess/.vercelignore arcade-pro/pixel-princess/CLAUDE.md
           # Pixel Princess's upstream service worker deletes all origin caches on activation.
