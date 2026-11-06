@@ -493,7 +493,7 @@ jobs:
               if 'id="mindspace-background-music-script"' in content:
                   continue
               if "</body>" in content:
-                  content = content.replace("</body>", player + "\\n</body>", 1)
+                  content = content.replace("</body>", player + "\n</body>", 1)
               else:
                   content += player
               page.write_text(content, encoding="utf-8")
