@@ -1,5 +1,9 @@
 /* Mindspace shared entry screen. This is a convenience lock only: GitHub Pages serves the site files publicly. */
 (() => {
+  const path = window.location.pathname;
+  const isArcadePage = path.endsWith("/arcade.html") || path.includes("/arcade-pro/") || /\/(mini-metro|connect-four|tiny-traffic-town)\.html$/.test(path);
+  if (!isArcadePage) return;
+
   const ACCESS_KEY = "mindspaceAccessGranted";
   const PASSWORD_SHA256 = "403774aa7e1635aaf218dc899900238e691ffb21ec1701255840aa614a28fc39";
   let unlocked = false;
