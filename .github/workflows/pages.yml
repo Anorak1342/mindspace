@@ -73,7 +73,7 @@ jobs:
           import re
           p = Path('arcade-pro/basket-random/index.html')
           s = p.read_text(encoding='utf-8')
-          s, count = re.subn(r'<script>\s*window\.location="https://ubg98\.github\.io/BasketRandom/"\s*;</script>', '', s, count=1)
+          s, count = re.subn(r'<script>\s*window\.location="https://ubg98\.github\.io/BasketRandom/"\s*;\s*</script>', '', s, count=1)
           if count != 1:
               raise SystemExit("Could not remove the Basket Random external redirect")
           p.write_text(s, encoding='utf-8')
