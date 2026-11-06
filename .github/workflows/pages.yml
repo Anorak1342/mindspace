@@ -58,6 +58,8 @@ jobs:
           git clone --depth 1 https://github.com/ihtasham42/progress-knight.git /tmp/progress-knight
           git clone --depth 1 https://github.com/pmotschmann/Evolve.git /tmp/evolve
           git clone --depth 1 https://github.com/ThatOneMop/study-desk.git /tmp/study-desk
+          git clone --depth 1 https://github.com/particle-clicker/particle-clicker.git /tmp/particle-clicker
+          git clone --depth 1 https://github.com/wwwtyro/Astray.git /tmp/astray
           git -C /tmp/snack-hole-game checkout 2f1e5699eb08e19b6e6b76ab1e28055c9295a27b
           # Publish the four requested Random sports games locally inside Mindspace.
           mkdir -p arcade-pro/soccer-random arcade-pro/basket-random arcade-pro/boxing-random arcade-pro/volley-random
@@ -66,6 +68,24 @@ jobs:
           cp -R /tmp/boxing-random/. arcade-pro/boxing-random/
           # The Volley Random repository's playable Construct build is in its /file directory.
           cp -R /tmp/volley-random/file/. arcade-pro/volley-random/
+          # Add two locally hosted games with their original licence notices.
+          mkdir -p arcade-pro/particle-clicker arcade-pro/astray
+          cp -R /tmp/particle-clicker/. arcade-pro/particle-clicker/
+          cp /tmp/particle-clicker/LICENSE arcade-pro/particle-clicker/LICENSE.txt
+          cp -R /tmp/astray/. arcade-pro/astray/
+          cp /tmp/astray/License.md arcade-pro/astray/LICENSE.txt
+          rm -rf arcade-pro/particle-clicker/.git arcade-pro/particle-clicker/.github arcade-pro/astray/.git arcade-pro/astray/.github
+          # Keep Astray textures relative to its Mindspace subfolder, not the site root.
+          sed -i "s|/ball.png|./ball.png|g; s|/concrete.png|./concrete.png|g; s|/brick.png|./brick.png|g" arcade-pro/astray/index.html
+          # Remove the upstream analytics beacon from Particle Clicker.
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path("arcade-pro/particle-clicker/index.html")
+          s = p.read_text(encoding="utf-8")
+          s = re.sub(r"<!-- Google Analytics -->.*?<!-- End Google Analytics -->", "", s, flags=re.S)
+          p.write_text(s, encoding="utf-8")
+          PY
           # The Basket Random repository contains a redirect in its landing page; remove it
           # so its locally bundled Construct game can run inside Mindspace.
           python3 - <<'PY'
