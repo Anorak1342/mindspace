@@ -37,7 +37,8 @@ jobs:
           git clone --depth 1 --branch gh-pages https://github.com/Unblocked-Games-786/Soccer-Random.git /tmp/soccer-random
           git clone --depth 1 https://github.com/BasketRandom/BasketRandom.github.io.git /tmp/basket-random
           git clone --depth 1 --branch gh-pages https://github.com/Unblocked-Games-786/Boxing-Random.git /tmp/boxing-random
-          git clone --depth 1 https://github.com/ChilakalaAnish/Volleyrandom.github.io.git /tmp/volley-random
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/ChilakalaAnish/Volleyrandom.github.io.git /tmp/volley-random
+          git -C /tmp/volley-random sparse-checkout set file
           git clone --depth 1 https://github.com/stateloop-connected/source-vibe-basketball.git /tmp/vibe-basketball
           git clone --depth 1 https://github.com/Anorak1342/F-15-Flight-Sim-.git /tmp/f15-flight-sim
           git clone --depth 1 https://github.com/KhazP/librecorsa.git /tmp/librecorsa
@@ -69,9 +70,12 @@ jobs:
           # so its locally bundled Construct game can run inside Mindspace.
           python3 - <<'PY'
           from pathlib import Path
+          import re
           p = Path('arcade-pro/basket-random/index.html')
           s = p.read_text(encoding='utf-8')
-          s = s.replace('<script>\\n\\twindow.location="https://ubg98.github.io/BasketRandom/";\\n</script>', '')
+          s, count = re.subn(r'<script>\\s*window\\.location="https://ubg98\\.github\\.io/BasketRandom/"\\s*;</script>', '', s, count=1)
+          if count != 1:
+              raise SystemExit("Could not remove the Basket Random external redirect")
           p.write_text(s, encoding='utf-8')
           PY
           mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim arcade-pro/source/librecorsa arcade-pro/source/pacman arcade-pro/source/2048 arcade-pro/source/trex-runner
