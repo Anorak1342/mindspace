@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Flappy Bird-Remade</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#4ec0ca;font-family:"Courier New",monospace;touch-action:none;user-select:none}
+  canvas{display:block}
+  #hud{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;align-items:center;color:#fff;text-shadow:3px 3px 0 #543847,-2px -2px 0 #543847,2px -2px 0 #543847,-2px 2px 0 #543847}
+  #score{font-size:64px;font-weight:900;margin-top:24px}
+  #msg{margin-top:auto;margin-bottom:auto;text-align:center;font-size:28px;font-weight:900;line-height:1.5}
+  #msg small{font-size:18px}
+  #cam{position:fixed;top:16px;right:16px;pointer-events:auto;font:900 16px "Courier New",monospace;color:#fff;background:#e86101;border:3px solid #543847;border-radius:6px;padding:8px 12px;cursor:pointer}
+</style>
+</head>
+<body>
+<button id="cam">VIEW: 3RD PERSON (C)</button>
+<div id="hud"><div id="score">0</div><div id="msg">FLAPPY BIRD-REMADE<br><small>Click, tap or press Space to flap</small></div></div>
+<script type="importmap">{"imports":{"three":"./three.module.js"}}</script>
+<script type="module">
+import * as THREE from "three";
+const GRAVITY = -28, FLAP = 9.5, SPEED = 6, GAP = 4.2, SPACING = 7, PIPE_R = 1.1;
+const CEIL = 9, FLOOR = 0;
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x4ec0ca);
+scene.fog = new THREE.Fog(0x4ec0ca, 25, 70);
+const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x88aa66, 1.1));
+const sun = new THREE.DirectionalLight(0xffffff, 1.6);
+sun.position.set(-8, 20, 12); sun.castShadow = true;
+Object.assign(sun.shadow.camera, { left: -20, right: 20, top: 20, bottom: -20 });
+sun.shadow.mapSize.set(1024, 1024);
+scene.add(sun, sun.target);
+const mat = c => new THREE.MeshLambertMaterial({ color: c });
+const box = (w, h, d, c) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(c)); m.castShadow = true; return m; };
+const gtex = (() => { const c = document.createElement("canvas"); c.width = 64; c.height = 64; const g = c.getContext("2d");
+  g.fillStyle = "#ded895"; g.fillRect(0, 0, 64, 64); g.fillStyle = "#73bf2e"; g.fillRect(0, 0, 64, 14);
+  g.fillStyle = "#9ce659"; for (let i = 0; i < 64; i += 16) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i + 8, 0); g.lineTo(i, 14); g.lineTo(i - 8, 14); g.fill(); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.magFilter = THREE.NearestFilter; t.repeat.set(60, 10); return t; })();
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(240, 40), new THREE.MeshLambertMaterial({ map: gtex }));
+ground.rotation.x = -Math.PI / 2; ground.position.set(0, FLOOR - 0.01, 0); ground.receiveShadow = true;
+scene.add(ground);
+const bg = new THREE.Group(); scene.add(bg);
+for (let i = 0; i < 40; i++) {
+  const h = 3 + Math.random() * 6, b = box(2 + Math.random() * 2, h, 2, Math.random() < .5 ? 0xd7f2ee : 0xbfe8e2);
+  b.position.set(-40 + i * 2.5, h / 2, -14 - Math.random() * 4); bg.add(b);
+  for (let k = 0; k < 3; k++) { const c = box(3 + Math.random() * 4, 2 + Math.random() * 2, 3, 0xffffff); c.material = mat(0xf4fbf0);
+    c.position.set(-40 + i * 2.5 + Math.random() * 2, 4 + Math.random() * 7, -20 - Math.random() * 6); bg.add(c); }
+  for (let k = 0; k < 2; k++) { const s = box(1.5, 1, 1.5, 0x5ee270); s.position.set(-40 + i * 2.5 + k, .5, -9 - Math.random() * 3); bg.add(s); }
+}
+const bird = new THREE.Group();
+const body = box(1, .85, .8, 0xf8c630); bird.add(body);
+const belly = box(.6, .35, .82, 0xfbe9a0); belly.position.set(.05, -.25, 0); bird.add(belly);
+const eye = box(.4, .4, .86, 0xffffff); eye.position.set(.3, .2, 0); bird.add(eye);
+const pupil = box(.14, .2, .9, 0x222222); pupil.position.set(.42, .2, 0); bird.add(pupil);
+const beak = box(.45, .2, .5, 0xf35b23); beak.position.set(.65, -.05, 0); bird.add(beak);
+const beak2 = box(.38, .15, .48, 0xe0401a); beak2.position.set(.6, -.22, 0); bird.add(beak2);
+const wing = box(.45, .3, .9, 0xfdf5d0); wing.position.set(-.2, 0, 0); bird.add(wing);
+scene.add(bird);
+const pipeMat = mat(0x73bf2e), capMat = mat(0x5aa021);
+const pipes = [];
+function makePipe() {
+  const g = new THREE.Group();
+  const mk = (h, top) => { const p = new THREE.Mesh(new THREE.CylinderGeometry(PIPE_R, PIPE_R, h, 20), pipeMat); p.castShadow = true;
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(PIPE_R + .25, PIPE_R + .25, .8, 20), capMat); cap.castShadow = true;
+    cap.position.y = top ? -h / 2 + .4 : h / 2 - .4; p.add(cap); return p; };
+  g.bottom = mk(20, false); g.top = mk(20, true); g.add(g.bottom, g.top); scene.add(g); return g;
+}
+function placePipe(p, x) {
+  p.position.x = x; p.gapY = 2.6 + Math.random() * (CEIL - 5.2);
+  p.bottom.position.y = p.gapY - GAP / 2 - 10; p.top.position.y = p.gapY + GAP / 2 + 10; p.scored = false;
+}
+for (let i = 0; i < 6; i++) pipes.push(makePipe());
+let state = "ready", y = 4.5, vy = 0, x = 0, score = 0, best = +localStorage.flappyBirdRemadeBest || 0, t = 0, deadTimer = 0;
+const scoreEl = document.getElementById("score"), msgEl = document.getElementById("msg");
+function reset() {
+  state = "ready"; y = 4.5; vy = 0; x = 0; score = 0; scoreEl.textContent = 0;
+  pipes.forEach((p, i) => placePipe(p, 14 + i * SPACING));
+  msgEl.innerHTML = `FLAPPY BIRD-REMADE<br><small>Click, tap or press Space to flap<br>Best: ${best}</small>`;
+}
+reset();
+queueMicrotask(() => setCam(firstPerson));
+function flap() {
+  if (state === "ready") { state = "play"; msgEl.innerHTML = ""; }
+  if (state === "play") vy = FLAP;
+  else if (state === "dead" && deadTimer > .6) reset();
+}
+addEventListener("keydown", e => { if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); flap(); } });
+addEventListener("pointerdown", e => { if (e.target.id !== "cam") flap(); });
+let firstPerson = localStorage.flappyBirdRemadeCam === "fp";
+const camBtn = document.getElementById("cam");
+function setCam(fp) { firstPerson = fp; localStorage.flappyBirdRemadeCam = fp ? "fp" : "tp"; camBtn.textContent = fp ? "VIEW: 1ST PERSON (C)" : "VIEW: 3RD PERSON (C)"; camera.fov = fp ? 75 : 55; camera.updateProjectionMatrix(); bird.visible = !fp; }
+camBtn.addEventListener("click", () => setCam(!firstPerson));
+addEventListener("keydown", e => { if (e.code === "KeyC") setCam(!firstPerson); });
+function die() {
+  if (state !== "play") return; state = "dead"; deadTimer = 0;
+  if (score > best) { best = score; localStorage.flappyBirdRemadeBest = best; }
+  msgEl.innerHTML = `GAME OVER<br><small>Score ${score} · Best ${best}<br>Tap to retry</small>`;
+}
+function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener("resize", resize); resize();
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.05); t += dt;
+  if (state === "ready") { y = 4.5 + Math.sin(t * 6) * .25; x += SPEED * dt * .5; }
+  else if (state === "play" || state === "dead") {
+    if (state === "dead") deadTimer += dt;
+    vy += GRAVITY * dt; y += vy * dt;
+    if (state === "play") x += SPEED * dt;
+    if (y < FLOOR + .45) { y = FLOOR + .45; vy = 0; die(); }
+    if (y > CEIL + 2) { y = CEIL + 2; vy = 0; }
+  }
+  if (state === "play") {
+    for (const p of pipes) {
+      if (p.position.x < x - 10) { const maxX = Math.max(...pipes.map(q => q.position.x)); placePipe(p, maxX + SPACING); }
+      const dx = Math.abs(p.position.x - x);
+      if (dx < PIPE_R + .5 && (y - .4 < p.gapY - GAP / 2 || y + .4 > p.gapY + GAP / 2)) die();
+      if (!p.scored && p.position.x < x) { p.scored = true; score++; scoreEl.textContent = score; }
+    }
+  }
+  bird.position.set(x, y, 0);
+  const tilt = state === "ready" ? 0 : THREE.MathUtils.clamp(vy * .08, -1.4, .5);
+  bird.rotation.z = tilt;
+  wing.position.y = Math.sin(t * (state === "dead" ? 0 : 30)) * .18;
+  if (firstPerson) { camera.position.set(x + .3, y + .25, 0); camera.lookAt(x + 10, y + .25 + tilt * 3, 0); }
+  else { camera.position.set(x - 4, 6, 13); camera.lookAt(x + 3, 4.5, 0); }
+  sun.position.set(x - 8, 20, 12); sun.target.position.set(x, 0, 0);
+  ground.position.x = x; gtex.offset.x = x / 4;
+  bg.position.x = x * .7;
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>
