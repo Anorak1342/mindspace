@@ -11,7 +11,7 @@ The admin dashboard and server-side moderation code are in this repository. The 
 
 ## Deploy the backend and Firestore rules
 
-Install Node.js 20, then open a terminal in a local copy of this repository and run:
+Install Node.js 22, then open a terminal in a local copy of this repository and run:
 
 ```bash
 npm install -g firebase-tools
