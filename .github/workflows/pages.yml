@@ -299,12 +299,23 @@ jobs:
               if ".git" in page.parts or "source" in page.parts:
                   continue
               content = page.read_text(encoding="utf-8")
-              if 'id="mindspace-lock-shortcut"' in content:
-                  continue
-              if "</body>" in content:
-                  content = content.replace("</body>", script + "\n</body>", 1)
-              else:
-                  content += script
+              is_arcade = (
+                  page == Path("arcade.html")
+                  or "arcade-pro" in page.parts
+                  or page.name in {"mini-metro.html", "connect-four.html", "tiny-traffic-town.html"}
+              )
+              if is_arcade and "mindspace-lock.js" not in content:
+                  relative_lock = "../" * (len(page.parts) - 1) + "mindspace-lock.js"
+                  lock_tag = f'<script src="{relative_lock}" defer></script>'
+                  if "</head>" in content:
+                      content = content.replace("</head>", lock_tag + "\n</head>", 1)
+                  else:
+                      content = lock_tag + content
+              if 'id="mindspace-lock-shortcut"' not in content:
+                  if "</body>" in content:
+                      content = content.replace("</body>", script + "\n</body>", 1)
+                  else:
+                      content += script
               page.write_text(content, encoding="utf-8")
           PY
 
