@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10111b"><title>Mindspace · Admin</title>
+<style>
+:root{color-scheme:dark;--bg:#10111b;--panel:#191b29;--panel2:#22253a;--line:#343750;--text:#f4f5ff;--muted:#a5aac4;--mint:#9df3d0;--red:#ff8d9b;--gold:#ffdf8a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% 0%,#25264b,transparent 40%),var(--bg);color:var(--text);font:15px/1.5 system-ui,Segoe UI,sans-serif;min-height:100vh}
+.wrap{width:min(1100px,calc(100% - 32px));margin:auto;padding:28px 0 60px}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:28px}.brand{font-weight:900;font-size:21px}.brand span{color:var(--mint)}a{color:var(--mint)}button,input{font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:10px 14px;font-weight:800}.primary{background:var(--mint);color:#111923}.secondary{background:#ffffff0c;color:var(--text);border:1px solid var(--line)}.danger{background:#ff8d9b1c;color:var(--red);border:1px solid #ff8d9b55}.gold{background:#ffdf8a1c;color:var(--gold);border:1px solid #ffdf8a55}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px;margin:14px 0}.muted{color:var(--muted)}.eyebrow{font-size:11px;letter-spacing:2px;color:var(--mint);font-weight:900}.hero h1{font-size:clamp(30px,5vw,46px);margin:7px 0}.hero p{color:var(--muted);margin:0}.field{display:grid;gap:6px;margin:12px 0}.field label{font-size:12px;color:var(--muted)}.field input{width:100%;padding:12px;background:#11131e;border:1px solid var(--line);border-radius:10px;color:var(--text)}.auth{max-width:480px;margin:28px auto}.hidden{display:none!important}.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.bar input{flex:1;min-width:190px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{padding:16px;background:var(--panel2);border-radius:14px}.stat strong{font-size:26px;display:block}.stat span{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}.userlist{display:grid;gap:9px;margin-top:16px}.user{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:14px;background:#11131e;border:1px solid var(--line);border-radius:13px}.user strong{display:block;overflow-wrap:anywhere}.user small{color:var(--muted)}.actions{display:flex;gap:7px;flex-wrap:wrap}.status{font-size:11px;color:var(--muted);margin-top:4px}.notice{padding:12px 14px;border-radius:12px;background:#9df3d014;border:1px solid #9df3d044;color:var(--mint);margin:12px 0}.error{color:var(--red);font-size:13px;margin-top:10px;white-space:pre-wrap}.warning{padding:13px;border:1px solid #ffdf8a55;background:#ffdf8a10;color:var(--gold);border-radius:12px;font-size:13px;margin-top:14px}@media(max-width:650px){.stats{grid-template-columns:1fr}.user{align-items:flex-start;flex-direction:column}.actions{width:100%}.actions button{flex:1}}
+</style></head>
+<body><main class="wrap">
+<header class="top"><div class="brand">mindspace <span>✳ ADMIN</span></div><a href="./">← Back to Mindspace</a></header>
+<section class="hero"><div class="eyebrow">CONTROL ROOM</div><h1>Welcome, Admin.</h1><p>Manage Mindspace Chat accounts and room access.</p></section>
+<section id="loginPanel" class="panel auth"><h2>Administrator sign in</h2><p class="muted">Sign in with your existing Mindspace Chat account.</p>
+<div class="field"><label for="email">Admin email</label><input id="email" type="email" autocomplete="username" value="leo337657@gmail.com"></div>
+<div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password"></div>
+<button id="signIn" class="primary">Sign in as Admin</button><div id="loginError" class="error" role="alert"></div>
+<div class="warning">Only the verified administrator account can initialise admin access. Your password is sent directly to Firebase Authentication and is never stored by this page.</div>
+</section>
+<section id="dashboard" class="hidden">
+<div class="panel"><div class="bar" style="justify-content:space-between"><div><div class="eyebrow">ADMIN SESSION</div><strong id="adminIdentity">Admin</strong><div class="muted" id="adminEmail"></div></div><button id="signOut" class="secondary">Sign out</button></div></div>
+<div class="stats"><div class="stat"><strong id="totalUsers">—</strong><span>Accounts</span></div><div class="stat"><strong id="bannedUsers">—</strong><span>Banned</span></div><div class="stat"><strong id="activeUsers">—</strong><span>Not banned</span></div></div>
+<div class="panel"><div class="bar"><div style="flex:1"><h2 style="margin:0">Users</h2><p class="muted" style="margin:4px 0 0">Email addresses are visible only through this protected admin function.</p></div><button id="refresh" class="secondary">↻ Refresh</button></div>
+<div class="bar" style="margin-top:16px"><input id="search" type="search" placeholder="Search by email or display name" aria-label="Search users"><span class="muted" id="shownCount"></span></div>
+<div id="userList" class="userlist"><p class="muted">Loading users…</p></div><div id="actionError" class="error"></div>
+</div></section>
+</main>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+import {getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-functions.js";
+const firebaseConfig={apiKey:"AIzaSyDymemJH4sSueC3PtiRsFlzdO_sR3yf2u4",authDomain:"mindspace-59b2d.firebaseapp.com",projectId:"mindspace-59b2d",storageBucket:"mindspace-59b2d.firebasestorage.app",messagingSenderId:"17331225260",appId:"1:17331225260:web:251d323c504ef116465509"};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),functions=getFunctions(app,"us-central1");
+const call=(name)=>httpsCallable(functions,name);
+const $=id=>document.getElementById(id);let users=[];
+function errorText(e){return e?.message||"Something went wrong."}
+function showError(id,e){$(id).textContent=errorText(e)}
+async function loadUsers(){ $("userList").innerHTML='<p class="muted">Loading accounts…</p>'; $("actionError").textContent="";
+ try{const result=await call("adminListUsers")({});users=result.data.users||[];render();}
+ catch(e){showError("actionError",e);$("userList").innerHTML='<p class="muted">Could not load accounts.</p>';}}
+function render(){const q=$("search").value.trim().toLowerCase();const filtered=users.filter(u=>(u.email||"").toLowerCase().includes(q)||(u.displayName||"").toLowerCase().includes(q));$("totalUsers").textContent=users.length;$("bannedUsers").textContent=users.filter(u=>u.banned||u.disabled).length;$("activeUsers").textContent=users.filter(u=>!u.banned&&!u.disabled).length;$("shownCount").textContent=filtered.length+" shown";const root=$("userList");root.innerHTML="";
+ if(!filtered.length){root.innerHTML='<p class="muted">No matching accounts.</p>';return;}
+ for(const u of filtered){const row=document.createElement("article");row.className="user";const info=document.createElement("div");const name=document.createElement("strong");name.textContent=u.displayName||"No display name";const email=document.createElement("small");email.textContent=u.email||"(no email)";const state=document.createElement("div");state.className="status";state.textContent=u.banned||u.disabled?"BANNED / DISABLED":"ACTIVE";info.append(name,email,state);const actions=document.createElement("div");actions.className="actions";
+ const make=(label,cls,action)=>{const b=document.createElement("button");b.className=cls;b.textContent=label;b.onclick=()=>moderate(u,action);actions.append(b)};
+ if(u.uid!==auth.currentUser.uid){if(u.banned||u.disabled)make("Unban","gold","unban");else{make("Kick","secondary","kick");make("Ban","danger","ban");}}
+ else {const own=document.createElement("span");own.className="muted";own.textContent="Your admin account";actions.append(own);}
+ row.append(info,actions);root.append(row);}
+}
+async function moderate(u,action){const verb=action==="unban"?"unban":action;const promptText=action==="kick"?"Kick this user out of all their chat rooms? They can sign in and join again later.":action==="ban"?"Permanently block this account from Mindspace Chat until you unban it?":"Restore this account's access to Mindspace Chat?";
+ if(!confirm(promptText))return;$("actionError").textContent="";
+ try{await call("adminModerateUser")({uid:u.uid,action});await loadUsers();}
+ catch(e){showError("actionError",e);}}
+$("signIn").onclick=async()=>{ $("loginError").textContent="";try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);$("password").value="";}catch(e){showError("loginError",e);}};
+$("signOut").onclick=()=>signOut(auth);$("refresh").onclick=loadUsers;$("search").oninput=render;
+onAuthStateChanged(auth,async user=>{if(!user){$("loginPanel").classList.remove("hidden");$("dashboard").classList.add("hidden");return;}
+ $("loginPanel").classList.add("hidden");$("dashboard").classList.remove("hidden");$("adminIdentity").textContent=user.displayName||"Admin";$("adminEmail").textContent=user.email||"";
+ try{await call("initializeMindspaceAdmin")({});await user.getIdToken(true);await loadUsers();}
+ catch(e){showError("actionError",e);$("userList").innerHTML='<p class="muted">Admin setup is not complete. Check the setup instructions and verify the admin email address.</p>';}}
+);
+</script></body></html>
