@@ -34,6 +34,7 @@ jobs:
       - name: Download and copy the game source into Mindspace
         run: |
           git clone --depth 1 https://github.com/TMHSDigital/GH-Arcade.git /tmp/gh-arcade
+          git clone --depth 1 https://github.com/sausi-7/games.git /tmp/sports-random-games
           git clone --depth 1 https://github.com/stateloop-connected/source-vibe-basketball.git /tmp/vibe-basketball
           git clone --depth 1 https://github.com/Anorak1342/F-15-Flight-Sim-.git /tmp/f15-flight-sim
           git clone --depth 1 https://github.com/KhazP/librecorsa.git /tmp/librecorsa
@@ -54,6 +55,20 @@ jobs:
           git clone --depth 1 https://github.com/pmotschmann/Evolve.git /tmp/evolve
           git clone --depth 1 https://github.com/ThatOneMop/study-desk.git /tmp/study-desk
           git -C /tmp/snack-hole-game checkout 2f1e5699eb08e19b6e6b76ab1e28055c9295a27b
+          # Publish only the sports category from sausi-7/games as a self-contained launcher.
+          mkdir -p arcade-pro/sports-random-games/games
+          cp -R /tmp/sports-random-games/games/sports arcade-pro/sports-random-games/games/
+          cp -R /tmp/sports-random-games/site arcade-pro/sports-random-games/site
+          cp -R /tmp/sports-random-games/assets arcade-pro/sports-random-games/assets
+          cp /tmp/sports-random-games/index.html /tmp/sports-random-games/LICENSE arcade-pro/sports-random-games/
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          source = json.loads(Path('/tmp/sports-random-games/games/registry.json').read_text(encoding='utf-8'))
+          source['games'] = [game for game in source['games'] if game.get('category') == 'sports']
+          source['categories'] = [category for category in source['categories'] if category.get('id') == 'sports']
+          Path('arcade-pro/sports-random-games/games/registry.json').write_text(json.dumps(source, ensure_ascii=False), encoding='utf-8')
+          PY
           mkdir -p arcade-pro/source/gh-arcade arcade-pro/source/vibe-basketball arcade-pro/source/f15-flight-sim arcade-pro/source/librecorsa arcade-pro/source/pacman arcade-pro/source/2048 arcade-pro/source/trex-runner
           cp -R /tmp/gh-arcade/. arcade-pro/source/gh-arcade/
           cp -R /tmp/vibe-basketball/. arcade-pro/source/vibe-basketball/
