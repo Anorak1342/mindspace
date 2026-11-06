@@ -248,6 +248,39 @@ jobs:
           # Keep downloaded upstream source in the build workspace only.
           # Do not push it back to main: that creates a second deployment run.
 
+      - name: Download and copy Gravity Forge and Pixel Princess
+        run: |
+          git clone --depth 1 https://github.com/Mohammed-Farzan-Javeed/gravity-forge.git /tmp/gravity-forge
+          git clone --depth 1 https://github.com/VTvito/pixel-princess-platformer.git /tmp/pixel-princess
+          mkdir -p arcade-pro/gravity-forge arcade-pro/pixel-princess
+          cp -R /tmp/gravity-forge/. arcade-pro/gravity-forge/
+          cp /tmp/gravity-forge/LICENSE arcade-pro/gravity-forge/LICENSE.txt
+          rm -rf arcade-pro/gravity-forge/.git arcade-pro/gravity-forge/.github
+          cp -R /tmp/pixel-princess/. arcade-pro/pixel-princess/
+          cp /tmp/pixel-princess/LICENSE arcade-pro/pixel-princess/LICENSE.txt
+          rm -rf arcade-pro/pixel-princess/.git arcade-pro/pixel-princess/.github arcade-pro/pixel-princess/.claude arcade-pro/pixel-princess/api arcade-pro/pixel-princess/tools
+          rm -f arcade-pro/pixel-princess/sw.js arcade-pro/pixel-princess/vercel.json arcade-pro/pixel-princess/.vercelignore arcade-pro/pixel-princess/CLAUDE.md
+          # Pixel Princess's upstream service worker deletes all origin caches on activation.
+          # Remove its registration so it cannot interfere with Mindspace or other games.
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('arcade-pro/pixel-princess/src/main.js')
+          s = p.read_text(encoding='utf-8')
+          s, count = re.subn(r'\n// Register the service worker for offline play / PWA install.*?\n}\n\n// Dev-only test handle', '\n// Service worker disabled when embedded in Mindspace.\n\n// Dev-only test handle', s, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit('Could not safely disable Pixel Princess service-worker registration')
+          p.write_text(s, encoding='utf-8')
+          p = Path('arcade-pro/pixel-princess/index.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('https://gameforprincess.vercel.app', 'https://anorak1342.github.io/mindspace/arcade-pro/pixel-princess')
+          p.write_text(s, encoding='utf-8')
+          PY
+          # Keep the uploaded Flappy Bird-Remade self-contained by serving its Three.js module locally.
+          mkdir -p arcade-pro/flappy-bird-remade
+          curl -fsSL https://unpkg.com/three@0.160.0/build/three.module.js -o arcade-pro/flappy-bird-remade/three.module.js
+          curl -fsSL https://raw.githubusercontent.com/mrdoob/three.js/r160/LICENSE -o arcade-pro/flappy-bird-remade/THREE-LICENSE.txt
+
       - name: Type-check and build the copied Neon Arcade source
         run: |
           cd arcade-pro/source/gh-arcade
