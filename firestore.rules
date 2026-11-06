@@ -1,8 +1,13 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function statusPath(uid) {
+      return /databases/$(database)/documents/users/$(uid);
+    }
     function signedIn() {
-      return request.auth != null;
+      return request.auth != null
+        && (!exists(statusPath(request.auth.uid))
+          || get(statusPath(request.auth.uid)).data.banned != true);
     }
     function roomPath(roomId) {
       return /databases/$(database)/documents/rooms/$(roomId);
@@ -110,6 +115,10 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // User status documents are writable only by the trusted Admin SDK backend.
+    match /users/{uid} {
+      allow read, write: if false;
+    }
 
     match /{document=**} {
       allow read, write: if false;
