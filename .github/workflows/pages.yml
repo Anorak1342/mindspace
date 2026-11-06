@@ -274,17 +274,23 @@ jobs:
             var lastPress = 0;
             window.addEventListener("keydown", function (event) {
               if (event.key !== "Enter" || event.repeat || event.isComposing) return;
+              var target = event.target;
+              if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(target.tagName))) {
+                count = 0;
+                lastPress = 0;
+                return;
+              }
               var now = Date.now();
               count = now - lastPress <= 3000 ? count + 1 : 1;
               lastPress = now;
-              event.preventDefault();
               if (count < 3) return;
               count = 0;
+              event.preventDefault();
               event.stopPropagation();
               event.stopImmediatePropagation();
               var path = window.location.pathname;
               var base = path === "/mindspace" || path.indexOf("/mindspace/") === 0 ? "/mindspace/" : "/";
-              var home = path === base || path === base + "index.html";
+              var home = path === base || path === base + "index.html" || path === base + "index.htm";
               if (home) {
                 try { localStorage.setItem("ms-arcade-unlocked", "yes"); } catch (error) {}
                 window.location.assign(base + "arcade.html");
@@ -318,6 +324,12 @@ jobs:
                       content += script
               page.write_text(content, encoding="utf-8")
           PY
+
+      - name: Remove build-only source files before publishing
+        run: |
+          # The original repositories are only needed while building. Publishing
+          # them bloats the Pages artifact and can exceed GitHub's 1 GB limit.
+          rm -rf arcade-pro/source
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
