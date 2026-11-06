@@ -438,6 +438,67 @@ jobs:
               page.write_text(content, encoding="utf-8")
           PY
 
+      - name: Add looping Mountain King background music
+        run: |
+          mkdir -p assets
+          curl -fL --retry 3 "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Hall%20of%20the%20Mountain%20King.mp3" -o assets/mountain-king.mp3
+          python3 - <<'PY'
+          from pathlib import Path
+          player = r"""<style id="mindspace-music-style">
+          #mindspace-music-wrap{position:fixed;right:14px;bottom:14px;z-index:2147483000;display:flex;flex-direction:column;align-items:flex-end;gap:4px;font:12px/1.35 system-ui,sans-serif}
+          #mindspace-music-toggle{border:1px solid #8ce8c5;background:#151b25;color:#a7f3d0;border-radius:999px;padding:9px 13px;font:700 12px system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 18px #0008}
+          #mindspace-music-credit{color:#c5c8d5;background:#151b25eF;border:1px solid #ffffff22;border-radius:7px;padding:4px 7px;font-size:10px}
+          #mindspace-music-credit a{color:#a7f3d0}
+          </style>
+          <div id="mindspace-music-wrap">
+            <button id="mindspace-music-toggle" type="button" aria-pressed="false">♫ Turn music on</button>
+            <small id="mindspace-music-credit">Hall of the Mountain King · Kevin MacLeod · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></small>
+          </div>
+          <audio id="mindspace-background-music" loop preload="none"></audio>
+          <script id="mindspace-background-music-script">
+          (function(){
+            var audio=document.getElementById("mindspace-background-music");
+            var button=document.getElementById("mindspace-music-toggle");
+            if(!audio||!button)return;
+            var base=location.pathname.indexOf("/mindspace/")===0?"/mindspace/":"/";
+            audio.src=base+"assets/mountain-king.mp3";
+            audio.volume=0.24;
+            function label(on){
+              button.textContent=on?"♫ Music: On":"♫ Turn music on";
+              button.setAttribute("aria-pressed",on?"true":"false");
+            }
+            function start(){
+              var result=audio.play();
+              if(result&&typeof result.then==="function"){
+                result.then(function(){label(true);}).catch(function(){label(false);});
+              }else{label(true);}
+            }
+            button.addEventListener("click",function(){
+              if(!audio.paused){audio.pause();try{localStorage.setItem("mindspace-music-enabled","no");}catch(e){}label(false);return;}
+              try{localStorage.setItem("mindspace-music-enabled","yes");}catch(e){}
+              start();
+            });
+            try{if(localStorage.getItem("mindspace-music-enabled")==="yes")start();}catch(e){}
+            audio.addEventListener("pause",function(){label(false);});
+            audio.addEventListener("play",function(){label(true);});
+          })();
+          </script>"""
+          for page in Path(".").rglob("*.html"):
+              if ".git" in page.parts or "source" in page.parts:
+                  continue
+              # The main Mindspace study dashboard is intentionally music-free.
+              if page == Path("index.html") or "study" in page.stem.lower():
+                  continue
+              content = page.read_text(encoding="utf-8")
+              if 'id="mindspace-background-music-script"' in content:
+                  continue
+              if "</body>" in content:
+                  content = content.replace("</body>", player + "\\n</body>", 1)
+              else:
+                  content += player
+              page.write_text(content, encoding="utf-8")
+          PY
+
       - name: Remove build-only source files before publishing
         run: |
           # The original repositories are only needed while building. Publishing
