@@ -4,10 +4,10 @@
   const isArcadePage = path.endsWith("/arcade.html") || path.includes("/arcade-pro/") || /\/(mini-metro|connect-four|tiny-traffic-town)\.html$/.test(path);
   if (!isArcadePage) return;
 
-  const ACCESS_KEY = "mindspaceAccessGranted";
+  const ACCESS_KEY = "mindspaceArcadeAccessV2";
   const PASSWORD_SHA256 = "403774aa7e1635aaf218dc899900238e691ffb21ec1701255840aa614a28fc39";
   let unlocked = false;
-  try { unlocked = localStorage.getItem(ACCESS_KEY) === "yes"; } catch (_) {}
+  try { unlocked = sessionStorage.getItem(ACCESS_KEY) === "yes"; } catch (_) {}
   if (unlocked) return;
 
   document.documentElement.classList.add("mindspace-locked");
@@ -43,10 +43,10 @@
     screen.innerHTML = `
       <form class="ms-lock-card" autocomplete="off">
         <div class="ms-lock-mark">M</div>
-        <h1>Welcome to Mindspace</h1>
-        <p>This space is password protected.<br>Enter the access code to continue.</p>
-        <input id="ms-lock-password" type="password" inputmode="numeric" autocomplete="off" placeholder="Enter password" aria-label="Website password" required>
-        <button type="submit">Unlock Mindspace</button>
+        <h1>Mindspace Arcade</h1>
+        <p>The Arcade is password protected.<br>Enter your access code to continue.</p>
+        <input id="ms-lock-password" type="password" inputmode="numeric" autocomplete="off" placeholder="Enter password" aria-label="Arcade password" required>
+        <button type="submit">Unlock Arcade</button>
         <div class="ms-lock-error" id="ms-lock-error" role="alert"></div>
         <div class="ms-lock-foot">Your space to learn, play and create.</div>
       </form>`;
@@ -59,7 +59,7 @@
       const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input.value));
       const hash = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2,"0")).join("");
       if (hash === PASSWORD_SHA256) {
-        try { localStorage.setItem(ACCESS_KEY, "yes"); } catch (_) {}
+        try { sessionStorage.setItem(ACCESS_KEY, "yes"); } catch (_) {}
         document.documentElement.classList.remove("mindspace-locked");
         screen.remove();
       } else {
