@@ -356,7 +356,7 @@ jobs:
           if marker not in s:
               raise SystemExit('Could not find the 2048 application script')
           if tag not in s:
-              s = s.replace(marker, tag + '\\n  ' + marker, 1)
+              s = s.replace(marker, tag + chr(10) + '  ' + marker, 1)
           p.write_text(s, encoding='utf-8')
           PY
 
