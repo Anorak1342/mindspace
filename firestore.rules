@@ -140,12 +140,6 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Scores are written only by trusted server functions.
-    match /leaderboards/{gameId}/scores/{uid} {
-      allow get, list: if signedIn();
-      allow create, update, delete: if false;
-    }
-
     // User status documents are writable only by the trusted Admin SDK backend.
     match /users/{uid} {
       allow read, write: if false;
