@@ -58,38 +58,3 @@ exports.adminModerateUser=onCall(async request=>{
  await auth.updateUser(uid,{disabled:false});
  return {ok:true,message:"Account unbanned."};
 });
-const SCORE_LIMITS={
- slope:1000000,"2048":1000000,pacman:1000000,"trex-runner":1000000,
- hextris:1000000,snake:1000000,tetris:1000000,pong:100000
-};
-exports.submitGameScore=onCall({enforceAppCheck:false},async request=>{
- if(!request.auth)throw new HttpsError("unauthenticated","Sign in to submit a score.");
- const uid=request.auth.uid,{gameId,score}=request.data||{};
- if(typeof gameId!=="string"||!Object.prototype.hasOwnProperty.call(SCORE_LIMITS,gameId))
-  throw new HttpsError("invalid-argument","That game does not have leaderboard support yet.");
- if(!Number.isSafeInteger(score)||score<0||score>SCORE_LIMITS[gameId])
-  throw new HttpsError("invalid-argument","That score is outside the accepted range.");
- const profileSnap=await db.doc("profiles/"+uid).get();
- if(!profileSnap.exists)throw new HttpsError("failed-precondition","Create your Mindspace profile before submitting scores.");
- const profile=profileSnap.data();
- const ref=db.doc("leaderboards/"+gameId+"/scores/"+uid);
- const result=await db.runTransaction(async tx=>{
-  const old=await tx.get(ref);
-  const now=Date.now();
-  if(old.exists){
-   const previous=old.data();
-   const last=previous.submittedAt&&previous.submittedAt.toMillis?previous.submittedAt.toMillis():0;
-   if(now-last<5000)throw new HttpsError("resource-exhausted","Please wait a few seconds before submitting another score.");
-   if(score<=previous.score)return {updated:false,best:previous.score};
-  }
-  tx.set(ref,{
-   uid,gameId,score,
-   displayName:profile.displayName||"Mindspace member",
-   avatar:profile.avatar||"🙂",
-   updatedAt:FieldValue.serverTimestamp(),
-   submittedAt:FieldValue.serverTimestamp()
-  });
-  return {updated:true,best:score};
- });
- return {ok:true,...result};
-});
