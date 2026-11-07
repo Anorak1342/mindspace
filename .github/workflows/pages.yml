@@ -344,22 +344,6 @@ jobs:
           mkdir -p arcade-pro/2048
           cp -R arcade-pro/source/2048/. arcade-pro/2048/
 
-      - name: Connect 2048 to the verified global leaderboard
-        run: |
-          cp leaderboard-2048.js arcade-pro/2048/leaderboard-2048.js
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('arcade-pro/2048/index.html')
-          s = p.read_text(encoding='utf-8')
-          marker = '<script src="js/application.js"></script>'
-          tag = '<script src="leaderboard-2048.js"></script>'
-          if marker not in s:
-              raise SystemExit('Could not find the 2048 application script')
-          if tag not in s:
-              s = s.replace(marker, tag + chr(10) + '  ' + marker, 1)
-          p.write_text(s, encoding='utf-8')
-          PY
-
       - name: Publish T-Rex Runner locally
         run: |
           mkdir -p arcade-pro/trex-runner
