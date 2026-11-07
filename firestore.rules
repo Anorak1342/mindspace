@@ -76,9 +76,10 @@ service cloud.firestore {
       match /messages/{messageId} {
         allow get, list: if isMember(roomId);
         allow create: if isMember(roomId)
-          && request.resource.data.keys().hasOnly(['uid', 'displayName', 'text', 'createdAt'])
+          && request.resource.data.keys().hasOnly(['uid', 'displayName', 'avatar', 'text', 'createdAt'])
           && request.resource.data.uid == request.auth.uid
           && request.resource.data.displayName == get(memberPath(roomId, request.auth.uid)).data.displayName
+          && request.resource.data.avatar in ['🙂','😎','🚀','🐉','🦊','🐼','🐸','🦁','👾','🎮','⭐','🌙','⚡','🔥','🌿','🐺']
           && request.resource.data.text is string
           && request.resource.data.text.size() > 0
           && request.resource.data.text.size() <= 1000
