@@ -115,6 +115,37 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // Public member cards. Email addresses and moderation status stay private.
+    match /profiles/{uid} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['displayName', 'avatar', 'bio', 'createdAt', 'updatedAt'])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 24
+        && request.resource.data.avatar in ['🙂','😎','🚀','🐉','🦊','🐼','🐸','🦁','👾','🎮','⭐','🌙','⚡','🔥','🌿','🐺']
+        && request.resource.data.bio is string
+        && request.resource.data.bio.size() <= 120;
+      allow update: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'avatar', 'bio', 'updatedAt'])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 24
+        && request.resource.data.avatar in ['🙂','😎','🚀','🐉','🦊','🐼','🐸','🦁','👾','🎮','⭐','🌙','⚡','🔥','🌿','🐺']
+        && request.resource.data.bio is string
+        && request.resource.data.bio.size() <= 120;
+      allow delete: if false;
+    }
+
+    // Scores are written only by trusted server functions.
+    match /leaderboards/{gameId}/scores/{uid} {
+      allow get, list: if signedIn();
+      allow create, update, delete: if false;
+    }
+
     // User status documents are writable only by the trusted Admin SDK backend.
     match /users/{uid} {
       allow read, write: if false;
