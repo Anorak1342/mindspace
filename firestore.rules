@@ -126,7 +126,7 @@ service cloud.firestore {
           'xp', 'level', 'gamesPlayed', 'uniqueGames', 'studySessions',
           'cardsReviewed', 'socialMessages', 'favourites', 'collections',
           'records', 'focusSessions', 'achievements', 'recentUnlocks',
-          'lastEvents', 'updatedAt'
+          'unlockedTitles', 'decorations', 'selectedTitle', 'lastEvents', 'updatedAt'
         ])
         && request.resource.data.xp is number
         && request.resource.data.xp >= 0
@@ -149,6 +149,12 @@ service cloud.firestore {
         && request.resource.data.achievements.size() <= 120
         && request.resource.data.recentUnlocks is list
         && request.resource.data.recentUnlocks.size() <= 12
+        && request.resource.data.unlockedTitles is list
+        && request.resource.data.unlockedTitles.size() <= 120
+        && request.resource.data.decorations is list
+        && request.resource.data.decorations.size() <= 120
+        && request.resource.data.selectedTitle is string
+        && request.resource.data.selectedTitle.size() <= 60
         && request.resource.data.lastEvents is map
         && request.resource.data.lastEvents.size() <= 100;
       allow delete: if false;
