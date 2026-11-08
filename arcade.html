@@ -282,7 +282,7 @@ $("theme-status").textContent="Midnight is always available. Neon unlocks at lev
 document.querySelectorAll(".game .play").forEach(link=>link.addEventListener("click",()=>{const card=link.closest(".game");recordActivity("game",{game:link.getAttribute("href")||card?.querySelector("h2")?.textContent||"arcade"}).catch(console.warn);}));
 window.MindspaceSoundsEnabled=getSounds();
 $("theme-sounds").addEventListener("change",e=>{window.MindspaceSoundsEnabled=e.target.checked;});
-document.addEventListener("click",event=>{const b=event.target.closest(".favorite-toggle");if(b&&b.textContent.includes("Favourite"))recordActivity("favourite").catch(console.warn);});
+document.addEventListener("click",event=>{const b=event.target.closest(".favorite-toggle");if(b&&b.getAttribute("aria-pressed")==="false")recordActivity("favourite").catch(console.warn);});
 document.getElementById("collection-form").addEventListener("submit",()=>recordActivity("collection").catch(console.warn));
 document.getElementById("personal-record-form").addEventListener("submit",()=>recordActivity("record").catch(console.warn));
 window.addEventListener("mindspace:progress",e=>{const l=levelFor(e.detail.stats.xp);$("player-rank").textContent="Level "+l.level+" · "+l.rank;$("player-summary").textContent=(user?.displayName||"Player")+" · "+l.title+" · "+e.detail.stats.xp.toLocaleString()+" XP";$("player-progress-fill").style.width=l.progress+"%";$("player-progress-label").textContent=l.level>=100?"Maximum level reached":Math.floor(l.xpIntoLevel)+" / "+l.xpForNext+" XP to level "+(l.level+1);});
