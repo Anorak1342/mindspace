@@ -41,7 +41,9 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 .toplinks{display:flex;gap:10px;align-items:center}.toplinks button.back{background:transparent;font:inherit;cursor:pointer}
 @media(max-width:600px){.controls{grid-template-columns:1fr}.daily{align-items:flex-start;flex-direction:column}.daily .play{max-width:none;width:100%}.toplinks{flex-wrap:wrap;justify-content:flex-end}}
 
-\n.whats-new-link{position:relative;padding-right:25px}.new-dot{display:none;position:absolute;top:5px;right:7px;width:9px;height:9px;border-radius:50%;background:#ff5b68;box-shadow:0 0 0 3px #ff5b6826}.new-dot.show{display:block}\n
+
+.whats-new-link{position:relative;padding-right:25px}.new-dot{display:none;position:absolute;top:5px;right:7px;width:9px;height:9px;border-radius:50%;background:#ff5b68;box-shadow:0 0 0 3px #ff5b6826}.new-dot.show{display:block}
+
 /* Personal arcade tools */
 .player-hub{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:26px 0 28px}
 .hub-panel{min-width:0;border:1px solid #343434;background:#101010;border-radius:10px;padding:18px}
@@ -71,7 +73,8 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
  <div class="hub-panel"><h2>🏆 Personal Records</h2><p>Keep your best scores, distances or times on this device.</p><form class="hub-form" id="personal-record-form"><select class="hub-select" id="record-game" aria-label="Choose a game" required><option value="">Choose a game…</option></select><input class="hub-input" id="record-value" type="number" min="0" step="any" placeholder="Your record" aria-label="Record value" required><input class="hub-input" id="record-unit" type="text" maxlength="16" placeholder="Unit (e.g. points)" aria-label="Record unit"><button class="hub-button" type="submit">Save record</button></form><div class="hub-list" id="personal-record-list" style="margin-top:12px"><div class="hub-empty">No personal records saved yet.</div></div><small style="display:block;color:#777;margin-top:8px;font-size:11px">Records are entered by you. Automatic score capture depends on each game's code.</small></div>
  <div class="hub-panel"><h2>🗂️ Game Collections</h2><p>Make your own playlists of games, such as Racing, Favourites or Play with Friends.</p><form class="hub-form" id="collection-form"><input class="hub-input" id="collection-name" type="text" maxlength="28" placeholder="New collection name" aria-label="New collection name" required><button class="hub-button" type="submit">Create collection</button></form><div class="hub-list" id="game-collections-list" style="margin-top:10px"><div class="hub-empty">Create a collection, then add games using the menus on each game card.</div></div></div>
 </section>
-\n<div class="controls"><input id="game-search" type="search" placeholder="Search games by name or description…" aria-label="Search games"><select id="genre-filter" aria-label="Filter games by genre"><option value="all">All genres</option><option value="action">Action</option><option value="arcade">Arcade</option><option value="puzzle">Puzzle</option><option value="racing">Racing</option><option value="simulation">Simulation</option><option value="sports">Sports</option><option value="strategy">Strategy</option><option value="idle">Idle</option></select></div>
+
+<div class="controls"><input id="game-search" type="search" placeholder="Search games by name or description…" aria-label="Search games"><select id="genre-filter" aria-label="Filter games by genre"><option value="all">All genres</option><option value="action">Action</option><option value="arcade">Arcade</option><option value="puzzle">Puzzle</option><option value="racing">Racing</option><option value="simulation">Simulation</option><option value="sports">Sports</option><option value="strategy">Strategy</option><option value="idle">Idle</option></select></div>
 <p id="results-count" class="note" aria-live="polite">Showing all games</p>
 <section class="games">
 <article class="game" data-genres="idle simulation"><div class="icon">⚛️</div><h2>PARTICLE CLICKER</h2><p class="desc">Build a particle physics research lab, discover particles and grow your scientific reputation.</p><a class="play gold" href="./arcade-pro/particle-clicker/">PLAY PARTICLE CLICKER ↗</a></article>
@@ -189,7 +192,10 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 })();
 
 </script>
-\n<script>\n(()=>{const release="2026-11-07-2";const key="mindspace-whats-new-seen";if(localStorage.getItem(key)!==release){const dot=document.getElementById("whats-new-dot");if(dot)dot.classList.add("show");}})();\n
+
+<script>
+(()=>{const release="2026-11-07-2";const key="mindspace-whats-new-seen";if(localStorage.getItem(key)!==release){const dot=document.getElementById("whats-new-dot");if(dot)dot.classList.add("show");}})();
+
 (function(){
  const cards=[...document.querySelectorAll('.game')];
  if(!cards.length)return;
@@ -214,4 +220,5 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
  games.forEach(g=>{const link=g.card.querySelector('.play');link.addEventListener('click',()=>{recent=[g.href,...recent.filter(h=>h!==g.href)].slice(0,20);write(KEYS.recent,recent);});});
  renderRecent();renderFavs();renderRecords();renderCollections();renderCardTools();
 })();
-</script>\n</body></html>
+</script>
+</body></html>
