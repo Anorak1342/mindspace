@@ -88,6 +88,9 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 [data-arcade-theme="neon"] .game{border-radius:14px}
 [data-arcade-theme="sunset"] .game{border-radius:3px 14px 3px 14px}
 @keyframes msArcadeGlow{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:.42;transform:translateY(-8px)}}
+@keyframes msThemeDrift{0%{transform:translate3d(-2%,0,0) scale(1)}50%{transform:translate3d(2%,-1%,0) scale(1.05)}100%{transform:translate3d(-2%,0,0) scale(1)}}
+[data-arcade-theme="neon"] body:before,[data-arcade-theme="sunset"] body:before{content:"";position:fixed;z-index:0;pointer-events:none;inset:-15%;opacity:.45;background:radial-gradient(ellipse at 30% 35%,var(--player-accent),transparent 42%),radial-gradient(ellipse at 75% 65%,#a78bfa55,transparent 38%);filter:blur(30px);animation:msThemeDrift 18s ease-in-out infinite}
+.wrap{position:relative;z-index:1}
 [data-arcade-theme="neon"] .hero:after,[data-arcade-theme="sunset"] .hero:after{content:"";display:block;height:2px;margin-top:18px;background:linear-gradient(90deg,transparent,var(--player-accent),transparent);animation:msArcadeGlow 5s ease-in-out infinite}
 @media(max-width:600px){.player-bar{grid-template-columns:1fr}}
 
@@ -259,6 +262,8 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 <script type="module">
 import {ready,levelFor,recordActivity,getTheme,setTheme,getAccent,setAccent,getSounds,setSounds,currentUser,getCurrentStats} from "./player-system.js";
 const $=id=>document.getElementById(id);
+let soundContext=null;
+function uiSound(){if(!getSounds())return;try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;soundContext=soundContext||new Audio();const osc=soundContext.createOscillator(),gain=soundContext.createGain();osc.type="sine";osc.frequency.setValueAtTime(660,soundContext.currentTime);osc.frequency.exponentialRampToValueAtTime(880,soundContext.currentTime+.08);gain.gain.setValueAtTime(.045,soundContext.currentTime);gain.gain.exponentialRampToValueAtTime(.001,soundContext.currentTime+.12);osc.connect(gain);gain.connect(soundContext.destination);osc.start();osc.stop(soundContext.currentTime+.13);}catch(e){}}
 const themeButtons=[...document.querySelectorAll("[data-theme]")];
 function paintTheme(theme){setTheme(theme);themeButtons.forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.theme===theme)));}
 paintTheme(getTheme());
@@ -266,7 +271,7 @@ if(getAccent()){$("theme-accent").value=getAccent();document.documentElement.sty
 $("theme-accent").addEventListener("input",e=>setAccent(e.target.value));
 $("theme-sounds").checked=getSounds();
 $("theme-sounds").addEventListener("change",e=>{setSounds(e.target.checked);$("theme-save-status").textContent=e.target.checked?"Theme sounds enabled":"Theme sounds muted";});
-themeButtons.forEach(b=>b.addEventListener("click",()=>{if(b.disabled)return;paintTheme(b.dataset.theme);}));
+themeButtons.forEach(b=>b.addEventListener("click",()=>{if(b.disabled)return;paintTheme(b.dataset.theme);uiSound();}));
 await ready;
 const stats=getCurrentStats();const user=currentUser();
 const level=levelFor(stats?.xp||0);
@@ -281,11 +286,11 @@ if(getTheme()==="sunset"&&level.level<25)paintTheme("midnight");
 $("theme-status").textContent="Midnight is always available. Neon unlocks at level 10; Pixel Sunset unlocks at level 25.";
 document.querySelectorAll(".game .play").forEach(link=>link.addEventListener("click",()=>{const card=link.closest(".game");recordActivity("game",{game:link.getAttribute("href")||card?.querySelector("h2")?.textContent||"arcade"}).catch(console.warn);}));
 window.MindspaceSoundsEnabled=getSounds();
-$("theme-sounds").addEventListener("change",e=>{window.MindspaceSoundsEnabled=e.target.checked;});
+$("theme-sounds").addEventListener("change",e=>{window.MindspaceSoundsEnabled=e.target.checked;if(e.target.checked)uiSound();});
 document.addEventListener("click",event=>{const b=event.target.closest(".favorite-toggle");if(b&&b.getAttribute("aria-pressed")==="false")recordActivity("favourite").catch(console.warn);});
 document.getElementById("collection-form").addEventListener("submit",()=>recordActivity("collection").catch(console.warn));
 document.getElementById("personal-record-form").addEventListener("submit",()=>recordActivity("record").catch(console.warn));
-window.addEventListener("mindspace:progress",e=>{const l=levelFor(e.detail.stats.xp);$("player-rank").textContent="Level "+l.level+" · "+l.rank;$("player-summary").textContent=(user?.displayName||"Player")+" · "+l.title+" · "+e.detail.stats.xp.toLocaleString()+" XP";$("player-progress-fill").style.width=l.progress+"%";$("player-progress-label").textContent=l.level>=100?"Maximum level reached":Math.floor(l.xpIntoLevel)+" / "+l.xpForNext+" XP to level "+(l.level+1);});
+window.addEventListener("mindspace:progress",e=>{const l=levelFor(e.detail.stats.xp);themeButtons.find(b=>b.dataset.theme==="neon").disabled=l.level<10;themeButtons.find(b=>b.dataset.theme==="sunset").disabled=l.level<25;$("player-rank").textContent="Level "+l.level+" · "+l.rank;$("player-summary").textContent=(user?.displayName||"Player")+" · "+l.title+" · "+e.detail.stats.xp.toLocaleString()+" XP";$("player-progress-fill").style.width=l.progress+"%";$("player-progress-label").textContent=l.level>=100?"Maximum level reached":Math.floor(l.xpIntoLevel)+" / "+l.xpForNext+" XP to level "+(l.level+1);});
 </script>
 
 </body></html>
