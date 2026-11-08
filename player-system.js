@@ -41,4 +41,5 @@ export function setSounds(on){try{localStorage.setItem(SOUNDS,on?"on":"off")}cat
 export function applyTheme(theme=getTheme()){const root=document.documentElement;root.dataset.arcadeTheme=theme;const accent=getAccent();if(accent)root.style.setProperty("--player-accent",accent);}
 export function achievementList(statsNow=stats){return ACHIEVEMENTS.map(a=>({...a,unlocked:!!statsNow.achievements?.[a.id],progress:Math.min(100,(Number(statsNow[a.metric]||0)/a.threshold)*100)})).filter(a=>!a.hidden||a.unlocked);}
 export function currentUser(){return user;}
+export function getCurrentStats(){return stats;}
 export {db};
