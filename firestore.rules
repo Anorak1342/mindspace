@@ -115,6 +115,45 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // Player progress is visible to signed-in members and writable only by its owner.
+    // Client-side rewards are convenience tracking, not cheat-proof competitive rankings.
+    match /playerStats/{uid} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create, update: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly([
+          'xp', 'level', 'gamesPlayed', 'uniqueGames', 'studySessions',
+          'cardsReviewed', 'socialMessages', 'favourites', 'collections',
+          'records', 'focusSessions', 'achievements', 'recentUnlocks',
+          'lastEvents', 'updatedAt'
+        ])
+        && request.resource.data.xp is number
+        && request.resource.data.xp >= 0
+        && request.resource.data.xp <= 1000000000
+        && request.resource.data.level is int
+        && request.resource.data.level >= 1
+        && request.resource.data.level <= 100
+        && request.resource.data.gamesPlayed is int
+        && request.resource.data.gamesPlayed >= 0
+        && request.resource.data.uniqueGames is list
+        && request.resource.data.uniqueGames.size() <= 2000
+        && request.resource.data.studySessions is int
+        && request.resource.data.cardsReviewed is int
+        && request.resource.data.socialMessages is int
+        && request.resource.data.favourites is int
+        && request.resource.data.collections is int
+        && request.resource.data.records is int
+        && request.resource.data.focusSessions is int
+        && request.resource.data.achievements is map
+        && request.resource.data.achievements.size() <= 120
+        && request.resource.data.recentUnlocks is list
+        && request.resource.data.recentUnlocks.size() <= 12
+        && request.resource.data.lastEvents is map
+        && request.resource.data.lastEvents.size() <= 100;
+      allow delete: if false;
+    }
+
     // Public member cards. Email addresses and moderation status stay private.
     match /profiles/{uid} {
       allow get: if signedIn();
