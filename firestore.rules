@@ -126,7 +126,7 @@ service cloud.firestore {
           'xp', 'level', 'gamesPlayed', 'uniqueGames', 'studySessions',
           'cardsReviewed', 'socialMessages', 'favourites', 'collections',
           'records', 'focusSessions', 'achievements', 'recentUnlocks',
-          'unlockedTitles', 'decorations', 'selectedTitle', 'lastEvents', 'updatedAt'
+          'unlockedTitles', 'decorations', 'unlockedThemes', 'levelRewards', 'selectedTitle', 'lastEvents', 'updatedAt'
         ])
         && request.resource.data.xp is number
         && request.resource.data.xp >= 0
@@ -153,6 +153,10 @@ service cloud.firestore {
         && request.resource.data.unlockedTitles.size() <= 120
         && request.resource.data.decorations is list
         && request.resource.data.decorations.size() <= 120
+        && request.resource.data.unlockedThemes is list
+        && request.resource.data.unlockedThemes.size() <= 3
+        && request.resource.data.levelRewards is list
+        && request.resource.data.levelRewards.size() <= 8
         && request.resource.data.selectedTitle is string
         && request.resource.data.selectedTitle.size() <= 60
         && request.resource.data.lastEvents is map
