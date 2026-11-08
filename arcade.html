@@ -59,11 +59,45 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 .collection-block{border:1px solid #303030;border-radius:7px;padding:10px;margin-top:9px}.collection-heading{display:flex;justify-content:space-between;gap:10px;align-items:center}.collection-heading strong{font-size:13px}.collection-heading small{color:#888;font-size:11px}
 .collection-games{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.collection-games a{color:#b8f2d9;background:#1b2a24;padding:5px 8px;border-radius:5px;text-decoration:none;font-size:11px}
 @media(max-width:760px){.player-hub{grid-template-columns:1fr}.hub-panel{padding:15px}}
+
+/* Player progression and selectable arcade themes */
+:root{--player-accent:#83e6bd}
+.player-bar,.theme-panel{border:1px solid #343434;background:#101010;border-radius:10px;padding:17px 19px;margin:18px 0}
+.player-bar{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.player-bar h2,.theme-panel h2{font-size:20px;margin:0 0 5px}
+.player-muted{font:12px ui-monospace,monospace;color:#999}
+.player-progress{height:8px;border-radius:20px;background:#292929;overflow:hidden;margin-top:10px}
+.player-progress span{display:block;height:100%;background:var(--player-accent);width:0;transition:width .35s}
+.player-bar a{color:var(--player-accent);font-weight:800;text-decoration:none}
+.theme-options{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
+.theme-choice{border:1px solid #444;background:#1b1b1b;color:#eee;border-radius:7px;padding:9px 12px;cursor:pointer;font-weight:750}
+.theme-choice[aria-pressed=true]{border-color:var(--player-accent);box-shadow:0 0 0 1px var(--player-accent) inset}
+.theme-choice:disabled{opacity:.4;cursor:not-allowed}
+.theme-tools{display:flex;gap:14px;align-items:center;flex-wrap:wrap;color:#aaa;font-size:12px}
+.theme-tools label{display:flex;gap:8px;align-items:center}
+.theme-tools input[type=color]{width:34px;height:30px;padding:2px;background:#171717;border:1px solid #444;border-radius:5px}
+.theme-tools input[type=checkbox]{accent-color:var(--player-accent)}
+[data-arcade-theme="neon"]{--bg:#080817;--panel:#11112b;--line:#3b3268;--text:#f5efff;--mint:#67e8f9;--gold:#ff82d1;--player-accent:#67e8f9}
+[data-arcade-theme="neon"] body{background:radial-gradient(ellipse at 15% 0%,#25205a,transparent 40%),radial-gradient(ellipse at 90% 30%,#163b55,transparent 34%),#080817}
+[data-arcade-theme="neon"] .game{background:linear-gradient(145deg,#171438,#101025);border-color:#3b3268;box-shadow:0 8px 25px #05051280}
+[data-arcade-theme="neon"] .game:hover{border-color:#67e8f9}
+[data-arcade-theme="sunset"]{--bg:#1b1014;--panel:#2a171b;--line:#68403b;--text:#fff1dc;--mint:#ffb35c;--gold:#ff756c;--player-accent:#ffb35c}
+[data-arcade-theme="sunset"] body{background:radial-gradient(ellipse at 50% 0%,#63303b,transparent 45%),linear-gradient(180deg,#211217,#130e13)}
+[data-arcade-theme="sunset"] .game{background:linear-gradient(145deg,#3a2024,#25161b);border-color:#68403b}
+[data-arcade-theme="sunset"] .game:hover{border-color:#ffb35c}
+[data-arcade-theme="neon"] .game{border-radius:14px}
+[data-arcade-theme="sunset"] .game{border-radius:3px 14px 3px 14px}
+@keyframes msArcadeGlow{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:.42;transform:translateY(-8px)}}
+[data-arcade-theme="neon"] .hero:after,[data-arcade-theme="sunset"] .hero:after{content:"";display:block;height:2px;margin-top:18px;background:linear-gradient(90deg,transparent,var(--player-accent),transparent);animation:msArcadeGlow 5s ease-in-out infinite}
+@media(max-width:600px){.player-bar{grid-template-columns:1fr}}
+
 </style>
 <script src="mindspace-lock.js" defer></script>
 </head>
 <body><main class="wrap">
 <header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><nav class="toplinks"><button class="back" id="blank-launch" type="button" hidden>↗ Open blank tab</button><a class="back" href="https://github.com/Anorak1342/mindspace/issues/1" target="_blank" rel="noopener noreferrer">💡 Suggest a Game</a><a class="back" href="./creator-favs.html">★ Creator Favs</a><a class="back whats-new-link" href="./whats-new.html?v=20261107-2">✦ What’s new<span class="new-dot" id="whats-new-dot" aria-label="New updates"></span></a><a class="back" href="./">← Back to study</a></nav></header>
+<section class="player-bar" id="player-bar"><div><h2 id="player-rank">Your Mindspace level</h2><div class="player-muted" id="player-summary">Sign in through Chat to sync your progress across devices.</div><div class="player-progress"><span id="player-progress-fill"></span></div><div class="player-muted" id="player-progress-label">Your XP progress will appear here.</div></div><a href="./chat.html">Player profile ↗</a></section>
+<section class="theme-panel" aria-label="Arcade appearance"><h2>🎨 Arcade themes</h2><div class="player-muted" id="theme-status">Choose your arcade look. New themes unlock as you level up.</div><div class="theme-options"><button class="theme-choice" type="button" data-theme="midnight" aria-pressed="true">🌑 Mindspace Midnight</button><button class="theme-choice" type="button" data-theme="neon" disabled title="Unlock at level 10">⚡ Neon Arcade · Level 10</button><button class="theme-choice" type="button" data-theme="sunset" disabled title="Unlock at level 25">🌇 Pixel Sunset · Level 25</button></div><div class="theme-tools"><label>Accent colour <input id="theme-accent" type="color" value="#83e6bd" aria-label="Choose accent colour"></label><label><input id="theme-sounds" type="checkbox" checked> Theme sounds on</label><span id="theme-save-status">Saved on this device</span></div></section>
 <section class="hero"><div class="eyebrow">THE SECRET SIDE QUEST</div><h1>Pick your game.</h1><p class="tagline">Bigger than FlashOS, better than Studydesk.</p><p>Big games, tiny games, racing, puzzles and city-building. Choose a tile and jump in.</p></section>
 <section class="daily" id="daily-feature"><div><div class="daily-label">✦ GAME OF THE DAY</div><h2 id="daily-title">Choosing today’s game…</h2><p id="daily-desc">A fresh pick from the Mindspace arcade.</p></div><a class="play gold" id="daily-link" href="./arcade-pro/">PLAY TODAY’S PICK ↗</a></section>
 
@@ -221,4 +255,36 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
  renderRecent();renderFavs();renderRecords();renderCollections();renderCardTools();
 })();
 </script>
+
+<script type="module">
+import {ready,levelFor,recordActivity,getTheme,setTheme,getAccent,setAccent,getSounds,setSounds,currentUser} from "./player-system.js";
+import {getFirestore,doc,getDoc} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+const $=id=>document.getElementById(id);
+const themeButtons=[...document.querySelectorAll("[data-theme]")];
+function paintTheme(theme){setTheme(theme);themeButtons.forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.theme===theme)));}
+paintTheme(getTheme());
+if(getAccent()){$("theme-accent").value=getAccent();document.documentElement.style.setProperty("--player-accent",getAccent());}
+$("theme-accent").addEventListener("input",e=>setAccent(e.target.value));
+$("theme-sounds").checked=getSounds();
+$("theme-sounds").addEventListener("change",e=>{setSounds(e.target.checked);$("theme-save-status").textContent=e.target.checked?"Theme sounds enabled":"Theme sounds muted";});
+themeButtons.forEach(b=>b.addEventListener("click",()=>{if(b.disabled)return;paintTheme(b.dataset.theme);}));
+await ready;
+let stats=null;const user=currentUser();
+if(user){try{const db=getFirestore();const snap=await getDoc(doc(db,"playerStats",user.uid));if(snap.exists())stats=snap.data();}catch(e){console.warn("Player progress is waiting for Firestore rules.",e);}}
+const level=levelFor(stats?.xp||0);
+$("player-rank").textContent="Level "+level.level+" · "+level.rank;
+$("player-summary").textContent=(user?(user.displayName||"Player"):"Guest player")+" · "+level.title+" · "+(stats?.xp||0).toLocaleString()+" XP";
+$("player-progress-fill").style.width=level.progress+"%";
+$("player-progress-label").textContent=level.level>=100?"Maximum level reached":Math.floor(level.xpIntoLevel)+" / "+level.xpForNext+" XP to level "+(level.level+1);
+themeButtons.find(b=>b.dataset.theme==="neon").disabled=level.level<10;
+themeButtons.find(b=>b.dataset.theme==="sunset").disabled=level.level<25;
+if(getTheme()==="neon"&&level.level<10)paintTheme("midnight");
+if(getTheme()==="sunset"&&level.level<25)paintTheme("midnight");
+$("theme-status").textContent="Midnight is always available. Neon unlocks at level 10; Pixel Sunset unlocks at level 25.";
+document.querySelectorAll(".game .play").forEach(link=>link.addEventListener("click",()=>{const card=link.closest(".game");recordActivity("game",{game:link.getAttribute("href")||card?.querySelector("h2")?.textContent||"arcade"}).catch(console.warn);}));
+window.MindspaceSoundsEnabled=getSounds();
+$("theme-sounds").addEventListener("change",e=>{window.MindspaceSoundsEnabled=e.target.checked;});
+window.addEventListener("mindspace:progress",e=>{const l=levelFor(e.detail.stats.xp);$("player-rank").textContent="Level "+l.level+" · "+l.rank;$("player-summary").textContent=(user?.displayName||"Player")+" · "+l.title+" · "+e.detail.stats.xp.toLocaleString()+" XP";$("player-progress-fill").style.width=l.progress+"%";$("player-progress-label").textContent=l.level>=100?"Maximum level reached":Math.floor(l.xpIntoLevel)+" / "+l.xpForNext+" XP to level "+(l.level+1);});
+</script>
+
 </body></html>
