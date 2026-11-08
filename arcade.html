@@ -257,8 +257,7 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 </script>
 
 <script type="module">
-import {ready,levelFor,recordActivity,getTheme,setTheme,getAccent,setAccent,getSounds,setSounds,currentUser} from "./player-system.js";
-import {getFirestore,doc,getDoc} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+import {ready,levelFor,recordActivity,getTheme,setTheme,getAccent,setAccent,getSounds,setSounds,currentUser,getCurrentStats} from "./player-system.js";
 const $=id=>document.getElementById(id);
 const themeButtons=[...document.querySelectorAll("[data-theme]")];
 function paintTheme(theme){setTheme(theme);themeButtons.forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.theme===theme)));}
@@ -269,8 +268,7 @@ $("theme-sounds").checked=getSounds();
 $("theme-sounds").addEventListener("change",e=>{setSounds(e.target.checked);$("theme-save-status").textContent=e.target.checked?"Theme sounds enabled":"Theme sounds muted";});
 themeButtons.forEach(b=>b.addEventListener("click",()=>{if(b.disabled)return;paintTheme(b.dataset.theme);}));
 await ready;
-let stats=null;const user=currentUser();
-if(user){try{const db=getFirestore();const snap=await getDoc(doc(db,"playerStats",user.uid));if(snap.exists())stats=snap.data();}catch(e){console.warn("Player progress is waiting for Firestore rules.",e);}}
+const stats=getCurrentStats();const user=currentUser();
 const level=levelFor(stats?.xp||0);
 $("player-rank").textContent="Level "+level.level+" · "+level.rank;
 $("player-summary").textContent=(user?(user.displayName||"Player"):"Guest player")+" · "+level.title+" · "+(stats?.xp||0).toLocaleString()+" XP";
@@ -284,6 +282,9 @@ $("theme-status").textContent="Midnight is always available. Neon unlocks at lev
 document.querySelectorAll(".game .play").forEach(link=>link.addEventListener("click",()=>{const card=link.closest(".game");recordActivity("game",{game:link.getAttribute("href")||card?.querySelector("h2")?.textContent||"arcade"}).catch(console.warn);}));
 window.MindspaceSoundsEnabled=getSounds();
 $("theme-sounds").addEventListener("change",e=>{window.MindspaceSoundsEnabled=e.target.checked;});
+document.addEventListener("click",event=>{const b=event.target.closest(".favorite-toggle");if(b&&b.textContent.includes("Favourite"))recordActivity("favourite").catch(console.warn);});
+document.getElementById("collection-form").addEventListener("submit",()=>recordActivity("collection").catch(console.warn));
+document.getElementById("personal-record-form").addEventListener("submit",()=>recordActivity("record").catch(console.warn));
 window.addEventListener("mindspace:progress",e=>{const l=levelFor(e.detail.stats.xp);$("player-rank").textContent="Level "+l.level+" · "+l.rank;$("player-summary").textContent=(user?.displayName||"Player")+" · "+l.title+" · "+e.detail.stats.xp.toLocaleString()+" XP";$("player-progress-fill").style.width=l.progress+"%";$("player-progress-label").textContent=l.level>=100?"Maximum level reached":Math.floor(l.xpIntoLevel)+" / "+l.xpForNext+" XP to level "+(l.level+1);});
 </script>
 
