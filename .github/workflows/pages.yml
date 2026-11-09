@@ -61,7 +61,17 @@ jobs:
           git clone --depth 1 https://github.com/particle-clicker/particle-clicker.git /tmp/particle-clicker
           git clone --depth 1 https://github.com/wwwtyro/Astray.git /tmp/astray
           git clone --depth 1 https://github.com/Leonxlnx/level-devil.git /tmp/fabledevil
+          git clone --depth 1 https://github.com/EvanBacon/Expo-Crossy-Road.git /tmp/crossy-road
           git -C /tmp/snack-hole-game checkout 2f1e5699eb08e19b6e6b76ab1e28055c9295a27b
+          # Build Evan Bacon's original Expo Crossy Road project for the web.
+          # No game source, graphics, models, audio, or gameplay code is edited.
+          cd /tmp/crossy-road
+          npm install --no-audit --no-fund
+          npx expo export -p web --output-dir dist --base-url /mindspace/arcade-pro/crossy-road
+          cd -
+          mkdir -p arcade-pro/crossy-road
+          cp -R /tmp/crossy-road/dist/. arcade-pro/crossy-road/
+          cp /tmp/crossy-road/LICENSE arcade-pro/crossy-road/LICENSE.txt
           # Publish the four requested Random sports games locally inside Mindspace.
           mkdir -p arcade-pro/soccer-random arcade-pro/basket-random arcade-pro/boxing-random arcade-pro/volley-random
           cp -R /tmp/soccer-random/. arcade-pro/soccer-random/
