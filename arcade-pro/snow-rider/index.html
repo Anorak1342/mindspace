@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Snow Rider 3D | Mindspace</title>
+
+    <script src="UnityProgress.js"></script>
+    <script src="UnityLoader.js"></script>
+
+    <style>
+        html, body { width:100%; height:100%; margin:0; }
+        .webgl-content, #gameContainer { width:100%; height:100%; }
+        canvas { width:100% !important; height:100% !important; display:block; }
+    </style>
+
+    <script>
+        // 1=password on, 0=skip password
+        const ENABLE_PASSWORD = 0;
+        const PASSWORD = "";
+
+        function startGame() {
+            if (document.getElementById("login")) document.getElementById("login").style.display = "none";
+            document.querySelector(".webgl-content").style.display = "block";
+            UnityLoader.instantiate("gameContainer", "config.json", { onProgress: UnityProgress });
+        }
+
+        function checkPassword() {
+            if (ENABLE_PASSWORD === 0 || document.getElementById("pw").value === PASSWORD) {
+                startGame();
+            } else {
+                alert("Wrong password");
+            }
+        }
+        if (ENABLE_PASSWORD === 0) window.addEventListener("load", startGame);
+    </script>
+</head>
+
+<body>
+    <div id="login">
+        Password:
+        <input type="password" id="pw">
+        <button onclick="checkPassword()">Enter</button>
+    </div>
+
+    <div class="webgl-content" style="display:none;">
+        <div id="gameContainer"></div>
+    </div>
+</body>
+</html>
+
