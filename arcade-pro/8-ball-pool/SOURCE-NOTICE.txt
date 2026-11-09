@@ -1,0 +1,6 @@
+VIGU Pool Arena is based on VIGU Sinuca Arena by Gustavo Vitor S.
+Original project: https://github.com/GustavoVitorS/vigu-sinuca-arena
+The source README states: “You may use, modify, and publish this project on your GitHub account.”
+This Mindspace-hosted copy includes English interface translations. Original project code and game design remain credited to the original creator.
+
+The original game is a static HTML/CSS/vanilla JavaScript project with no framework or external runtime dependencies.

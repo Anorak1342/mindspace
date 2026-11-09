@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#08151a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  
+  <meta name="description" content="VIGU Sinuca Arena — jogo de sinuca responsivo em HTML, CSS e JavaScript puro." />
+  <title>VIGU Sinuca Arena</title>
+  <link rel="stylesheet" href="style.css?v=11" />
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">V</div>
+        <div>
+          <strong>VIGU POOL ARENA</strong>
+          <span>8-Ball Challenge</span>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <button class="icon-btn" id="soundBtn" type="button" aria-label="Ativar ou desativar sons"
+          title="Som ligado">🔊</button>
+        <button class="icon-btn" id="helpBtn" type="button" aria-label="Como jogar" title="Como jogar">?</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="menuScreen" class="screen active">
+        <div class="hero-card glass">
+          <p class="eyebrow">SINUCA PARA JOGAR A QUALQUER HORA</p>
+          <h1>Choose your difficulty</h1>
+          <p class="subtitle">
+            Win one match on <b>Easy</b>, <b>Medium</b> and <b>Hard</b> to unlock
+            <b>HARDCORE</b>.
+          </p>
+
+          <div id="difficultyGrid" class="difficulty-grid">
+            <button class="difficulty-card" data-level="easy" type="button">
+              <span class="difficulty-icon">🎯</span>
+              <span class="difficulty-name">Easy</span>
+              <small>The CPU misses often and plays cautiously.</small>
+              <span class="status-pill" data-status="easy">Available</span>
+            </button>
+
+            <button class="difficulty-card" data-level="medium" type="button">
+              <span class="difficulty-icon">⚡</span>
+              <span class="difficulty-name">Medium</span>
+              <small>The CPU calculates angles and power more accurately.</small>
+              <span class="status-pill" data-status="medium">Available</span>
+            </button>
+
+            <button class="difficulty-card" data-level="hard" type="button">
+              <span class="difficulty-icon">🔥</span>
+              <span class="difficulty-name">Hard</span>
+              <small>The CPU is aggressive and rarely wastes chances.</small>
+              <span class="status-pill" data-status="hard">Available</span>
+            </button>
+
+            <button class="difficulty-card hardcore" data-level="hardcore" type="button">
+              <span class="difficulty-icon">💀</span>
+              <span class="difficulty-name">HARDCORE</span>
+              <small>Brutal accuracy, optimized power and very few chances to recover.</small>
+              <span class="status-pill locked" data-status="hardcore">🔒 Locked</span>
+            </button>
+          </div>
+
+          <div class="progress-card">
+            <div class="progress-copy">
+              <span>Challenge progress</span>
+              <strong id="progressText">0/3 wins</strong>
+            </div>
+            <div class="progress-track">
+              <div id="progressBar" class="progress-fill"></div>
+            </div>
+            <button id="resetProgressBtn" class="text-btn" type="button">Resetar progresso</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="gameScreen" class="screen">
+        <div class="game-layout">
+          <div class="hud glass">
+            <div class="player-card active-turn" id="playerCard">
+              <div class="avatar">YOU</div>
+              <div class="player-info">
+                <span id="playerGroup">Open table</span>
+                <strong id="playerBalls">—</strong>
+              </div>
+            </div>
+
+            <div class="center-hud">
+              <span id="difficultyBadge">FÁCIL</span>
+              <strong id="turnLabel">Your turn</strong>
+              <small id="messageLabel">Aim, set your power and release.</small>
+            </div>
+
+            <div class="player-card" id="cpuCard">
+              <div class="player-info right">
+                <span id="cpuGroup">Open table</span>
+                <strong id="cpuBalls">—</strong>
+              </div>
+              <div class="avatar cpu">CPU</div>
+            </div>
+          </div>
+
+          <div class="table-stage">
+            <div class="table-wrap">
+              <canvas id="gameCanvas" aria-label="Mesa de sinuca"></canvas>
+              <div id="cpuThinking" class="thinking hidden">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                CPU pensando
+              </div>
+            </div>
+
+            <aside class="controls glass">
+              <div class="control-head">
+                <div>
+                  <span class="control-label">
+                    <span class="label-full">SHOT POWER</span>
+                    <span class="label-compact">POWER</span>
+                  </span>
+                  <strong id="powerValue">0%</strong>
+                </div>
+                <span id="dragState" class="drag-state">PRONTO</span>
+              </div>
+
+              <div class="power-meter" aria-label="Força da tacada">
+                <div id="powerFill" class="power-fill"></div>
+              </div>
+
+              <div class="gesture-card">
+                <span class="gesture-icon">↙</span>
+                <div>
+                  <strong>Hold, pull back and release</strong>
+                  <small>Shot power increases as you pull the cue backwards.</small>
+                </div>
+              </div>
+
+              <div class="control-hints">
+                <span>🖱️ Desktop: move to aim, hold the mouse button, pull back and release.</span>
+                <span>📱 Mobile: hold and move to aim, then touch the cue, pull back and release.</span>
+                <span>🎯 Dotted line = initial trajectory.</span>
+              </div>
+
+              <div class="mini-actions">
+                <button id="newGameBtn" type="button"><span class="action-icon">↻</span><span
+                    class="action-text">Restart</span></button>
+                <button id="menuBtn" type="button"><span class="action-icon">☰</span><span
+                    class="action-text">Menu</span></button>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+
+  <div id="orientationGate" class="orientation-gate hidden" role="dialog" aria-modal="true"
+    aria-labelledby="orientationTitle">
+    <div class="orientation-card glass">
+      <div class="rotate-phone" aria-hidden="true">
+        <span class="phone-shape">▯</span>
+        <span class="rotate-arrow">↻</span>
+      </div>
+      <p class="orientation-kicker">MODO MOBILE</p>
+      <h2 id="orientationTitle">Play in landscape</h2>
+      <p id="orientationText">
+        The table is optimized for full-screen landscape play.
+      </p>
+      <button id="landscapeBtn" class="landscape-btn" type="button">Enable landscape mode</button>
+      <small id="orientationHint">If your browser cannot rotate automatically, turn your device sideways.</small>
+    </div>
+  </div>
+
+  <div id="modalBackdrop" class="modal-backdrop hidden">
+    <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div id="modalIcon" class="modal-icon">🏆</div>
+      <h2 id="modalTitle">You win!</h2>
+      <p id="modalText"></p>
+      <div id="modalActions" class="modal-actions"></div>
+    </div>
+  </div>
+
+  <script src="script.js?v=11"></script>
+</body>
+
+</html>
