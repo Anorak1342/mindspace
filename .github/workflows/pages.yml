@@ -67,10 +67,30 @@ jobs:
           # No game source, graphics, models, audio, or gameplay code is edited.
           cd /tmp/crossy-road
           npm install --no-audit --no-fund
-          npx expo export -p web --output-dir dist --base-url /mindspace/arcade-pro/crossy-road
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("app.json")
+          config = json.loads(p.read_text(encoding="utf-8"))
+          config.setdefault("expo", {}).setdefault("experiments", {})["baseUrl"] = "/mindspace/arcade-pro/crossy-road/game"
+          p.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+          PY
+          npx expo export -p web --output-dir dist
           cd -
-          mkdir -p arcade-pro/crossy-road
-          cp -R /tmp/crossy-road/dist/. arcade-pro/crossy-road/
+          mkdir -p arcade-pro/crossy-road/game
+          cp -R /tmp/crossy-road/dist/. arcade-pro/crossy-road/game/
+          cat > arcade-pro/crossy-road/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width,initial-scale=1">
+            <title>Crossy Road · Mindspace</title>
+            <style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#87c6ff}iframe{display:block;width:100%;height:100%;border:0}</style>
+          </head>
+          <body><iframe src="./game/" title="Original Crossy Road" allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe></body>
+          </html>
+          HTML
           cp /tmp/crossy-road/LICENSE arcade-pro/crossy-road/LICENSE.txt
           # Publish the four requested Random sports games locally inside Mindspace.
           mkdir -p arcade-pro/soccer-random arcade-pro/basket-random arcade-pro/boxing-random arcade-pro/volley-random
@@ -425,7 +445,7 @@ jobs:
           })();
           </script>'''
           for page in Path(".").rglob("*.html"):
-              if ".git" in page.parts or "source" in page.parts:
+              if ".git" in page.parts or "source" in page.parts or ("crossy-road" in page.parts and "game" in page.parts):
                   continue
               content = page.read_text(encoding="utf-8")
               is_arcade = (
@@ -494,7 +514,7 @@ jobs:
           })();
           </script>"""
           for page in Path(".").rglob("*.html"):
-              if ".git" in page.parts or "source" in page.parts:
+              if ".git" in page.parts or "source" in page.parts or ("crossy-road" in page.parts and "game" in page.parts):
                   continue
               # The main Mindspace study dashboard is intentionally music-free.
               if page == Path("index.html") or "study" in page.stem.lower():
