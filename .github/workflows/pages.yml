@@ -42,6 +42,7 @@ jobs:
           git clone --depth 1 https://github.com/stateloop-connected/source-vibe-basketball.git /tmp/vibe-basketball
           git clone --depth 1 https://github.com/Anorak1342/F-15-Flight-Sim-.git /tmp/f15-flight-sim
           git clone --depth 1 https://github.com/pjo/starstruck.git /tmp/starstruck
+          git clone --depth 1 https://github.com/carlomigueldy/sprout-runner.git /tmp/sprout-runner
           git clone --depth 1 https://github.com/KhazP/librecorsa.git /tmp/librecorsa
           git clone --depth 1 https://github.com/KamranBoroomand/PacMan.git /tmp/pacman
           git clone --depth 1 https://github.com/gabrielecirulli/2048.git /tmp/2048
@@ -383,6 +384,13 @@ jobs:
           cp /tmp/starstruck/LICENSE arcade-pro/starstruck/LICENSE.txt
           # Keep the game fully local: no external login or third-party leaderboard.
           sed -i '/supabase-js@2.45.4/d' arcade-pro/starstruck/index.html
+
+      - name: Publish Sprout Runner locally
+        run: |
+          mkdir -p arcade-pro/sprout-runner
+          cp /tmp/sprout-runner/index.html arcade-pro/sprout-runner/index.html
+          cp /tmp/sprout-runner/README.md arcade-pro/sprout-runner/README.md
+          # README documents the original code and visuals as MIT licensed.
 
       - name: Remove tracking and ad scripts from Hextris
         run: |
