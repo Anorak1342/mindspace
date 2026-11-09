@@ -57,6 +57,12 @@ main>section:nth-of-type(3){margin-top:34px}
 @media(max-width:760px){.app{padding:16px 14px 36px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.welcome{padding:22px}.hero{margin-bottom:22px}}
 @media(max-width:480px){.grid{grid-template-columns:1fr}.topbar{margin-bottom:20px}.deck{min-height:138px}}
 
+/* Reliable deck controls: one real button fills each entire card. */
+.deck{padding:0;overflow:hidden}
+.deck-open{display:flex;flex-direction:column;justify-content:space-between;gap:16px;width:100%;height:100%;min-height:155px;padding:18px;border:0;border-radius:inherit;background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer}
+.deck-open:focus-visible{outline:3px solid var(--mint);outline-offset:-4px;border-radius:15px}
+.deck-action{color:#278c70;font-weight:800}
+.deck-open:hover .deck-action{text-decoration:underline}
 /* Year 7 study page: bright, readable light theme */
 :root{color-scheme:light;--bg:#f4f7fb;--panel:#ffffff;--panel2:#e9eef7;--text:#20263a;--muted:#68728b;--line:#dce3ef;--mint:#35ae88;--violet:#8a78df;--pink:#dc6b9a;--yellow:#d89a2b}
 body{background:radial-gradient(ellipse at 8% 0%,#e3eaff,transparent 40%),radial-gradient(ellipse at 95% 8%,#ddf6ec,transparent 32%),var(--bg);color:var(--text)}
@@ -95,83 +101,30 @@ body{background:radial-gradient(ellipse at 8% 0%,#e3eaff,transparent 40%),radial
 </main><footer class="footer"><span>© Mindspace · Made for curious minds.</span><span>Your decks and notes stay in this browser on this device.</span></footer></div>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-card"><div class="modal-top"><h2 id="modalTitle">Mindspace</h2><button class="close" id="closeModal" aria-label="Close">×</button></div><div id="modalBody"></div></div></div><div class="toast" id="toast"></div>
 <script>
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];const starter=[{id:1,name:"Biology basics",subject:"SCIENCE",icon:"🌿",color:"#9df3d0",cards:[["What is photosynthesis?","The process plants use to turn light, water and carbon dioxide into glucose and oxygen."],["Where does photosynthesis happen?","In chloroplasts, which contain chlorophyll."],["What gas do plants absorb?","Carbon dioxide (CO₂)."]]},{id:2,name:"Maths essentials",subject:"MATHEMATICS",icon:"✳️",color:"#b6a6ff",cards:[["What is the area of a triangle?","½ × base × perpendicular height."],["What is a prime number?","A whole number greater than 1 with exactly two factors: 1 and itself."],["What is 15% of 200?","30."]]},{id:3,name:"History review",subject:"HUMANITIES",icon:"🏛️",color:"#ff9cc7",cards:[["What is a primary source?","Evidence created during the time being studied, such as a diary or photograph."],["What does chronology mean?","The arrangement of events in the order they happened."],["Why compare sources?","To identify different perspectives, reliability and possible bias."]]}];let decks;try{const stored=JSON.parse(localStorage.getItem("ms-decks")||"null");decks=Array.isArray(stored)?stored:JSON.parse(JSON.stringify(starter));}catch(error){decks=JSON.parse(JSON.stringify(starter));}let activeDeck=null,cardIndex=0,showAnswer=false,timerSeconds=1500,timerInterval=null,breakMode=false,reflexTimeout=null,reflexStart=0,memoryDeck=[],memoryOpen=[],memoryMatches=0;const save=()=>localStorage.setItem("ms-decks",JSON.stringify(decks));
-/* Add Year 7 science, English and maths revision decks once, including for existing users. */
-decks=decks.filter(d=>d&&typeof d==="object");
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];const starter=[{id:1,name:"Biology basics",subject:"SCIENCE",icon:"🌿",color:"#9df3d0",cards:[["What is photosynthesis?","The process plants use to turn light, water and carbon dioxide into glucose and oxygen."],["Where does photosynthesis happen?","In chloroplasts, which contain chlorophyll."],["What gas do plants absorb?","Carbon dioxide (CO₂)."]]},{id:2,name:"Maths essentials",subject:"MATHEMATICS",icon:"✳️",color:"#b6a6ff",cards:[["What is the area of a triangle?","½ × base × perpendicular height."],["What is a prime number?","A whole number greater than 1 with exactly two factors: 1 and itself."],["What is 15% of 200?","30."]]},{id:3,name:"History review",subject:"HUMANITIES",icon:"🏛️",color:"#ff9cc7",cards:[["What is a primary source?","Evidence created during the time being studied, such as a diary or photograph."],["What does chronology mean?","The arrangement of events in the order they happened."],["Why compare sources?","To identify different perspectives, reliability and possible bias."]]}];let decks;try{const stored=JSON.parse(localStorage.getItem("ms-decks-v2")||localStorage.getItem("ms-decks")||"null");decks=Array.isArray(stored)?stored:JSON.parse(JSON.stringify(starter));}catch(error){decks=JSON.parse(JSON.stringify(starter));}let activeDeck=null,cardIndex=0,showAnswer=false,timerSeconds=1500,timerInterval=null,breakMode=false,reflexTimeout=null,reflexStart=0,memoryDeck=[],memoryOpen=[],memoryMatches=0;const save=()=>localStorage.setItem("ms-decks-v2",JSON.stringify(decks));
+/* Rebuild the three core Year 7 decks from a clean, known-good set.
+   Keep personal decks, but replace any old built-in copies and stale card data. */
+const builtInDeckNames=new Set(["biology basics","maths essentials","history review",...year7Decks.map(d=>d.name.toLowerCase())]);
+decks=decks.filter(d=>d&&typeof d==="object").filter(d=>!builtInDeckNames.has(String(d.name||"").trim().toLowerCase()));
 decks.forEach((d,i)=>{if(!Number.isFinite(Number(d.id)))d.id=Date.now()+i;if(!Array.isArray(d.cards))d.cards=[];d.name=String(d.name||"Untitled deck");d.subject=String(d.subject||"MY DECK");d.icon=String(d.icon||"📚");d.color=String(d.color||"#8a78df");});
-const year7Decks=[
-{id:71001,name:"Year 7 Science",subject:"SCIENCE · YEAR 7",icon:"🧪",color:"#39b88d",cards:[
-["What are the three common states of matter?","Solid, liquid and gas."],
-["What happens to particles when a solid melts?","They gain energy and move past one another."],
-["What is a mixture?","Two or more substances physically combined, not chemically joined."],
-["What is a fair test?","A test where only one variable is changed."],
-["What is a variable?","A factor that can change in an experiment."],
-["What is a cell?","The smallest basic unit of a living thing."],
-["What does the nucleus do?","It controls many activities of the cell and contains DNA."],
-["What is photosynthesis?","Plants use light to make glucose from water and carbon dioxide."],
-["What is a food chain?","A sequence showing how energy passes between organisms."],
-["What is a force?","A push or pull that can change motion or shape."],
-["What is friction?","A force that resists movement between touching surfaces."],
-["What is an ecosystem?","Living things interacting with each other and their environment."]
-]},
-{id:71002,name:"Year 7 English",subject:"ENGLISH · YEAR 7",icon:"📚",color:"#9b85e8",cards:[
-["What is a noun?","A word naming a person, place, thing or idea."],
-["What is a verb?","A word describing an action, event or state."],
-["What is an adjective?","A word that describes a noun."],
-["What is an adverb?","A word that adds information about a verb, adjective or adverb."],
-["What is a simile?","A comparison using 'like' or 'as'."],
-["What is a metaphor?","A comparison that says one thing is another."],
-["What is personification?","Giving human qualities to something non-human."],
-["What is alliteration?","Repetition of the same starting consonant sound."],
-["What is a theme in a story?","A central idea or message explored by the text."],
-["What is a protagonist?","The main character in a story."],
-["What is persuasive language?","Words and techniques used to influence an audience."],
-["What belongs in a strong paragraph?","A clear point, evidence or example, and an explanation."]
-]},
-{id:71003,name:"Year 7 Maths",subject:"MATHEMATICS · YEAR 7",icon:"➗",color:"#e5a54e",cards:[
-["What is an integer?","A whole number, including negative numbers and zero."],
-["What is the order of operations?","Brackets, indices, division/multiplication, addition/subtraction."],
-["What is 3/4 as a decimal?","0.75."],
-["What is 25% as a fraction?","1/4."],
-["What is 15% of 80?","12."],
-["How do you find the perimeter of a rectangle?","Add all sides, or use 2 × (length + width)."],
-["How do you find the area of a rectangle?","Length × width."],
-["How many degrees are in a right angle?","90 degrees."],
-["What is a variable in algebra?","A letter or symbol representing an unknown or changing number."],
-["Solve: x + 7 = 15.","x = 8."],
-["How do you find the mean?","Add all values, then divide by the number of values."],
-["What is the probability of a certain event?","1, or 100%."]
-]}
-];
-/* Reliable deck seeding: add missing Year 7 decks/cards on every visit.
-   This repairs browsers that received an earlier incomplete migration. */
-let decksChanged=false;
-year7Decks.forEach(seed=>{
- let deck=decks.find(d=>String(d.name||"").trim().toLowerCase()===seed.name.toLowerCase());
- if(!deck){decks.push(JSON.parse(JSON.stringify(seed)));decksChanged=true;return;}
- if(!Array.isArray(deck.cards))deck.cards=[];
- const known=new Set(deck.cards.filter(c=>Array.isArray(c)).map(c=>c[0]));
- seed.cards.forEach(c=>{if(!known.has(c[0])){deck.cards.push(c);decksChanged=true}});
-});
-if(!Array.isArray(decks)||!decks.length){decks=JSON.parse(JSON.stringify(starter));decksChanged=true;}
-if(decksChanged)save();
+decks.push(...year7Decks.map(d=>JSON.parse(JSON.stringify(d))));
+save();
 function toast(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2100)}
 function renderDecks(){
- const root=$("#decks");if(!root)return;root.innerHTML="";
+ const root=$("#decks");if(!root)return;root.replaceChildren();
+ if(!decks.length){root.innerHTML='<div class="empty">No decks yet. Create your first one to get started.</div>';return;}
  decks.forEach(d=>{
-  const el=document.createElement("article");el.className="deck";el.tabIndex=0;el.setAttribute("role","button");el.setAttribute("aria-label","Study "+d.name);el.style.cursor="pointer";
-  el.innerHTML='<div><div class="deck-top"><div class="deck-icon"></div><span class="tag"></span></div><h3></h3><p></p></div><div><div class="deck-bottom"><span class="deck-count"></span><button type="button" class="text-btn study-deck">Study →</button></div><div class="progress"><span></span></div></div>';
-  el.querySelector(".deck-icon").textContent=d.icon;el.querySelector(".deck-icon").style.background=d.color+"22";
-  el.querySelector(".tag").textContent=d.subject;el.querySelector("h3").textContent=d.name;
-  el.querySelector("p").textContent=d.cards.length?"Open this deck and start revising.":"Add your first question to get started.";
-  el.querySelector(".deck-count").textContent=d.cards.length+" cards";
-  el.querySelector(".progress span").style.cssText="width:"+Math.min(100,d.cards.length*8)+"%;background:"+d.color;
-  const open=()=>studyDeck(d.id);
-  el.addEventListener("click",open);
-  el.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();open()}});
-  root.append(el);
+  const card=document.createElement("article");card.className="deck";
+  const button=document.createElement("button");button.type="button";button.className="deck-open";button.dataset.deckId=String(d.id);button.setAttribute("aria-label","Open "+d.name+" study deck");
+  button.innerHTML='<div><div class="deck-top"><div class="deck-icon"></div><span class="tag"></span></div><h3></h3><p></p></div><div><div class="deck-bottom"><span class="deck-count"></span><span class="deck-action">Open deck →</span></div><div class="progress"><span></span></div></div>';
+  button.querySelector(".deck-icon").textContent=d.icon;button.querySelector(".deck-icon").style.background=d.color+"22";
+  button.querySelector(".tag").textContent=d.subject;button.querySelector("h3").textContent=d.name;
+  button.querySelector("p").textContent=d.cards.length? "Open this deck and start revising.":"Add your first question to get started.";
+  button.querySelector(".deck-count").textContent=d.cards.length+" cards";
+  button.querySelector(".progress span").style.cssText="width:"+Math.min(100,d.cards.length*8)+"%;background:"+d.color;
+  card.append(button);root.append(card);
  });
- if(!decks.length)root.innerHTML='<div class="empty">No decks yet. Create your first one to get started.</div>';
+ root.onclick=event=>{const button=event.target.closest(".deck-open");if(!button||!root.contains(button))return;studyDeck(button.dataset.deckId);};
 }
 function modal(title,html){$("#modalTitle").textContent=title;$("#modalBody").innerHTML=html;$("#modal").classList.add("show")}function closeModal(){$("#modal").classList.remove("show");clearTimeout(reflexTimeout)}$("#closeModal").onclick=closeModal;$("#modal").onclick=e=>{if(e.target===$("#modal"))closeModal()};
 function checkLibrary(){}function createDeck(){modal("Create a study deck",'<p style="color:var(--muted);font-size:13px">Give your deck a name and add a few cards. You can edit it any time.</p><div class="field"><label>Deck name</label><input id="deckName" placeholder="e.g. Geography revision" maxlength="50"></div><div class="field"><label>Subject</label><input id="deckSubject" placeholder="e.g. Geography" maxlength="30"></div><div class="field"><label>First question</label><input id="q1" placeholder="What do you want to remember?"></div><div class="field"><label>Answer</label><textarea id="a1" placeholder="Write a clear, short answer..."></textarea></div><button class="primary" id="createDeckSave">Create deck</button>');$("#createDeckSave").onclick=()=>{let name=$("#deckName").value.trim();if(!name){toast("Give your deck a name first.");return}let cards=[];if($("#q1").value.trim()&&$("#a1").value.trim())cards.push([$("#q1").value.trim(),$("#a1").value.trim()]);decks.push({id:Date.now(),name,subject:($("#deckSubject").value.trim()||"MY DECK").toUpperCase(),icon:"📚",color:"#b6a6ff",cards});save();renderDecks();if(name.trim().toLowerCase()==="library"){localStorage.setItem("ms-arcade-unlocked","yes");toast("🎮 Library created! Arcade unlocked.")}checkLibrary();closeModal()}}$("#addDeck").onclick=$("#newDeckHero").onclick=createDeck;
