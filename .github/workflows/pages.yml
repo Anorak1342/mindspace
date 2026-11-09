@@ -481,6 +481,12 @@ jobs:
                       content = content.replace("</head>", lock_tag + "\n</head>", 1)
                   else:
                       content = lock_tag + content
+              if is_arcade:
+                  import re
+                  content = re.sub(r"<title>.*?</title>", "<title>Mindspace</title>", content, count=1, flags=re.I | re.S)
+                  title_guard = '<script id="mindspace-history-title">document.title="Mindspace";new MutationObserver(()=>{if(document.title!=="Mindspace")document.title="Mindspace"}).observe(document.head,{subtree:true,childList:true,characterData:true});</script>'
+                  if 'id="mindspace-history-title"' not in content and "</head>" in content:
+                      content = content.replace("</head>", title_guard + "\n</head>", 1)
               if 'id="mindspace-lock-shortcut"' not in content:
                   if "</body>" in content:
                       content = content.replace("</body>", script + "\n</body>", 1)
