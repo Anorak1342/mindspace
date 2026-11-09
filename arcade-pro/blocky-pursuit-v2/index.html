@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#101820"><title>Blocky Pursuit | Mindspace</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#243642 0,#101820 58%);color:#f4f7f8;font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;justify-content:center}.shell{width:min(1120px,100%);padding:18px 20px 24px}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.brand{font-size:13px;font-weight:950;letter-spacing:1.6px}.brand span{color:#ffc45b}.top a{color:#b9d8df;text-decoration:none;font-weight:750}.top a:hover{color:#fff}.heading{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:8px 0 13px}.heading h1{font-size:clamp(24px,4vw,36px);line-height:1;margin:0;letter-spacing:-1.2px}.heading p{margin:6px 0 0;color:#9aabb4}.stats{display:flex;gap:8px;flex-wrap:wrap}.stat{min-width:88px;padding:9px 13px;background:#1a2832;border:1px solid #31434e;border-radius:11px}.stat small{display:block;color:#8fa3ad;font-size:9px;font-weight:900;letter-spacing:1.2px}.stat b{font-size:20px;font-variant-numeric:tabular-nums}.stat.heat b{color:#ff6c62} .stage{position:relative;border:1px solid #43545c;border-radius:16px;overflow:hidden;background:#18251f;box-shadow:0 18px 55px #0008}canvas{display:block;width:100%;height:auto;aspect-ratio:960/600;touch-action:none}.overlay{position:absolute;inset:0;display:grid;place-items:center;background:#071018b8;backdrop-filter:blur(5px);padding:20px}.panel{width:min(430px,100%);text-align:center;background:#172630f2;border:1px solid #52636a;border-radius:18px;padding:25px;box-shadow:0 20px 70px #0008}.panel .eyebrow{color:#ffc45b;font-weight:950;letter-spacing:2px;font-size:10px}.panel h2{font-size:34px;line-height:1;margin:9px 0}.panel p{color:#b7c4ca;margin:10px 0 19px}.primary{border:0;border-radius:10px;background:#ffc45b;color:#17202a;padding:12px 22px;font-weight:950;font-size:14px;cursor:pointer}.primary:hover{background:#ffda8e;transform:translateY(-1px)}.tips{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#9eafb7;font-size:12px;padding:11px 3px}.tips strong{color:#dfe8eb}.mobile{display:none;justify-content:space-between;align-items:center;gap:12px;margin-top:10px}.pad{display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,38px);gap:5px}.pad button,.handbrake{border:1px solid #53646e;background:#1c2c36;color:#f4f7f8;border-radius:9px;font-weight:900;touch-action:none}.pad button:active,.handbrake:active{background:#ffc45b;color:#15212a}.pad button:nth-child(1){grid-column:2}.pad button:nth-child(2){grid-column:1;grid-row:2}.pad button:nth-child(3){grid-column:2;grid-row:2}.pad button:nth-child(4){grid-column:3;grid-row:2}.handbrake{padding:0 16px;height:81px;color:#ffc45b}@media(max-width:700px){.shell{padding:12px}.heading{align-items:start;flex-direction:column}.stats{width:100%}.stat{flex:1;min-width:0;padding:7px 9px}.stat b{font-size:17px}.mobile{display:flex}.tips{font-size:11px}}
+</style>
+</head>
+<body><main class="shell">
+<header class="top"><div class="brand">MINDSpace <span>✳ ARCADE</span></div><a href="../arcade.html">← Back to Arcade</a></header>
+<section class="heading"><div><h1>BLOCKY PURSUIT</h1><p>One city. A growing police force. Don't get boxed in.</p></div>
+<div class="stats"><div class="stat"><small>SURVIVAL</small><b id="time">0:00</b></div><div class="stat"><small>CASH GRABBED</small><b id="cash">$0</b></div><div class="stat heat"><small>WANTED LEVEL</small><b id="heat">★</b></div><div class="stat"><small>PERSONAL BEST</small><b id="best">0:00</b></div></div></section>
+<div class="stage"><canvas id="game" width="960" height="600" aria-label="Blocky Pursuit driving game"></canvas>
+<div class="overlay" id="overlay"><div class="panel"><div class="eyebrow">MINDSpace ORIGINAL</div><h2 id="panelTitle">READY TO RUN?</h2><p id="panelText">Steal the cash, weave through the city and stay ahead of the cops. The longer you last, the tougher the chase gets.</p><button class="primary" id="start">START ENGINE</button></div></div></div>
+<div class="tips"><span><strong>DRIVE</strong> WASD / Arrow keys</span><span><strong>HANDBRAKE</strong> Space</span><span><strong>OBJECTIVE</strong> Collect cash and survive</span><span><strong>TIP</strong> Sharp turns at high speed make you slide</span></div>
+<div class="mobile"><div class="pad"><button data-key="ArrowUp">▲</button><button data-key="ArrowLeft">◀</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button></div><button class="handbrake" data-key=" ">HANDBRAKE</button></div>
+</main>
+<script>
+(()=> {
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),W=960,H=600;
+const ui={time:document.getElementById('time'),cash:document.getElementById('cash'),heat:document.getElementById('heat'),best:document.getElementById('best'),overlay:document.getElementById('overlay'),title:document.getElementById('panelTitle'),text:document.getElementById('panelText'),start:document.getElementById('start')};
+const WORLD=3000,ROAD=142,GRID=420,keys={},bestKey='mindspaceBlockyPursuitBest';
+let best=Number(localStorage.getItem(bestKey)||0),player,cops,cashPacks,buildings,particles,elapsed,money,heat,active=false,dead=false,last=0,shake=0,spawnTimer=0,flash=0;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),rand=(a,b)=>a+Math.random()*(b-a),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+const fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+ui.best.textContent=fmt(best);
+function makeCity(){
+ buildings=[];
+ for(let gx=0;gx<WORLD/GRID;gx++)for(let gy=0;gy<WORLD/GRID;gy++){
+  const bx=gx*GRID+ROAD/2+18,by=gy*GRID+ROAD/2+18,bw=GRID-ROAD-36,bh=GRID-ROAD-36;
+  const count=2+Math.floor(Math.random()*3);
+  for(let i=0;i<count;i++){
+   const w=rand(72,130),h=rand(68,128),x=bx+rand(0,Math.max(1,bw-w)),y=by+rand(0,Math.max(1,bh-h));
+   buildings.push({x,y,w,h,tint:Math.floor(rand(0,4)),roof:rand(.1,.9)});
+  }
+ }
+}
+function roadAt(x,y){return (x%GRID<ROAD)||(y%GRID<ROAD)}
+function reset(){
+ player={x:Math.floor(WORLD/2/GRID)*GRID+ROAD/2,y:Math.floor(WORLD/2/GRID)*GRID+ROAD/2+60,a:-Math.PI/2,speed:0,health:100,slip:0};
+ cops=[];cashPacks=[];particles=[];elapsed=0;money=0;heat=1;spawnTimer=1;shake=0;flash=0;dead=false;
+ for(let i=0;i<13;i++)spawnCash();
+ updateHud();
+}
+function spawnCash(){
+ let x,y;do{x=rand(100,WORLD-100);y=rand(100,WORLD-100)}while(!roadAt(x,y));
+ cashPacks.push({x,y,phase:rand(0,6.28)});
+}
+function spawnCop(){
+ const angle=rand(0,Math.PI*2),radius=rand(490,680);
+ let x=clamp(player.x+Math.cos(angle)*radius,45,WORLD-45),y=clamp(player.y+Math.sin(angle)*radius,45,WORLD-45);
+ if(!roadAt(x,y)){x=Math.round(x/GRID)*GRID+ROAD/2;y=Math.round(y/GRID)*GRID+ROAD/2;}
+ cops.push({x:clamp(x,35,WORLD-35),y:clamp(y,35,WORLD-35),a:Math.atan2(player.y-y,player.x-x),speed:rand(105,135)+heat*5,stun:0,phase:rand(0,6)});
+}
+function updateHud(){ui.time.textContent=fmt(elapsed);ui.cash.textContent='$'+money;ui.heat.textContent='★'.repeat(Math.min(5,heat));ui.best.textContent=fmt(best)}
+function hitBuilding(x,y,r){
+ for(const b of buildings)if(x+r>b.x&&x-r<b.x+b.w&&y+r>b.y&&y-r<b.y+b.h)return b;
+ return null;
+}
+function burst(x,y,color,n=8){for(let i=0;i<n;i++){const a=rand(0,Math.PI*2),s=rand(35,180);particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:rand(.25,.7),max:.7,color,size:rand(2,5)})}}
+function update(dt){
+ if(!active||dead)return;
+ elapsed+=dt;heat=Math.min(5,1+Math.floor(elapsed/18)+Math.floor(money/100));spawnTimer-=dt;
+ const forward=(keys.ArrowUp||keys.w||keys.W?1:0)-(keys.ArrowDown||keys.s||keys.S?1:0);
+ const steer=(keys.ArrowRight||keys.d||keys.D?1:0)-(keys.ArrowLeft||keys.a||keys.A?1:0),brake=!!(keys[' ']||keys.Space);
+ const maxSpeed=brake?205:310;
+ player.speed+=forward*(forward>0?390:500)*dt;
+ if(!forward)player.speed*=Math.pow(brake ? .91 : .982,dt*60);
+ if(brake)player.speed*=Math.pow(.965,dt*60);
+ player.speed=clamp(player.speed,-115,maxSpeed);
+ const grip=roadAt(player.x,player.y)?1:.66;
+ const turnRate=(.7+Math.min(1,Math.abs(player.speed)/190))*steer*2.45*dt;
+ player.a+=turnRate*(player.speed<0?-1:1)*grip;
+ const targetVx=Math.cos(player.a)*player.speed,targetVy=Math.sin(player.a)*player.speed;
+ const slide=brake ? .78 : .91;
+ player.vx=(player.vx||targetVx)+(targetVx-(player.vx||targetVx))*(1-Math.pow(slide,dt*60));
+ player.vy=(player.vy||targetVy)+(targetVy-(player.vy||targetVy))*(1-Math.pow(slide,dt*60));
+ const oldX=player.x,oldY=player.y;
+ player.x=clamp(player.x+player.vx*dt,24,WORLD-24);player.y=clamp(player.y+player.vy*dt,24,WORLD-24);
+ const wall=hitBuilding(player.x,player.y,14);
+ if(wall){player.x=oldX;player.y=oldY;player.speed*=-.27;player.health-=18;shake=9;burst(player.x,player.y,'#ffc45b',10);flash=.12}
+ if(!roadAt(player.x,player.y))player.speed*=Math.pow(.985,dt*60);
+ if(Math.abs(steer)&&Math.abs(player.speed)>135&&brake)burst(player.x-Math.cos(player.a)*15,player.y-Math.sin(player.a)*15,'#b7c5c8',1);
+ for(let i=cashPacks.length-1;i>=0;i--){const p=cashPacks[i];p.phase+=dt*3;if(dist(player,p)<27){money+=25;burst(p.x,p.y,'#ffc45b',12);cashPacks.splice(i,1);spawnCash();}}
+ if(spawnTimer<=0){spawnCop();spawnTimer=Math.max(1.15,4.6-heat*.58-cops.length*.08)}
+ for(const cop of cops){
+  const target=Math.atan2(player.y-cop.y,player.x-cop.x),delta=Math.atan2(Math.sin(target-cop.a),Math.cos(target-cop.a));
+  cop.a+=clamp(delta,-1.65*dt,1.65*dt);
+  const speed=cop.speed+(heat-1)*13;
+  const ox=cop.x,oy=cop.y;cop.x+=Math.cos(cop.a)*speed*dt;cop.y+=Math.sin(cop.a)*speed*dt;
+  if(hitBuilding(cop.x,cop.y,13)){cop.x=ox;cop.y=oy;cop.a+=rand(-1.2,1.2)}
+  if(dist(cop,player)<29){player.health-=25*dt;player.speed*=Math.pow(.965,dt*60);shake=5;flash=.08}
+ }
+ if(player.health<=0||cops.some(c=>dist(c,player)<18)){finish()}
+ for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;if(p.life<=0)particles.splice(i,1)}
+ shake=Math.max(0,shake-dt*24);flash=Math.max(0,flash-dt);
+ if(elapsed>best){best=elapsed;localStorage.setItem(bestKey,String(best))}
+ updateHud();
+}
+function drawCar(o,kind){
+ ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.a);ctx.shadowColor='#0009';ctx.shadowBlur=9;ctx.shadowOffsetY=4;
+ ctx.fillStyle='#101820';ctx.fillRect(-15,-21,30,42);ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+ ctx.fillStyle=kind==='cop'?'#e8edf0':'#f4b942';ctx.beginPath();ctx.roundRect(-12,-21,24,42,6);ctx.fill();
+ ctx.fillStyle=kind==='cop'?'#263f65':'#293b46';ctx.beginPath();ctx.roundRect(-9,-9,18,17,4);ctx.fill();
+ ctx.fillStyle='#a9dce8';ctx.fillRect(-8,-7,16,6);ctx.fillStyle='#e9f3f4';ctx.fillRect(-8,3,16,4);
+ ctx.fillStyle='#101820';ctx.fillRect(-16,-13,4,10);ctx.fillRect(12,-13,4,10);ctx.fillRect(-16,7,4,10);ctx.fillRect(12,7,4,10);
+ ctx.fillStyle='#fff1c9';ctx.fillRect(-9,-20,5,3);ctx.fillRect(4,-20,5,3);
+ if(kind==='cop'){ctx.fillStyle=Math.sin(elapsed*12+o.phase)>0?'#ff4d55':'#438dff';ctx.fillRect(-8,-14,7,4);ctx.fillStyle=Math.sin(elapsed*12+o.phase)>0?'#438dff':'#ff4d55';ctx.fillRect(1,-14,7,4)}
+ ctx.restore();
+}
+function draw(){
+ ctx.save();if(shake)ctx.translate(rand(-shake,shake),rand(-shake,shake));
+ const camX=clamp(player.x-W/2,0,WORLD-W),camY=clamp(player.y-H/2,0,WORLD-H);
+ ctx.translate(-camX,-camY);
+ ctx.fillStyle='#23372f';ctx.fillRect(camX,camY,W,H);
+ // road grid
+ ctx.fillStyle='#343d43';
+ for(let x=0;x<WORLD;x+=GRID)ctx.fillRect(x,0,ROAD,WORLD);
+ for(let y=0;y<WORLD;y+=GRID)ctx.fillRect(0,y,WORLD,ROAD);
+ // sidewalks and lane markings
+ ctx.strokeStyle='#6a7070';ctx.lineWidth=3;ctx.setLineDash([]);
+ for(let x=0;x<WORLD;x+=GRID){ctx.beginPath();ctx.moveTo(x+ROAD,0);ctx.lineTo(x+ROAD,WORLD);ctx.stroke()}
+ for(let y=0;y<WORLD;y+=GRID){ctx.beginPath();ctx.moveTo(0,y+ROAD);ctx.lineTo(WORLD,y+ROAD);ctx.stroke()}
+ ctx.strokeStyle='#d2bd79';ctx.lineWidth=2;ctx.setLineDash([18,19]);
+ for(let x=ROAD/2;x<WORLD;x+=GRID){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,WORLD);ctx.stroke()}
+ for(let y=ROAD/2;y<WORLD;y+=GRID){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(WORLD,y);ctx.stroke()}
+ ctx.setLineDash([]);
+ // buildings
+ for(const b of buildings){if(b.x+b.w<camX-20||b.x>camX+W+20||b.y+b.h<camY-20||b.y>camY+H+20)continue;
+  const colors=['#59666b','#65706b','#6a625b','#53646c'];ctx.fillStyle='#121a1d';ctx.fillRect(b.x+7,b.y+9,b.w,b.h);
+  ctx.fillStyle=colors[b.tint];ctx.fillRect(b.x,b.y,b.w,b.h);ctx.fillStyle='#ffffff12';ctx.fillRect(b.x+6,b.y+6,b.w-12,5);
+  ctx.fillStyle='#d5b879';for(let wx=b.x+12;wx<b.x+b.w-8;wx+=22)for(let wy=b.y+17;wy<b.y+b.h-8;wy+=23)ctx.fillRect(wx,wy,8,9);
+  ctx.fillStyle='#3e4c4d';ctx.fillRect(b.x+b.w*.36,b.y+b.h*.35,b.w*.28,b.h*.28);
+ }
+ // street decorations
+ for(let x=0;x<WORLD;x+=GRID)for(let y=0;y<WORLD;y+=GRID){if(x+ROAD/2>camX-80&&x+ROAD/2<camX+W+80&&y+ROAD/2>camY-80&&y+ROAD/2<camY+H+80){ctx.fillStyle='#d4d7c4';ctx.fillRect(x+ROAD+10,y+ROAD+10,5,5)}}
+ // cash pickups
+ for(const p of cashPacks){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.sin(p.phase)*.15);ctx.shadowColor='#ffc45b';ctx.shadowBlur=16;ctx.fillStyle='#ffc45b';ctx.beginPath();ctx.roundRect(-10,-8,20,16,4);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#59401c';ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.fillText('$',0,5);ctx.restore()}
+ for(const p of particles){ctx.globalAlpha=clamp(p.life/p.max,0,1);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
+ for(const cop of cops)drawCar(cop,'cop');
+ drawCar(player,'player');
+ // minimap
+ ctx.restore();
+ ctx.save();ctx.fillStyle='#0c151bdc';ctx.beginPath();ctx.roundRect(W-154,16,138,108,10);ctx.fill();ctx.strokeStyle='#81939a66';ctx.stroke();
+ const mx=W-145,my=25,mw=120,mh=90;ctx.fillStyle='#59636a';for(let x=0;x<mw;x+=17)ctx.fillRect(mx+x,my,5,mh);for(let y=0;y<mh;y+=17)ctx.fillRect(mx,my+y,mw,5);
+ ctx.fillStyle='#ff5964';for(const cop of cops)ctx.fillRect(mx+cop.x/WORLD*mw-2,my+cop.y/WORLD*mh-2,4,4);
+ ctx.fillStyle='#ffc45b';ctx.beginPath();ctx.arc(mx+player.x/WORLD*mw,my+player.y/WORLD*mh,4,0,Math.PI*2);ctx.fill();ctx.restore();
+ // health strip and wanted notice
+ ctx.save();ctx.fillStyle='#091117c9';ctx.beginPath();ctx.roundRect(16,H-43,180,27,7);ctx.fill();ctx.fillStyle='#53636b';ctx.fillRect(27,H-32,150,7);ctx.fillStyle=player.health>45?'#79d6a5':'#ff6262';ctx.fillRect(27,H-32,150*clamp(player.health/100,0,1),7);ctx.fillStyle='#e7eff1';ctx.font='bold 10px system-ui';ctx.fillText('CAR CONDITION',27,H-36);ctx.restore();
+ if(flash){ctx.fillStyle='#ff4c4c';ctx.globalAlpha=flash*2;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1}
+ ctx.restore();
+}
+function finish(){
+ if(dead)return;dead=true;active=false;
+ const record=elapsed>=best;ui.title.textContent='BUSTED';ui.text.textContent='You lasted '+fmt(elapsed)+' and grabbed $'+money+'. '+(record?'New personal best!':'Best run: '+fmt(best)+'.')+' Ready for another run?';ui.start.textContent='TRY AGAIN';ui.overlay.style.display='grid';
+}
+function start(){reset();active=true;ui.overlay.style.display='none';last=performance.now()}
+function loop(t){const dt=Math.min(.035,(t-last)/1000||0);last=t;update(dt);draw();requestAnimationFrame(loop)}
+ui.start.addEventListener('click',start);
+window.addEventListener('keydown',e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();if(e.key==='Enter'&&!active)start()});
+window.addEventListener('keyup',e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=false});
+window.addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
+document.querySelectorAll('[data-key]').forEach(btn=>{const k=btn.dataset.key;const down=e=>{e.preventDefault();keys[k]=true};const up=e=>{e.preventDefault();keys[k]=false};btn.addEventListener('pointerdown',down);btn.addEventListener('pointerup',up);btn.addEventListener('pointerleave',up);btn.addEventListener('pointercancel',up)});
+makeCity();reset();requestAnimationFrame(loop);
+})();
+</script></body></html>
