@@ -413,8 +413,8 @@
     if (level === "hardcore" && !progress.hardcoreUnlocked) {
       showModal(
         "🔒",
-        "HARDCORE bloqueado",
-        "Vença uma partida no Fácil, Médio e Difícil para liberar o modo mais cruel.",
+        "HARDCORE locked",
+        "Win one match on Easy, Medium and Hard to unlock the ultimate challenge.",
         [{ label: "Entendi", primary: true, action: hideModal }]
       );
       return;
@@ -1367,7 +1367,7 @@
 
       endGame(
         legalEight ? shooter : opponent,
-        legalEight ? "A bola 8 caiu legalmente." : "A bola 8 caiu antes da hora."
+        legalEight ? "The 8-ball was pocketed legally." : "The 8-ball was pocketed too early."
       );
       return;
     }
