@@ -1,0 +1,49 @@
+name: Import Snow Rider static game files
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/import-snow-rider.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  copy-game:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Mindspace
+        uses: actions/checkout@v4
+
+      - name: Copy the existing MIT-licensed game
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p arcade-pro/snow-rider
+          base="https://raw.githubusercontent.com/McNateyboii/tej/main"
+          for file in index.html UnityLoader.js UnityProgress.js config.json code.unityweb data.unityweb framework.unityweb LICENSE.md; do
+            curl --fail --location --silent --show-error "$base/$file" -o "arcade-pro/snow-rider/$file"
+          done
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("arcade-pro/snow-rider/index.html")
+          s = p.read_text()
+          s = s.replace("<title>Snow Rider 3D</title>", "<title>Snow Rider 3D | Mindspace</title>")
+          s = s.replace("const ENABLE_PASSWORD = 1;", "const ENABLE_PASSWORD = 0;")
+          s = s.replace('const PASSWORD = "0711";', 'const PASSWORD = "";')
+          p.write_text(s)
+          PY
+          cat > arcade-pro/snow-rider/SOURCE-NOTICE.txt <<'EOF'
+          Snow Rider 3D static build
+          Original repository: https://github.com/McNateyboii/tej
+          Original author listed in LICENSE.md: Nathan Schoonover
+          This copy is hosted inside Mindspace. The source repository provides an MIT license;
+          see LICENSE.md for the full license text.
+          The password prompt from the original sample index page has been disabled for Mindspace.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add arcade-pro/snow-rider
+          git commit -m "Import Snow Rider 3D static game files"
+          git push
