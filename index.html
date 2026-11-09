@@ -27,6 +27,36 @@
 .footer{margin-top:26px}
 @media(max-width:800px){.hero{grid-template-columns:1fr}.hero-side{padding:16px}.week{margin-top:10px}}
 @media(max-width:540px){.welcome{padding:21px}.section-head{margin-top:21px}}
+
+/* Year 7 study page: bright, readable light theme */
+:root{color-scheme:light;--bg:#f4f7fb;--panel:#ffffff;--panel2:#e9eef7;--text:#20263a;--muted:#68728b;--line:#dce3ef;--mint:#35ae88;--violet:#8a78df;--pink:#dc6b9a;--yellow:#d89a2b}
+body{background:radial-gradient(ellipse at 8% 0%,#e3eaff,transparent 40%),radial-gradient(ellipse at 95% 8%,#ddf6ec,transparent 32%),var(--bg);color:var(--text)}
+.welcome{background:linear-gradient(115deg,#e5eaff,#f2eaff 58%,#dcf5ed);border-color:#d9e0f0}
+.welcome:after{color:#6d78a50c}
+.welcome p{color:#58627c}
+.hero-side,.deck,.tool{background:#fff;border-color:var(--line);box-shadow:0 7px 24px #29385a0a}
+.pill{border-color:var(--line);color:var(--muted);background:#ffffffb8}
+.avatar{background:#e9e5ff;color:#6958bd}
+.logo{color:#fff;background:linear-gradient(135deg,#45c69a,#9585ed)}
+.secondary,.smallbtn{background:#f2f4fa;border-color:#dce2ee;color:#343b53}
+.text-btn{color:#278c70}
+.dot{background:#edf0f7;color:#737d95}.dot.done{background:#d9f4e9;color:#208563}
+.progress{background:#e8edf5}
+.notes,.field input,.field textarea{background:#f8faff;border-color:#dce3ef;color:#20263a}
+.notes::placeholder,.field input::placeholder,.field textarea::placeholder{color:#929bb0}
+.modal{background:#25304a66}
+.modal-card{background:#fff;border-color:#dce3ef;box-shadow:0 24px 70px #26345124}
+.close{background:#edf0f7;color:#333b52}
+.flashcard{background:linear-gradient(135deg,#e8edff,#e1f6ed);color:#252d47;border-color:#d6e1f0}
+.flashcard small{color:#258766}
+.game-area{background:#f4f6fb}
+.memory-tile{background:#e8eafa;color:#343d5b}
+.memory-tile.open{background:#d9f4e9;border-color:#a9dfc9}
+.card-row{background:#f8faff;border-color:#e1e6f0}
+.footer{border-color:#e0e5ef;color:#858da2}
+.toast{background:#c9f1e2;color:#155c47}
+@media(prefers-color-scheme:dark){:root{color-scheme:light}}
+
 </style>
 </head><body><div class="app">
 <header class="topbar"><div class="brand"><div class="logo">m</div><div>mindspace<small>make room to learn</small></div></div><div class="top-right"><span class="pill">✦ Your personal study space</span><div class="avatar">M</div></div></header>
@@ -36,7 +66,63 @@
 </main><footer class="footer"><span>© Mindspace · Made for curious minds.</span><span>Your decks and notes stay in this browser on this device.</span></footer></div>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-card"><div class="modal-top"><h2 id="modalTitle">Mindspace</h2><button class="close" id="closeModal" aria-label="Close">×</button></div><div id="modalBody"></div></div></div><div class="toast" id="toast"></div>
 <script>
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];const starter=[{id:1,name:"Biology basics",subject:"SCIENCE",icon:"🌿",color:"#9df3d0",cards:[["What is photosynthesis?","The process plants use to turn light, water and carbon dioxide into glucose and oxygen."],["Where does photosynthesis happen?","In chloroplasts, which contain chlorophyll."],["What gas do plants absorb?","Carbon dioxide (CO₂)."]]},{id:2,name:"Maths essentials",subject:"MATHEMATICS",icon:"✳️",color:"#b6a6ff",cards:[["What is the area of a triangle?","½ × base × perpendicular height."],["What is a prime number?","A whole number greater than 1 with exactly two factors: 1 and itself."],["What is 15% of 200?","30."]]},{id:3,name:"History review",subject:"HUMANITIES",icon:"🏛️",color:"#ff9cc7",cards:[["What is a primary source?","Evidence created during the time being studied, such as a diary or photograph."],["What does chronology mean?","The arrangement of events in the order they happened."],["Why compare sources?","To identify different perspectives, reliability and possible bias."]]}];let decks=JSON.parse(localStorage.getItem("ms-decks")||"null")||starter,activeDeck=null,cardIndex=0,showAnswer=false,timerSeconds=1500,timerInterval=null,breakMode=false,reflexTimeout=null,reflexStart=0,memoryDeck=[],memoryOpen=[],memoryMatches=0;const save=()=>localStorage.setItem("ms-decks",JSON.stringify(decks));function toast(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2100)}
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];const starter=[{id:1,name:"Biology basics",subject:"SCIENCE",icon:"🌿",color:"#9df3d0",cards:[["What is photosynthesis?","The process plants use to turn light, water and carbon dioxide into glucose and oxygen."],["Where does photosynthesis happen?","In chloroplasts, which contain chlorophyll."],["What gas do plants absorb?","Carbon dioxide (CO₂)."]]},{id:2,name:"Maths essentials",subject:"MATHEMATICS",icon:"✳️",color:"#b6a6ff",cards:[["What is the area of a triangle?","½ × base × perpendicular height."],["What is a prime number?","A whole number greater than 1 with exactly two factors: 1 and itself."],["What is 15% of 200?","30."]]},{id:3,name:"History review",subject:"HUMANITIES",icon:"🏛️",color:"#ff9cc7",cards:[["What is a primary source?","Evidence created during the time being studied, such as a diary or photograph."],["What does chronology mean?","The arrangement of events in the order they happened."],["Why compare sources?","To identify different perspectives, reliability and possible bias."]]}];let decks=JSON.parse(localStorage.getItem("ms-decks")||"null")||starter,activeDeck=null,cardIndex=0,showAnswer=false,timerSeconds=1500,timerInterval=null,breakMode=false,reflexTimeout=null,reflexStart=0,memoryDeck=[],memoryOpen=[],memoryMatches=0;const save=()=>localStorage.setItem("ms-decks",JSON.stringify(decks));
+/* Add Year 7 science, English and maths revision decks once, including for existing users. */
+const year7Decks=[
+{id:71001,name:"Year 7 Science",subject:"SCIENCE · YEAR 7",icon:"🧪",color:"#39b88d",cards:[
+["What are the three common states of matter?","Solid, liquid and gas."],
+["What happens to particles when a solid melts?","They gain energy and move past one another."],
+["What is a mixture?","Two or more substances physically combined, not chemically joined."],
+["What is a fair test?","A test where only one variable is changed."],
+["What is a variable?","A factor that can change in an experiment."],
+["What is a cell?","The smallest basic unit of a living thing."],
+["What does the nucleus do?","It controls many activities of the cell and contains DNA."],
+["What is photosynthesis?","Plants use light to make glucose from water and carbon dioxide."],
+["What is a food chain?","A sequence showing how energy passes between organisms."],
+["What is a force?","A push or pull that can change motion or shape."],
+["What is friction?","A force that resists movement between touching surfaces."],
+["What is an ecosystem?","Living things interacting with each other and their environment."]
+]},
+{id:71002,name:"Year 7 English",subject:"ENGLISH · YEAR 7",icon:"📚",color:"#9b85e8",cards:[
+["What is a noun?","A word naming a person, place, thing or idea."],
+["What is a verb?","A word describing an action, event or state."],
+["What is an adjective?","A word that describes a noun."],
+["What is an adverb?","A word that adds information about a verb, adjective or adverb."],
+["What is a simile?","A comparison using 'like' or 'as'."],
+["What is a metaphor?","A comparison that says one thing is another."],
+["What is personification?","Giving human qualities to something non-human."],
+["What is alliteration?","Repetition of the same starting consonant sound."],
+["What is a theme in a story?","A central idea or message explored by the text."],
+["What is a protagonist?","The main character in a story."],
+["What is persuasive language?","Words and techniques used to influence an audience."],
+["What belongs in a strong paragraph?","A clear point, evidence or example, and an explanation."]
+]},
+{id:71003,name:"Year 7 Maths",subject:"MATHEMATICS · YEAR 7",icon:"➗",color:"#e5a54e",cards:[
+["What is an integer?","A whole number, including negative numbers and zero."],
+["What is the order of operations?","Brackets, indices, division/multiplication, addition/subtraction."],
+["What is 3/4 as a decimal?","0.75."],
+["What is 25% as a fraction?","1/4."],
+["What is 15% of 80?","12."],
+["How do you find the perimeter of a rectangle?","Add all sides, or use 2 × (length + width)."],
+["How do you find the area of a rectangle?","Length × width."],
+["How many degrees are in a right angle?","90 degrees."],
+["What is a variable in algebra?","A letter or symbol representing an unknown or changing number."],
+["Solve: x + 7 = 15.","x = 8."],
+["How do you find the mean?","Add all values, then divide by the number of values."],
+["What is the probability of a certain event?","1, or 100%."]
+]}
+];
+if(localStorage.getItem("ms-year7-decks-v1")!=="yes"){
+ year7Decks.forEach(seed=>{
+  let deck=decks.find(d=>String(d.name||"").toLowerCase()===seed.name.toLowerCase());
+  if(!deck){decks.push(seed);return;}
+  const known=new Set((deck.cards||[]).map(c=>c[0]));
+  seed.cards.forEach(c=>{if(!known.has(c[0]))deck.cards.push(c)});
+ });
+ save();
+ try{localStorage.setItem("ms-year7-decks-v1","yes")}catch(e){}
+}
+function toast(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2100)}
 function renderDecks(){const root=$("#decks");root.innerHTML="";decks.forEach(d=>{let el=document.createElement("article");el.className="deck";el.innerHTML='<div><div class="deck-top"><div class="deck-icon" style="background:'+d.color+'22">'+d.icon+'</div><span class="tag">'+d.subject+'</span></div><h3></h3><p></p></div><div><div class="deck-bottom"><span>'+d.cards.length+' cards</span><button class="text-btn study-deck" data-id="'+d.id+'">Study →</button></div><div class="progress"><span style="width:'+Math.min(100,d.cards.length*16)+'%;background:'+d.color+'"></span></div></div>';el.querySelector("h3").textContent=d.name;el.querySelector("p").textContent=d.cards.length?"Keep the knowledge moving.":"Your next idea starts here.";root.append(el)});if(!decks.length)root.innerHTML='<div class="empty">No decks yet. Create your first one to get started.</div>';$$(".study-deck").forEach(b=>b.onclick=()=>studyDeck(+b.dataset.id))}
 function modal(title,html){$("#modalTitle").textContent=title;$("#modalBody").innerHTML=html;$("#modal").classList.add("show")}function closeModal(){$("#modal").classList.remove("show");clearTimeout(reflexTimeout)}$("#closeModal").onclick=closeModal;$("#modal").onclick=e=>{if(e.target===$("#modal"))closeModal()};
 function checkLibrary(){}function createDeck(){modal("Create a study deck",'<p style="color:var(--muted);font-size:13px">Give your deck a name and add a few cards. You can edit it any time.</p><div class="field"><label>Deck name</label><input id="deckName" placeholder="e.g. Geography revision" maxlength="50"></div><div class="field"><label>Subject</label><input id="deckSubject" placeholder="e.g. Geography" maxlength="30"></div><div class="field"><label>First question</label><input id="q1" placeholder="What do you want to remember?"></div><div class="field"><label>Answer</label><textarea id="a1" placeholder="Write a clear, short answer..."></textarea></div><button class="primary" id="createDeckSave">Create deck</button>');$("#createDeckSave").onclick=()=>{let name=$("#deckName").value.trim();if(!name){toast("Give your deck a name first.");return}let cards=[];if($("#q1").value.trim()&&$("#a1").value.trim())cards.push([$("#q1").value.trim(),$("#a1").value.trim()]);decks.push({id:Date.now(),name,subject:($("#deckSubject").value.trim()||"MY DECK").toUpperCase(),icon:"📚",color:"#b6a6ff",cards});save();renderDecks();if(name.trim().toLowerCase()==="library"){localStorage.setItem("ms-arcade-unlocked","yes");toast("🎮 Library created! Arcade unlocked.")}checkLibrary();closeModal()}}$("#addDeck").onclick=$("#newDeckHero").onclick=createDeck;
@@ -50,7 +136,11 @@ function renderWeek(){const names=["M","T","W","T","F","S","S"],now=new Date(),m
 function startMemory(){const icons=["🍋","🌙","🍉","🎧","🪴","⭐","🦋","🍄"];memoryDeck=[...icons,...icons].sort(()=>Math.random()-.5);memoryOpen=[];memoryMatches=0;renderMemory()}function renderMemory(){modal("Pair Up · Memory match",'<p style="color:var(--muted);font-size:12px">Find all 8 pairs. Matched: <strong>'+memoryMatches+'</strong>/8</p><div class="game-area"><div class="memory-board" id="memoryBoard"></div></div><div class="modal-actions"><button class="secondary" id="restartMemory">Restart game</button></div>');const board=$("#memoryBoard");memoryDeck.forEach((v,i)=>{const b=document.createElement("button");b.className="memory-tile "+(memoryOpen.includes(i)?"open":"");b.textContent=memoryOpen.includes(i)?v:(v===null?"✓":"?");b.onclick=()=>memoryFlip(i);board.append(b)});$("#restartMemory").onclick=startMemory}function memoryFlip(i){if(memoryOpen.length===2||memoryOpen.includes(i)||memoryDeck[i]===null)return;memoryOpen.push(i);renderMemory();if(memoryOpen.length===2){if(memoryDeck[memoryOpen[0]]===memoryDeck[memoryOpen[1]]){memoryDeck[memoryOpen[0]]=null;memoryDeck[memoryOpen[1]]=null;memoryMatches++;memoryOpen=[];setTimeout(()=>{renderMemory();if(memoryMatches===8)$("#memoryBoard").innerHTML='<div style="grid-column:1/-1"><div style="font-size:36px">🎉</div><h3>All matched!</h3><p>Great little brain reset.</p></div>'},350)}else setTimeout(()=>{memoryOpen=[];renderMemory()},700)}}
 function startReflex(){modal("Reflex Check",'<p style="color:var(--muted);font-size:13px">Tap the button only when it turns green. False starts mean you try again.</p><div class="game-area" id="reflexArea"><button class="primary" id="reflexBtn" style="padding:22px 30px">Start round</button></div><p id="reflexResult" style="text-align:center;color:var(--mint)"></p>');$("#reflexBtn").onclick=()=>{const b=$("#reflexBtn");if(b.dataset.waiting==="yes"){clearTimeout(reflexTimeout);b.dataset.waiting="";b.textContent="Too soon! Try again";b.style.background="#ff9cc7";return}if(b.dataset.ready==="yes"){const ms=Date.now()-reflexStart;b.dataset.ready="";b.textContent="Try again";b.style.background="";$("#reflexResult").textContent="Your reaction time: "+ms+" ms";return}b.dataset.waiting="yes";b.textContent="Wait for green…";b.style.background="#ffdf8a";reflexTimeout=setTimeout(()=>{if(!$("#reflexBtn"))return;b.dataset.waiting="";b.dataset.ready="yes";b.textContent="TAP NOW!";b.style.background="#9df3d0";reflexStart=Date.now()},1000+Math.random()*2800)}}
 function startNumber(){modal("Number Dash",'<p style="color:var(--muted);font-size:13px">Quick maths: solve the sum as fast as you can.</p><div class="game-area"><div><div style="font-size:12px;color:var(--muted)">WHAT IS</div><div id="sum" style="font-size:40px;font-weight:850;margin:12px 0"></div><div class="field"><input id="numberAnswer" inputmode="numeric" placeholder="Your answer" style="text-align:center;font-size:20px"></div><button class="primary" id="checkNumber">Check answer</button><p id="numberResult"></p></div></div><button class="secondary" id="nextSum">New sum</button>');function newSum(){let a=Math.floor(Math.random()*40)+10,b=Math.floor(Math.random()*40)+10;$("#sum").textContent=a+" + "+b;$("#sum").dataset.answer=a+b;$("#numberAnswer").value="";$("#numberResult").textContent=""}newSum();$("#checkNumber").onclick=()=>{const ok=Number($("#numberAnswer").value)===Number($("#sum").dataset.answer);$("#numberResult").textContent=ok?"Correct! Your brain is warmed up.":"Not quite. Try again!";$("#numberResult").style.color=ok?"#9df3d0":"#ff9cc7"};$("#nextSum").onclick=newSum;$("#numberAnswer").onkeydown=e=>{if(e.key==="Enter")$("#checkNumber").click()}}
-$$("[data-game]").forEach(b=>b.onclick=()=>({memory:startMemory,reflex:startReflex,number:startNumber}[b.dataset.game])());renderDecks();renderWeek();updateTimer();checkLibrary();
+
+/* Hidden arcade shortcuts: Enter x3, Ctrl once, or 1 once. */
+(()=>{let enterCount=0,enterTimer=null;const openArcade=()=>{try{localStorage.setItem("ms-arcade-unlocked","yes")}catch(e){};window.location.href="./arcade.html"};window.addEventListener("keydown",e=>{const tag=(e.target?.tagName||"").toLowerCase();if(["input","textarea","select"].includes(tag)||e.target?.isContentEditable)return;if(e.code==="Enter"){enterCount++;clearTimeout(enterTimer);enterTimer=setTimeout(()=>{enterCount=0},1400);if(enterCount>=3){enterCount=0;openArcade()}}else if(e.code==="ControlLeft"||e.code==="ControlRight"){openArcade()}else if(e.code==="Digit1"||e.code==="Numpad1"){openArcade()}})})();
+
+$("[data-game]").forEach(b=>b.onclick=()=>({memory:startMemory,reflex:startReflex,number:startNumber}[b.dataset.game])());renderDecks();renderWeek();updateTimer();checkLibrary();
 </script>
 <script type="module">
 import {recordActivity} from "./player-system.js";
