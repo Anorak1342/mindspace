@@ -66,7 +66,7 @@ jobs:
           # Build Evan Bacon's original Expo Crossy Road project for the web.
           # No game source, graphics, models, audio, or gameplay code is edited.
           cd /tmp/crossy-road
-          npm install --no-audit --no-fund
+          npm install --legacy-peer-deps --no-audit --no-fund
           python3 - <<'PY'
           import json
           from pathlib import Path
