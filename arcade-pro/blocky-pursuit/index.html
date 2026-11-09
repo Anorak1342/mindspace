@@ -32,7 +32,7 @@ function makeCity(){
   const count=2+Math.floor(Math.random()*3);
   for(let i=0;i<count;i++){
    const w=rand(72,130),h=rand(68,128),x=bx+rand(0,Math.max(1,bw-w)),y=by+rand(0,Math.max(1,bh-h));
-   buildings.push({x,y,w,h,tint=Math.floor(rand(0,4)),roof:rand(.1,.9)});
+   buildings.push({x,y,w,h,tint:Math.floor(rand(0,4)),roof:rand(.1,.9)});
   }
  }
 }
@@ -66,14 +66,14 @@ function update(dt){
  const steer=(keys.ArrowRight||keys.d||keys.D?1:0)-(keys.ArrowLeft||keys.a||keys.A?1:0),brake=!!(keys[' ']||keys.Space);
  const maxSpeed=brake?205:310;
  player.speed+=forward*(forward>0?390:500)*dt;
- if(!forward)player.speed*=Math.pow(brake?.91:.982,dt*60);
+ if(!forward)player.speed*=Math.pow(brake ? .91 : .982,dt*60);
  if(brake)player.speed*=Math.pow(.965,dt*60);
  player.speed=clamp(player.speed,-115,maxSpeed);
  const grip=roadAt(player.x,player.y)?1:.66;
  const turnRate=(.7+Math.min(1,Math.abs(player.speed)/190))*steer*2.45*dt;
  player.a+=turnRate*(player.speed<0?-1:1)*grip;
  const targetVx=Math.cos(player.a)*player.speed,targetVy=Math.sin(player.a)*player.speed;
- const slide=brake?.78:.91;
+ const slide=brake ? .78 : .91;
  player.vx=(player.vx||targetVx)+(targetVx-(player.vx||targetVx))*(1-Math.pow(slide,dt*60));
  player.vy=(player.vy||targetVy)+(targetVy-(player.vy||targetVy))*(1-Math.pow(slide,dt*60));
  const oldX=player.x,oldY=player.y;
