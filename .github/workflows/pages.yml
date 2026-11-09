@@ -41,6 +41,7 @@ jobs:
           git -C /tmp/volley-random sparse-checkout set file
           git clone --depth 1 https://github.com/stateloop-connected/source-vibe-basketball.git /tmp/vibe-basketball
           git clone --depth 1 https://github.com/Anorak1342/F-15-Flight-Sim-.git /tmp/f15-flight-sim
+          git clone --depth 1 https://github.com/pjo/starstruck.git /tmp/starstruck
           git clone --depth 1 https://github.com/KhazP/librecorsa.git /tmp/librecorsa
           git clone --depth 1 https://github.com/KamranBoroomand/PacMan.git /tmp/pacman
           git clone --depth 1 https://github.com/gabrielecirulli/2048.git /tmp/2048
@@ -374,6 +375,14 @@ jobs:
           cp -R dist/. "$GITHUB_WORKSPACE/arcade-pro/snack-hole/"
           cp LICENSE "$GITHUB_WORKSPACE/arcade-pro/snack-hole/LICENSE.txt"
           cp CREDITS.md "$GITHUB_WORKSPACE/arcade-pro/snack-hole/CREDITS.md"
+
+      - name: Publish Starstruck locally
+        run: |
+          mkdir -p arcade-pro/starstruck
+          cp /tmp/starstruck/index.html arcade-pro/starstruck/index.html
+          cp /tmp/starstruck/LICENSE arcade-pro/starstruck/LICENSE.txt
+          # Keep the game fully local: no external login or third-party leaderboard.
+          sed -i '/supabase-js@2.45.4/d' arcade-pro/starstruck/index.html
 
       - name: Remove tracking and ad scripts from Hextris
         run: |
