@@ -104,6 +104,50 @@ body{background:radial-gradient(ellipse at 8% 0%,#e3eaff,transparent 40%),radial
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-card"><div class="modal-top"><h2 id="modalTitle">Mindspace</h2><button class="close" id="closeModal" aria-label="Close">×</button></div><div id="modalBody"></div></div></div><div class="toast" id="toast"></div>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];const starter=[{id:1,name:"Biology basics",subject:"SCIENCE",icon:"🌿",color:"#9df3d0",cards:[["What is photosynthesis?","The process plants use to turn light, water and carbon dioxide into glucose and oxygen."],["Where does photosynthesis happen?","In chloroplasts, which contain chlorophyll."],["What gas do plants absorb?","Carbon dioxide (CO₂)."]]},{id:2,name:"Maths essentials",subject:"MATHEMATICS",icon:"✳️",color:"#b6a6ff",cards:[["What is the area of a triangle?","½ × base × perpendicular height."],["What is a prime number?","A whole number greater than 1 with exactly two factors: 1 and itself."],["What is 15% of 200?","30."]]},{id:3,name:"History review",subject:"HUMANITIES",icon:"🏛️",color:"#ff9cc7",cards:[["What is a primary source?","Evidence created during the time being studied, such as a diary or photograph."],["What does chronology mean?","The arrangement of events in the order they happened."],["Why compare sources?","To identify different perspectives, reliability and possible bias."]]}];let decks;try{const stored=JSON.parse(localStorage.getItem("ms-decks-v2")||localStorage.getItem("ms-decks")||"null");decks=Array.isArray(stored)?stored:JSON.parse(JSON.stringify(starter));}catch(error){decks=JSON.parse(JSON.stringify(starter));}let activeDeck=null,cardIndex=0,showAnswer=false,timerSeconds=1500,timerInterval=null,breakMode=false,reflexTimeout=null,reflexStart=0,memoryDeck=[],memoryOpen=[],memoryMatches=0;const save=()=>localStorage.setItem("ms-decks-v2",JSON.stringify(decks));
+const year7Decks=[
+{id:71001,name:"Year 7 Science",subject:"SCIENCE · YEAR 7",icon:"🧪",color:"#39b88d",cards:[
+["What are the three common states of matter?","Solid, liquid and gas."],
+["What happens to particles when a solid melts?","They gain energy and move past one another."],
+["What is a mixture?","Two or more substances physically combined, not chemically joined."],
+["What is a fair test?","A test where only one variable is changed."],
+["What is a variable?","A factor that can change in an experiment."],
+["What is a cell?","The smallest basic unit of a living thing."],
+["What does the nucleus do?","It controls many activities of the cell and contains DNA."],
+["What is photosynthesis?","Plants use light to make glucose from water and carbon dioxide."],
+["What is a food chain?","A sequence showing how energy passes between organisms."],
+["What is a force?","A push or pull that can change motion or shape."],
+["What is friction?","A force that resists movement between touching surfaces."],
+["What is an ecosystem?","Living things interacting with each other and their environment."]
+]},
+{id:71002,name:"Year 7 English",subject:"ENGLISH · YEAR 7",icon:"📚",color:"#9b85e8",cards:[
+["What is a noun?","A word naming a person, place, thing or idea."],
+["What is a verb?","A word describing an action, event or state."],
+["What is an adjective?","A word that describes a noun."],
+["What is an adverb?","A word that adds information about a verb, adjective or adverb."],
+["What is a simile?","A comparison using 'like' or 'as'."],
+["What is a metaphor?","A comparison that says one thing is another."],
+["What is personification?","Giving human qualities to something non-human."],
+["What is alliteration?","Repetition of the same starting consonant sound."],
+["What is a theme in a story?","A central idea or message explored by the text."],
+["What is a protagonist?","The main character in a story."],
+["What is persuasive language?","Words and techniques used to influence an audience."],
+["What belongs in a strong paragraph?","A clear point, evidence or example, and an explanation."]
+]},
+{id:71003,name:"Year 7 Maths",subject:"MATHEMATICS · YEAR 7",icon:"➗",color:"#e5a54e",cards:[
+["What is an integer?","A whole number, including negative numbers and zero."],
+["What is the order of operations?","Brackets, indices, division/multiplication, addition/subtraction."],
+["What is 3/4 as a decimal?","0.75."],
+["What is 25% as a fraction?","1/4."],
+["What is 15% of 80?","12."],
+["How do you find the perimeter of a rectangle?","Add all sides, or use 2 × (length + width)."],
+["How do you find the area of a rectangle?","Length × width."],
+["How many degrees are in a right angle?","90 degrees."],
+["What is a variable in algebra?","A letter or symbol representing an unknown or changing number."],
+["Solve: x + 7 = 15.","x = 8."],
+["How do you find the mean?","Add all values, then divide by the number of values."],
+["What is the probability of a certain event?","1, or 100%."]
+]}
+];
 /* Rebuild the three core Year 7 decks from a clean, known-good set.
    Keep personal decks, but replace any old built-in copies and stale card data. */
 const builtInDeckNames=new Set(["biology basics","maths essentials","history review",...year7Decks.map(d=>d.name.toLowerCase())]);
