@@ -1,6 +1,0 @@
-Snow Rider 3D static build
-Original repository: https://github.com/McNateyboii/tej
-Original author listed in LICENSE.md: Nathan Schoonover
-This copy is hosted inside Mindspace. The source repository provides an MIT license;
-see LICENSE.md for the full license text.
-The password prompt from the original sample index page has been disabled for Mindspace.
