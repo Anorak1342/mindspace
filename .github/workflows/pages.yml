@@ -558,21 +558,16 @@ jobs:
             audio.addEventListener("play",function(){label(true);});
           })();
           </script>"""
-          for page in Path(".").rglob("*.html"):
-              if ".git" in page.parts or "source" in page.parts or ("crossy-road" in page.parts and "game" in page.parts):
-                  continue
-              # The main Mindspace study dashboard is intentionally music-free.
-              if page == Path("index.html") or "study" in page.stem.lower():
-                  continue
-              content = page.read_text(encoding="utf-8")
-              if 'id="mindspace-background-music-script"' in content:
-                  continue
+          # The music control belongs only on the arcade library page.
+          # Game pages keep their own audio and controls untouched.
+          page = Path("arcade.html")
+          content = page.read_text(encoding="utf-8")
+          if 'id="mindspace-background-music-script"' not in content:
               if "</body>" in content:
-                  content = content.replace("</body>", player + "\n</body>", 1)
+                  content = content.replace("</body>", player + "\\n</body>", 1)
               else:
                   content += player
               page.write_text(content, encoding="utf-8")
-          PY
 
       - name: Remove build-only source files before publishing
         run: |
