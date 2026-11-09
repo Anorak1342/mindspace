@@ -295,7 +295,7 @@ themeButtons.find(b=>b.dataset.theme==="sunset").disabled=level.level<25;
 if(getTheme()==="neon"&&level.level<10)paintTheme("midnight");
 if(getTheme()==="sunset"&&level.level<25)paintTheme("midnight");
 $("theme-status").textContent="Midnight is always available. Neon unlocks at level 10; Pixel Sunset unlocks at level 25.";
-document.querySelectorAll(".game .play").forEach(link=>link.addEventListener("click",()=>{const card=link.closest(".game");recordActivity("game",{game:link.getAttribute("href")||card?.querySelector("h2")?.textContent||"arcade"}).catch(console.warn);}));
+const gameLaunches=new Map([...document.querySelectorAll(".game .play")].map(link=>{const card=link.closest(".game");return [link.href,link.getAttribute("href")||card?.querySelector("h2")?.textContent||"arcade"];}));document.addEventListener("click",event=>{const link=event.target.closest("a[href]");if(!link)return;const game=gameLaunches.get(link.href);if(game)recordActivity("game",{game}).catch(console.warn);});
 window.MindspaceSoundsEnabled=getSounds();
 $("theme-sounds").addEventListener("change",e=>{window.MindspaceSoundsEnabled=e.target.checked;if(e.target.checked)uiSound();});
 document.addEventListener("click",event=>{const b=event.target.closest(".favorite-toggle");if(b&&b.getAttribute("aria-pressed")==="false")recordActivity("favourite").catch(console.warn);});
