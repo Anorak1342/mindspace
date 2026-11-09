@@ -188,7 +188,7 @@ function startNumber(){modal("Number Dash",'<p style="color:var(--muted);font-si
 /* Hidden arcade shortcuts: Enter x3, Ctrl once, or 1 once. */
 (()=>{let enterCount=0,enterTimer=null;const openArcade=()=>{try{localStorage.setItem("ms-arcade-unlocked","yes")}catch(e){};window.location.href="./arcade.html"};window.addEventListener("keydown",e=>{const tag=(e.target?.tagName||"").toLowerCase();if(["input","textarea","select"].includes(tag)||e.target?.isContentEditable)return;if(e.code==="Enter"){enterCount++;clearTimeout(enterTimer);enterTimer=setTimeout(()=>{enterCount=0},1400);if(enterCount>=3){enterCount=0;openArcade()}}else if(e.code==="ControlLeft"||e.code==="ControlRight"){openArcade()}else if(e.code==="Digit1"||e.code==="Numpad1"){openArcade()}})})();
 
-$("[data-game]").forEach(b=>b.onclick=()=>({memory:startMemory,reflex:startReflex,number:startNumber}[b.dataset.game])());renderDecks();renderWeek();updateTimer();checkLibrary();
+$("[data-game]").forEach(b=>b.onclick=()=>{window.dispatchEvent(new CustomEvent("mindspace:activity",{detail:{type:"game",game:"mindspace-"+b.dataset.game}}));({memory:startMemory,reflex:startReflex,number:startNumber}[b.dataset.game])();});renderDecks();renderWeek();updateTimer();checkLibrary();
 </script>
 <script type="module">
 import {recordActivity} from "./player-system.js";
