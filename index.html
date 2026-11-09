@@ -20,7 +20,7 @@
 .section-head h2{font-size:19px}
 .section-head p{font-size:11px}
 .grid,.tools,.game-grid{gap:11px}
-.deck{padding:16px;border-radius:17px;min-height:142px}.deck-open{appearance:none;-webkit-appearance:none;background:#fff;border:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between;transition:.2s}.deck-open:focus-visible{outline:3px solid var(--mint);outline-offset:3px}.deck-open{color:var(--text);pointer-events:auto;position:relative;z-index:1}.deck-open .study-deck{display:inline-block}
+.deck{padding:16px;border-radius:17px;min-height:142px}
 .deck-icon{height:37px;width:37px;border-radius:12px}
 .deck h3{margin-top:10px;font-size:15px}
 .tool{padding:17px;border-radius:18px}
@@ -158,20 +158,17 @@ if(decksChanged)save();
 function toast(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2100)}
 function renderDecks(){
  const root=$("#decks");if(!root)return;root.innerHTML="";
- /* Delegate clicks from the grid so clicks on nested card content are handled too. */
- root.onclick=e=>{
-  const card=e.target.closest("button[data-deck-id]");
-  if(card&&root.contains(card))studyDeck(card.dataset.deckId);
- };
  decks.forEach(d=>{
-  const el=document.createElement("button");el.type="button";el.className="deck deck-open";el.dataset.deckId=String(d.id);el.setAttribute("aria-label","Study "+d.name);
-  el.style.cssText="width:100%;text-align:left;color:var(--text);font:inherit;cursor:pointer;pointer-events:auto";
-  el.innerHTML='<div><div class="deck-top"><div class="deck-icon"></div><span class="tag"></span></div><h3></h3><p></p></div><div><div class="deck-bottom"><span class="deck-count"></span><span class="text-btn study-deck">Study →</span></div><div class="progress"><span></span></div></div>';
+  const el=document.createElement("article");el.className="deck";el.tabIndex=0;el.setAttribute("role","button");el.setAttribute("aria-label","Study "+d.name);el.style.cursor="pointer";
+  el.innerHTML='<div><div class="deck-top"><div class="deck-icon"></div><span class="tag"></span></div><h3></h3><p></p></div><div><div class="deck-bottom"><span class="deck-count"></span><button type="button" class="text-btn study-deck">Study →</button></div><div class="progress"><span></span></div></div>';
   el.querySelector(".deck-icon").textContent=d.icon;el.querySelector(".deck-icon").style.background=d.color+"22";
   el.querySelector(".tag").textContent=d.subject;el.querySelector("h3").textContent=d.name;
   el.querySelector("p").textContent=d.cards.length?"Open this deck and start revising.":"Add your first question to get started.";
   el.querySelector(".deck-count").textContent=d.cards.length+" cards";
   el.querySelector(".progress span").style.cssText="width:"+Math.min(100,d.cards.length*8)+"%;background:"+d.color;
+  const open=()=>studyDeck(d.id);
+  el.addEventListener("click",open);
+  el.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();open()}});
   root.append(el);
  });
  if(!decks.length)root.innerHTML='<div class="empty">No decks yet. Create your first one to get started.</div>';
