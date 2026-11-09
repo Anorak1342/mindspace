@@ -436,10 +436,40 @@ jobs:
           (function () {
             var count = 0;
             var lastPress = 0;
+            function basePath() {
+              var path = window.location.pathname;
+              return path === "/mindspace" || path.indexOf("/mindspace/") === 0 ? "/mindspace/" : "/";
+            }
+            function isArcadePath(path) {
+              return path.indexOf("/arcade.html") !== -1 || path.indexOf("/arcade-pro/") !== -1 ||
+                /\/(mini-metro|connect-four|tiny-traffic-town)\.html$/.test(path);
+            }
+            function toggleSpace(event) {
+              var path = window.location.pathname;
+              var base = basePath();
+              var arcade = isArcadePath(path);
+              event.preventDefault();
+              event.stopPropagation();
+              event.stopImmediatePropagation();
+              if (arcade) {
+                try { localStorage.removeItem("ms-arcade-unlocked"); } catch (error) {}
+                window.location.assign(base);
+              } else {
+                try { localStorage.setItem("ms-arcade-unlocked", "yes"); } catch (error) {}
+                window.location.assign(base + "arcade.html");
+              }
+            }
             window.addEventListener("keydown", function (event) {
-              if (event.key !== "Enter" || event.repeat || event.isComposing) return;
+              if (event.repeat || event.isComposing) return;
               var target = event.target;
-              if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(target.tagName))) {
+              if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+              if (event.code === "ControlLeft" || event.code === "ControlRight" ||
+                  event.code === "Digit1" || event.code === "Numpad1") {
+                toggleSpace(event);
+                return;
+              }
+              if (event.key !== "Enter") return;
+              if (target && /^(BUTTON)$/.test(target.tagName)) {
                 count = 0;
                 lastPress = 0;
                 return;
@@ -449,19 +479,7 @@ jobs:
               lastPress = now;
               if (count < 3) return;
               count = 0;
-              event.preventDefault();
-              event.stopPropagation();
-              event.stopImmediatePropagation();
-              var path = window.location.pathname;
-              var base = path === "/mindspace" || path.indexOf("/mindspace/") === 0 ? "/mindspace/" : "/";
-              var home = path === base || path === base + "index.html" || path === base + "index.htm";
-              if (home) {
-                try { localStorage.setItem("ms-arcade-unlocked", "yes"); } catch (error) {}
-                window.location.assign(base + "arcade.html");
-              } else {
-                try { localStorage.removeItem("ms-arcade-unlocked"); } catch (error) {}
-                window.location.assign(base);
-              }
+              toggleSpace(event);
             }, true);
           })();
           </script>'''
