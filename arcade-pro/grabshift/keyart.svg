@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="560" viewBox="0 0 680 560">
+<defs><radialGradient id="glow"><stop stop-color="#2b4549" stop-opacity=".6"/><stop offset="1" stop-color="#101720" stop-opacity="0"/></radialGradient><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#7e9592" stroke-opacity=".09"/></pattern><filter id="shadow"><feDropShadow dx="5" dy="9" stdDeviation="1" flood-color="#070c12" flood-opacity=".5"/></filter></defs>
+<ellipse cx="367" cy="260" rx="313" ry="267" fill="url(#glow)"/><rect x="58" y="33" width="587" height="443" rx="22" fill="url(#grid)"/>
+<g fill="none" stroke="#33484e"><path d="M89 93V65H117M590 65H618V93M89 434V462H117M590 462H618V434"/><circle cx="368" cy="258" r="166" stroke-dasharray="3 9"/><circle cx="368" cy="258" r="115" stroke-opacity=".5"/></g>
+<g fill="#7c9698" font-family="monospace" font-size="9" letter-spacing="2"><text x="91" y="41">GRAVITY IS NOT YOUR FRIEND.</text><text x="550" y="41">↓ 9.81</text></g>
+<path d="M242 72V113M512 72V113" stroke="#51615e" stroke-width="4"/><rect x="218" y="108" width="320" height="16" rx="6" fill="#2b4146" stroke="#789280" stroke-width="2"/><rect x="223" y="108" width="310" height="4" rx="2" fill="#d9f978"/>
+<path d="M524 115L574 259" stroke="#738689" stroke-width="3"/><circle cx="574" cy="284" r="30" fill="#2f414a" stroke="#71858a" stroke-width="3"/><circle cx="574" cy="284" r="20" fill="none" stroke="#526c71"/><circle cx="574" cy="284" r="4" fill="#d9f978"/>
+<g filter="url(#shadow)" stroke-linecap="round" stroke-linejoin="round">
+<g transform="translate(281 243) rotate(19)">
+<path d="M-12 36L-32 75L-66 89M12 36L27 72L64 74" fill="none" stroke="#387872" stroke-width="21"/><path d="M-32 75L-66 89M27 72L64 74" stroke="#76dfcd" stroke-width="17"/>
+<path d="M-23 -19L-55 -54L-45 -124M22 -19L63 0L102 -31" fill="none" stroke="#39877f" stroke-width="19"/><path d="M-55 -54L-45 -124M63 0L102 -31" stroke="#77e2d2" stroke-width="16"/>
+<rect x="-26" y="-39" width="53" height="83" rx="16" fill="#77e2d2" stroke="#0c2229" stroke-width="3"/><circle cy="-4" r="11" fill="#164149"/>
+<rect x="-28" y="-94" width="57" height="49" rx="18" fill="#77e2d2" stroke="#0c2229" stroke-width="3"/><circle cx="-6" cy="-72" r="4" fill="#153039"/><circle cx="14" cy="-72" r="4" fill="#153039"/><path d="M1 -57h9" stroke="#153039" stroke-width="3"/><circle cx="0" cy="-91" r="5" fill="#d5fff0"/>
+<circle cx="-45" cy="-124" r="10" fill="#d9f978"/><circle cx="102" cy="-31" r="10" fill="#d9f978"/>
+</g>
+<g transform="translate(428 317) rotate(-28)">
+<path d="M-13 35L-35 76L-16 115M12 35L32 71L67 90" fill="none" stroke="#9b614d" stroke-width="21"/><path d="M-35 76L-16 115M32 71L67 90" stroke="#ffac78" stroke-width="17"/>
+<path d="M-22 -22L-64 -54L-67 -125M23 -20L55 -36L79 -12" fill="none" stroke="#b87654" stroke-width="19"/><path d="M-64 -54L-67 -125M55 -36L79 -12" stroke="#ffac78" stroke-width="16"/>
+<rect x="-26" y="-39" width="53" height="83" rx="13" fill="#ffac78" stroke="#30252b" stroke-width="3"/><path d="M0 -16l12 12L0 8-12-4z" fill="#513531"/>
+<rect x="-28" y="-94" width="57" height="49" rx="9" fill="#ffac78" stroke="#30252b" stroke-width="3"/><path d="M-26 -83H27" stroke="#ffe1b6" stroke-width="7"/><path d="M-18 -70h8M3 -70h8M-9 -57h10" stroke="#403037" stroke-width="4"/>
+<circle cx="-67" cy="-125" r="10" fill="#d9f978"/><circle cx="79" cy="-12" r="8" fill="#ffac78"/>
+</g></g>
+<g fill="none" stroke="#d9f978"><circle cx="361" cy="218" r="19" opacity=".3"/><path d="M377 188l7-8M388 206l11-2M371 174l3-9" stroke-width="2" opacity=".7"/></g>
+<g fill="none" stroke="#739190" stroke-width="2" stroke-linecap="round"><path d="M173 298q-18-26-15-55M159 308q-24-31-21-69" opacity=".45"/><path d="M499 371q18-18 22-41M512 382q23-23 29-51" opacity=".45"/></g>
+<path d="M107 414H278V465H107zM478 414H631V465H478z" fill="#23333c" stroke="#435b5e" stroke-width="2"/><path d="M109 414H276M480 414H629" stroke="#d9f978" stroke-width="4"/>
+<path d="M120 437l10-10m7 16 16-16m7 16 16-16m7 16 16-16m7 16 16-16m7 16 16-16m7 16 16-16M490 437l10-10m7 16 16-16m7 16 16-16m7 16 16-16m7 16 16-16m7 16 16-16" stroke="#7d8663" stroke-width="3" opacity=".5"/>
+<g fill="none" stroke="#d9f978" stroke-width="2" opacity=".4"><path d="M354 440l12 8 12-8M354 460l12 8 12-8M354 480l12 8 12-8"/></g>
+<g transform="translate(180 388) rotate(-9)"><rect x="-23" y="-23" width="46" height="46" rx="4" fill="#645f45" stroke="#b2ab75" stroke-width="2"/><path d="M-15-15L15 15M15-15L-15 15" stroke="#b2ab75" stroke-width="2"/></g>
+</svg>
