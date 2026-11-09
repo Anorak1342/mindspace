@@ -28,6 +28,35 @@
 @media(max-width:800px){.hero{grid-template-columns:1fr}.hero-side{padding:16px}.week{margin-top:10px}}
 @media(max-width:540px){.welcome{padding:21px}.section-head{margin-top:21px}}
 
+/* Study workspace refresh: put revision decks first and remove dashboard clutter. */
+.app{max-width:1080px;padding:22px 24px 56px}
+.topbar{margin-bottom:30px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.brand{font-size:22px}
+.hero{display:block;margin:0 0 28px}
+.welcome{min-height:0;padding:26px 30px;border-radius:18px}
+.welcome:after{font-size:115px;right:25px;top:0}
+.welcome h1{font-size:clamp(30px,4vw,42px);margin:8px 0}
+.welcome p{max-width:570px;margin-bottom:16px}
+.hero-side{display:none}
+.section-head{margin:0 0 15px;align-items:center}
+.section-head h2{font-size:22px}
+.section-head p{font-size:13px}
+.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.deck{min-height:155px;padding:18px;border-radius:15px;box-shadow:0 5px 18px #29385a0a}
+.deck h3{font-size:16px}
+.deck p{font-size:12px}
+.deck-bottom{margin-top:15px}
+.text-btn{font-size:13px}
+main>section:nth-of-type(3){margin-top:34px}
+.tools{gap:12px}
+.tool{padding:16px;border-radius:15px}
+.tool-head{margin-bottom:8px}
+.timer{font-size:35px;margin:5px 0 9px}
+.notes{min-height:78px}
+.footer{margin-top:30px}
+@media(max-width:760px){.app{padding:16px 14px 36px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.welcome{padding:22px}.hero{margin-bottom:22px}}
+@media(max-width:480px){.grid{grid-template-columns:1fr}.topbar{margin-bottom:20px}.deck{min-height:138px}}
+
 /* Year 7 study page: bright, readable light theme */
 :root{color-scheme:light;--bg:#f4f7fb;--panel:#ffffff;--panel2:#e9eef7;--text:#20263a;--muted:#68728b;--line:#dce3ef;--mint:#35ae88;--violet:#8a78df;--pink:#dc6b9a;--yellow:#d89a2b}
 body{background:radial-gradient(ellipse at 8% 0%,#e3eaff,transparent 40%),radial-gradient(ellipse at 95% 8%,#ddf6ec,transparent 32%),var(--bg);color:var(--text)}
@@ -112,16 +141,18 @@ const year7Decks=[
 ["What is the probability of a certain event?","1, or 100%."]
 ]}
 ];
-if(localStorage.getItem("ms-year7-decks-v1")!=="yes"){
- year7Decks.forEach(seed=>{
-  let deck=decks.find(d=>String(d.name||"").toLowerCase()===seed.name.toLowerCase());
-  if(!deck){decks.push(seed);return;}
-  const known=new Set((deck.cards||[]).map(c=>c[0]));
-  seed.cards.forEach(c=>{if(!known.has(c[0]))deck.cards.push(c)});
- });
- save();
- try{localStorage.setItem("ms-year7-decks-v1","yes")}catch(e){}
-}
+/* Reliable deck seeding: add missing Year 7 decks/cards on every visit.
+   This repairs browsers that received an earlier incomplete migration. */
+let decksChanged=false;
+year7Decks.forEach(seed=>{
+ let deck=decks.find(d=>String(d.name||"").trim().toLowerCase()===seed.name.toLowerCase());
+ if(!deck){decks.push(JSON.parse(JSON.stringify(seed)));decksChanged=true;return;}
+ if(!Array.isArray(deck.cards))deck.cards=[];
+ const known=new Set(deck.cards.map(c=>c[0]));
+ seed.cards.forEach(c=>{if(!known.has(c[0])){deck.cards.push(c);decksChanged=true}});
+});
+if(!Array.isArray(decks)||!decks.length){decks=JSON.parse(JSON.stringify(starter));decksChanged=true;}
+if(decksChanged)save();
 function toast(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2100)}
 function renderDecks(){const root=$("#decks");root.innerHTML="";decks.forEach(d=>{let el=document.createElement("article");el.className="deck";el.innerHTML='<div><div class="deck-top"><div class="deck-icon" style="background:'+d.color+'22">'+d.icon+'</div><span class="tag">'+d.subject+'</span></div><h3></h3><p></p></div><div><div class="deck-bottom"><span>'+d.cards.length+' cards</span><button class="text-btn study-deck" data-id="'+d.id+'">Study →</button></div><div class="progress"><span style="width:'+Math.min(100,d.cards.length*16)+'%;background:'+d.color+'"></span></div></div>';el.querySelector("h3").textContent=d.name;el.querySelector("p").textContent=d.cards.length?"Keep the knowledge moving.":"Your next idea starts here.";root.append(el)});if(!decks.length)root.innerHTML='<div class="empty">No decks yet. Create your first one to get started.</div>';$$(".study-deck").forEach(b=>b.onclick=()=>studyDeck(+b.dataset.id))}
 function modal(title,html){$("#modalTitle").textContent=title;$("#modalBody").innerHTML=html;$("#modal").classList.add("show")}function closeModal(){$("#modal").classList.remove("show");clearTimeout(reflexTimeout)}$("#closeModal").onclick=closeModal;$("#modal").onclick=e=>{if(e.target===$("#modal"))closeModal()};
