@@ -64,7 +64,8 @@ jobs:
           git clone --depth 1 https://github.com/wwwtyro/Astray.git /tmp/astray
           git clone --depth 1 https://github.com/Leonxlnx/level-devil.git /tmp/fabledevil
           git clone --depth 1 https://github.com/EvanBacon/Expo-Crossy-Road.git /tmp/crossy-road
-          # Edge Surf is embedded from its existing public host to preserve Microsoft's original game unchanged.
+          git clone --depth 1 https://github.com/jackbuehner/MicrosoftEdge-Surf.git /tmp/edge-surf
+          # Edge Surf is copied into Mindspace so the game and its assets load from this site.
           git -C /tmp/snack-hole-game checkout 2f1e5699eb08e19b6e6b76ab1e28055c9295a27b
           # Build Evan Bacon's original Expo Crossy Road project for the web.
           # No game source, graphics, models, audio, or gameplay code is edited.
@@ -96,25 +97,15 @@ jobs:
           HTML
           cp /tmp/crossy-road/LICENSE arcade-pro/crossy-road/LICENSE.txt
           mkdir -p arcade-pro/edge-surf
-          cat > arcade-pro/edge-surf/index.html <<'HTML'
-          <!doctype html>
-          <html lang="en">
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width,initial-scale=1">
-            <title>Edge Surf · Mindspace</title>
-            <style>
-              *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071b2b;color:#fff;font:15px system-ui,sans-serif}
-              iframe{display:block;width:100%;height:100%;border:0}
-              .fallback{position:fixed;z-index:2;left:12px;bottom:10px;padding:8px 12px;border-radius:8px;background:#ffffffdf;color:#172333;text-decoration:none;font-weight:700}
-            </style>
-          </head>
-          <body>
-            <iframe src="https://surf.jackbuehner.com/" title="Original Microsoft Edge Surf game" allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe>
-            <a class="fallback" href="https://surf.jackbuehner.com/" target="_blank" rel="noopener noreferrer">Open Edge Surf directly ↗</a>
-          </body>
-          </html>
-          HTML
+          cp -R /tmp/edge-surf/. arcade-pro/edge-surf/
+          rm -rf arcade-pro/edge-surf/.git arcade-pro/edge-surf/.github
+          rm -f arcade-pro/edge-surf/CNAME
+          cat > arcade-pro/edge-surf/ATTRIBUTION.txt <<'TXT'
+          Microsoft Edge Surf game files are from Microsoft Edge and were adapted
+          for independent browser use by jackbuehner/MicrosoftEdge-Surf.
+          Upstream project: https://github.com/jackbuehner/MicrosoftEdge-Surf
+          See the in-game Credits for Microsoft and third-party acknowledgements.
+          TXT
           # Publish the four requested Random sports games locally inside Mindspace.
           mkdir -p arcade-pro/soccer-random arcade-pro/basket-random arcade-pro/boxing-random arcade-pro/volley-random
           cp -R /tmp/soccer-random/. arcade-pro/soccer-random/
