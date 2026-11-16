@@ -212,12 +212,11 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
  const KEY="mindspace-panic-shortcut-v1";
  const readShortcut=()=>{try{return localStorage.getItem(KEY)||"Alt+Shift+M"}catch(e){return "Alt+Shift+M"}};
  let shortcut=readShortcut();
- const originalTitle=document.title;
+ const originalIcon=(document.querySelector('link[rel~="icon"]')||{}).href||"./brain.svg";
  let coverEnabled=true;
- const coverTitle="Mindspace · Study";
+ const coverIcon='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#e9eef7"/><path d="M16 13h22a10 10 0 0 1 10 10v28H26a10 10 0 0 1-10-10z" fill="#35ae88"/><path d="M26 13v38M26 23h13M26 33h13" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>');
  function setCover(active){
    if(!coverEnabled)return;
-   document.title=active?coverTitle:originalTitle;
    let icon=document.querySelector('link[rel~="icon"]');
    if(active){
      if(!icon){icon=document.createElement("link");icon.rel="icon";document.head.appendChild(icon);}
