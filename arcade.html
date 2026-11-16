@@ -98,7 +98,7 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 <script src="mindspace-lock.js" defer></script>
 </head>
 <body><main class="wrap">
-<header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><nav class="toplinks"><button class="back" id="blank-launch" type="button" hidden>↗ Open blank tab</button><a class="back" href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=_cdiBrDGHECV4nyShgopF62q1nLVpHhPjuyoCyF7_ZhUOFVGVFlFTEpZWkVVUU1PT0RTMFI2N0dGMy4u" target="_blank" rel="noopener noreferrer">💡 Suggest a Game</a><a class="back" href="./creator-favs.html">★ Creator Favs</a><a class="back whats-new-link" href="./whats-new.html?v=20261113-1">✦ What’s new<span class="new-dot" id="whats-new-dot" aria-label="New updates"></span></a><a class="back" href="./">← Back to study</a></nav></header>
+<header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><nav class="toplinks"><button class="back" id="blank-launch" type="button" hidden>↗ Open blank tab</button><button class="back" id="tab-privacy" type="button">⌘ Tab privacy</button><a class="back" href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=_cdiBrDGHECV4nyShgopF62q1nLVpHhPjuyoCyF7_ZhUOFVGVFlFTEpZWkVVUU1PT0RTMFI2N0dGMy4u" target="_blank" rel="noopener noreferrer">💡 Suggest a Game</a><a class="back" href="./creator-favs.html">★ Creator Favs</a><a class="back whats-new-link" href="./whats-new.html?v=20261113-1">✦ What’s new<span class="new-dot" id="whats-new-dot" aria-label="New updates"></span></a><a class="back" href="./">← Back to study</a></nav></header>
 <section class="player-bar" id="player-bar"><div><h2 id="player-rank">Your Mindspace level</h2><div class="player-muted" id="player-summary">Sign in through Chat to sync your progress across devices.</div><div class="player-progress"><span id="player-progress-fill"></span></div><div class="player-muted" id="player-progress-label">Your XP progress will appear here.</div></div><a href="./chat.html">Player profile ↗</a></section>
 <section class="theme-panel" aria-label="Arcade appearance"><h2>🎨 Arcade themes</h2><div class="player-muted" id="theme-status">Choose your arcade look. New themes unlock as you level up.</div><div class="theme-options"><button class="theme-choice" type="button" data-theme="midnight" aria-pressed="true">🌑 Mindspace Midnight</button><button class="theme-choice" type="button" data-theme="neon" disabled title="Unlock at level 10">⚡ Neon Arcade · Level 10</button><button class="theme-choice" type="button" data-theme="sunset" disabled title="Unlock at level 25">🌇 Pixel Sunset · Level 25</button></div><div class="theme-tools"><label>Accent colour <input id="theme-accent" type="color" value="#83e6bd" aria-label="Choose accent colour"></label><label><input id="theme-sounds" type="checkbox" checked> Theme sounds on</label><span id="theme-save-status">Saved on this device</span></div></section>
 <section class="hero"><div class="eyebrow">THE SECRET SIDE QUEST</div><h1>Pick your game.</h1><p class="tagline">Bigger than FlashOS, better than Studydesk.</p><p>Big games, tiny games, racing, puzzles and city-building. Choose a tile and jump in.</p></section>
@@ -175,6 +175,11 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 <article class="game" data-genres="action"><div class="icon">👑</div><h2>PIXEL PRINCESS</h2><p class="desc">Explore six themed worlds, defeat enemies, unlock outfits and face a multi-phase final boss.</p><a class="play gold" href="./arcade-pro/pixel-princess/">PLAY PIXEL PRINCESS ↗</a></article>
 <article class="game" data-genres="arcade"><div class="icon">🐤</div><h2>FLAPPY BIRD-REMADE</h2><p class="desc">A 3D flapping challenge. Fly between pipes, beat your best score and switch camera views.</p><a class="play" href="./arcade-pro/flappy-bird-remade/">PLAY FLAPPY BIRD-REMADE ↗</a></article>
 <article class="game" data-genres="action"><div class="icon">🥊</div><h2>STREET CRIME</h2><p class="desc">A classic side-scrolling beat ’em up. Punch, kick, block and fight through enemy waves and boss encounters.</p><a class="play gold" href="./arcade-pro/street-crime/">PLAY STREET CRIME ↗</a></article>
+<article class="game" data-genres="action puzzle"><div class="icon">😈</div><h2>LEVEL DEVIL</h2><p class="desc">A deceptively tricky platformer packed with surprise traps, disappearing floors and precision jumps.</p><a class="play gold" href="./arcade-pro/solus-level-devil/">PLAY LEVEL DEVIL ↗</a></article>
+<article class="game" data-genres="arcade action"><div class="icon">🟩</div><h2>GEOMETRY DASH</h2><p class="desc">Jump, fly and flip through rhythm-based obstacle courses in this browser port.</p><a class="play gold" href="./arcade-pro/solus-geometry-dash/">PLAY GEOMETRY DASH ↗</a></article>
+<article class="game" data-genres="arcade action"><div class="icon">🐔</div><h2>CROSSY ROAD</h2><p class="desc">Hop across busy roads, rivers and railway tracks. How far can you get?</p><a class="play gold" href="./arcade-pro/solus-crossy-road/">PLAY CROSSY ROAD ↗</a></article>
+<article class="game" data-genres="racing arcade"><div class="icon">🔺</div><h2>SLOPE 3</h2><p class="desc">Race down an endless neon slope, dodge obstacles and try to beat your high score.</p><a class="play gold" href="./arcade-pro/solus-slope/">PLAY SLOPE 3 ↗</a></article>
+<article class="game" data-genres="action multiplayer"><div class="icon">🚀</div><h2>AMONG US</h2><p class="desc">Complete tasks, investigate suspicious behaviour and find the impostor in this browser port.</p><a class="play gold" href="./arcade-pro/solus-among-us/">PLAY AMONG US ↗</a></article>
 <article class="game" data-genres="action"><div class="icon">⚔️</div><h2>VOXEL MUSOU</h2><p class="desc">Take on huge armies in a 3D warrior action game with seven officers, story campaigns, trials and weapon combos.</p><a class="play gold" href="./arcade-pro/voxel-musou/">PLAY VOXEL MUSOU ↗</a></article>
 
 
@@ -197,6 +202,51 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
    tab.document.documentElement.style.cssText="width:100%;height:100%;margin:0;overflow:hidden;background:#090909";
    tab.document.body.style.cssText="width:100%;height:100%;margin:0;overflow:hidden;background:#090909";
    tab.document.body.appendChild(frame);
+ });
+})();
+
+
+(function(){
+ const button=document.getElementById("tab-privacy");
+ if(!button)return;
+ const KEY="mindspace-panic-shortcut-v1";
+ const readShortcut=()=>{try{return localStorage.getItem(KEY)||"Alt+Shift+M"}catch(e){return "Alt+Shift+M"}};
+ let shortcut=readShortcut();
+ const originalTitle=document.title;
+ let coverEnabled=true;
+ const coverTitle="Mindspace · Study";
+ function setCover(active){
+   if(!coverEnabled)return;
+   document.title=active?coverTitle:originalTitle;
+   let icon=document.querySelector('link[rel~="icon"]');
+   if(active){
+     if(!icon){icon=document.createElement("link");icon.rel="icon";document.head.appendChild(icon);}
+     icon.href="./brain.svg";
+   }
+ }
+ document.addEventListener("visibilitychange",()=>setCover(document.hidden));
+ window.addEventListener("blur",()=>setCover(true));
+ window.addEventListener("focus",()=>setCover(false));
+ document.addEventListener("keydown",event=>{
+   if(event.altKey&&event.shiftKey&&event.key.toLowerCase()==="m"){
+     event.preventDefault();
+     window.location.href="./";
+   }
+ });
+ button.addEventListener("click",()=>{
+   const next=prompt("Panic shortcut is Alt + Shift + M. Enter a new shortcut as three keys (for example Alt+Shift+M), or leave blank to keep the default.",shortcut);
+   if(next===null)return;
+   const cleaned=next.replace(/\s+/g,"");
+   if(cleaned && !/^(Alt|Ctrl|Control|Shift|Meta)\+(Alt|Ctrl|Control|Shift|Meta)\+[A-Za-z0-9]$/i.test(cleaned)){
+     alert("Use a format such as Alt+Shift+M. The active shortcut remains Alt+Shift+M.");
+     return;
+   }
+   if(cleaned){
+     const parts=cleaned.split("+");
+     shortcut=cleaned;
+     try{localStorage.setItem(KEY,shortcut)}catch(e){}
+   }
+   alert("Tab title cover is enabled when Mindspace loses focus. Panic shortcut: "+shortcut+" returns to the Mindspace home page. The cover changes only the browser tab title and icon, not the visible page or browser history.");
  });
 })();
 
