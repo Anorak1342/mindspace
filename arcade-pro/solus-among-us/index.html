@@ -16,7 +16,7 @@
     .download-fill{width:0;height:100%;background:#35d0ba;transition:width .12s linear}
     #error{margin-top:12px;color:#ff6961;white-space:pre-wrap}
   </style>
-</head>
+<script id="mindspace-game-privacy">(function(){const original=(document.querySelector('link[rel~="icon"]')||{}).href||"../../brain.svg";const hidden='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#e9eef7"/><path d="M16 13h22a10 10 0 0 1 10 10v28H26a10 10 0 0 1-10-10z" fill="#35ae88"/><path d="M26 13v38M26 23h13M26 33h13" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>');function icon(active){let el=document.querySelector('link[rel~="icon"]');if(!el){el=document.createElement("link");el.rel="icon";document.head.appendChild(el)}el.href=active?hidden:original}document.addEventListener("visibilitychange",()=>icon(document.hidden));window.addEventListener("blur",()=>icon(true));window.addEventListener("focus",()=>icon(false));document.addEventListener("keydown",e=>{let v="Alt+Shift+M";try{v=localStorage.getItem("mindspace-panic-shortcut-v1")||v}catch(_){}const p=v.split("+"),k=p[p.length-1].toLowerCase(),has=n=>p.some(x=>x.toLowerCase()===n);if(e.key.toLowerCase()===k&&e.altKey===has("alt")&&e.shiftKey===has("shift")&&e.ctrlKey===(has("ctrl")||has("control"))&&e.metaKey===has("meta")){e.preventDefault();location.href="../../"}})})();</script></head>
 <body>
   <div id="game"><canvas id="unity-canvas" tabindex="-1"></canvas></div>
   <div id="loader"><div id="loader-box">
