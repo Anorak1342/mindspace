@@ -228,7 +228,13 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
  window.addEventListener("blur",()=>setCover(true));
  window.addEventListener("focus",()=>setCover(false));
  document.addEventListener("keydown",event=>{
-   if(event.altKey&&event.shiftKey&&event.key.toLowerCase()==="m"){
+   const parts=shortcut.split("+");
+   const key=parts[parts.length-1].toLowerCase();
+   const wantsAlt=parts.some(p=>p.toLowerCase()==="alt");
+   const wantsShift=parts.some(p=>p.toLowerCase()==="shift");
+   const wantsCtrl=parts.some(p=>["ctrl","control"].includes(p.toLowerCase()));
+   const wantsMeta=parts.some(p=>p.toLowerCase()==="meta");
+   if(event.key.toLowerCase()===key&&event.altKey===wantsAlt&&event.shiftKey===wantsShift&&event.ctrlKey===wantsCtrl&&event.metaKey===wantsMeta){
      event.preventDefault();
      window.location.href="./";
    }
