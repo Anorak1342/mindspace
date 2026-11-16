@@ -94,10 +94,37 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 [data-arcade-theme="neon"] .hero:after,[data-arcade-theme="sunset"] .hero:after{content:"";display:block;height:2px;margin-top:18px;background:linear-gradient(90deg,transparent,var(--player-accent),transparent);animation:msArcadeGlow 5s ease-in-out infinite}
 @media(max-width:600px){.player-bar{grid-template-columns:1fr}}
 
+
+#arcade-first-visit{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;padding:22px;background:radial-gradient(ellipse at 50% 0%,#263b39 0%,#101512 48%,#080909 100%);color:#f5f2ed}
+.arcade-welcome-card{width:min(680px,100%);padding:clamp(24px,5vw,42px);border:1px solid #ffffff24;border-radius:20px;background:#111715;box-shadow:0 24px 90px #0009}
+.arcade-welcome-card h1{font-size:clamp(38px,7vw,60px);margin:9px 0 8px}
+.arcade-welcome-intro{margin:0;color:#b5c2bc}
+.arcade-quick-tutorial{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:27px 0}
+.arcade-quick-tutorial>div{padding:15px;border:1px solid #34443d;border-radius:10px;background:#171f1b;display:flex;flex-direction:column;gap:7px}
+.arcade-quick-tutorial span{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:#83e6bd;color:#08140e;font-weight:900}
+.arcade-quick-tutorial strong{font-size:14px}
+.arcade-quick-tutorial small{font-size:12px;line-height:1.45;color:#9ca9a2}
+#enter-arcade{width:100%;padding:15px;border:0;border-radius:7px;background:#83e6bd;color:#08140e;font-weight:950;letter-spacing:1px;cursor:pointer}
+#enter-arcade:hover{filter:brightness(1.08)}
+.arcade-welcome-foot{display:block;text-align:center;color:#77847d;font-size:11px;margin-top:14px}
+@media(max-width:560px){.arcade-quick-tutorial{grid-template-columns:1fr}.arcade-quick-tutorial>div{display:grid;grid-template-columns:30px 1fr;align-items:center;column-gap:9px}.arcade-quick-tutorial small{grid-column:2}}
 </style>
 <script src="mindspace-lock.js" defer></script>
 </head>
-<body><main class="wrap">
+<body><section id="arcade-first-visit" role="dialog" aria-modal="true" aria-labelledby="arcade-welcome-title">
+  <div class="arcade-welcome-card">
+    <div class="eyebrow">WELCOME TO MINDSPACE ARCADE</div>
+    <h1 id="arcade-welcome-title">Ready to play?</h1>
+    <p class="arcade-welcome-intro">A big collection of games, without the hunting around.</p>
+    <div class="arcade-quick-tutorial">
+      <div><span>1</span><strong>Find a game</strong><small>Use the search bar or genre filter.</small></div>
+      <div><span>2</span><strong>Press Play</strong><small>Choose a game card to launch it.</small></div>
+      <div><span>3</span><strong>Keep your favourites</strong><small>Star games to find them quickly next time.</small></div>
+    </div>
+    <button type="button" id="enter-arcade">LET'S PLAY <span aria-hidden="true">→</span></button>
+    <small class="arcade-welcome-foot">This quick guide only appears the first time you visit on this browser.</small>
+  </div>
+</section><main class="wrap">
 <header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><nav class="toplinks"><button class="back" id="blank-launch" type="button" hidden>↗ Open blank tab</button><button class="back" id="tab-privacy" type="button">⌘ Tab privacy</button><a class="back" href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=_cdiBrDGHECV4nyShgopF62q1nLVpHhPjuyoCyF7_ZhUOFVGVFlFTEpZWkVVUU1PT0RTMFI2N0dGMy4u" target="_blank" rel="noopener noreferrer">💡 Suggest a Game</a><a class="back" href="./creator-favs.html">★ Creator Favs</a><a class="back whats-new-link" href="./whats-new.html?v=20261113-1">✦ What’s new<span class="new-dot" id="whats-new-dot" aria-label="New updates"></span></a><a class="back" href="./">← Back to study</a></nav></header>
 <section class="player-bar" id="player-bar"><div><h2 id="player-rank">Your Mindspace level</h2><div class="player-muted" id="player-summary">Sign in through Chat to sync your progress across devices.</div><div class="player-progress"><span id="player-progress-fill"></span></div><div class="player-muted" id="player-progress-label">Your XP progress will appear here.</div></div><a href="./chat.html">Player profile ↗</a></section>
 <section class="theme-panel" aria-label="Arcade appearance"><h2>🎨 Arcade themes</h2><div class="player-muted" id="theme-status">Choose your arcade look. New themes unlock as you level up.</div><div class="theme-options"><button class="theme-choice" type="button" data-theme="midnight" aria-pressed="true">🌑 Mindspace Midnight</button><button class="theme-choice" type="button" data-theme="neon" disabled title="Unlock at level 10">⚡ Neon Arcade · Level 10</button><button class="theme-choice" type="button" data-theme="sunset" disabled title="Unlock at level 25">🌇 Pixel Sunset · Level 25</button></div><div class="theme-tools"><label>Accent colour <input id="theme-accent" type="color" value="#83e6bd" aria-label="Choose accent colour"></label><label><input id="theme-sounds" type="checkbox" checked> Theme sounds on</label><span id="theme-save-status">Saved on this device</span></div></section>
@@ -114,58 +141,6 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 <div class="controls"><input id="game-search" type="search" placeholder="Search games by name or description…" aria-label="Search games"><select id="genre-filter" aria-label="Filter games by genre"><option value="all">All genres</option><option value="action">Action</option><option value="arcade">Arcade</option><option value="puzzle">Puzzle</option><option value="racing">Racing</option><option value="simulation">Simulation</option><option value="sports">Sports</option><option value="strategy">Strategy</option><option value="idle">Idle</option></select></div>
 <p id="results-count" class="note" aria-live="polite">Showing all games</p>
 <section class="games">
-<article class="game" data-genres="idle simulation"><div class="icon">⚛️</div><h2>PARTICLE CLICKER</h2><p class="desc">Build a particle physics research lab, discover particles and grow your scientific reputation.</p><a class="play gold" href="./arcade-pro/particle-clicker/">PLAY PARTICLE CLICKER ↗</a></article>
-<article class="game" data-genres="racing action arcade"><div class="icon">🚔</div><h2>SMASHY ROAD</h2><p class="desc">First-person blocky driving. Escape the cops, collect coins and unlock new cars.</p><a class="play" href="./smashy-road-first-person.html">PLAY SMASHY ROAD ↗</a></article>
-
-<article class="game" data-genres="adventure rpg strategy"><div class="icon">🔴</div><h2>POKÉMON RED</h2><p class="desc">Play the complete classic Kanto adventure in your browser. Catch Pokémon, challenge eight gyms and take on the Elite Four.</p><a class="play gold" href="https://brandeispatrick.github.io/pokemon-red-web/" target="_blank" rel="noopener noreferrer">PLAY POKÉMON RED ↗</a></article>
-<article class="game" data-genres="action arcade"><div class="icon">🥚</div><h2>SHELL SHOCKERS</h2><p class="desc">An online multiplayer egg-themed FPS. Choose your weapon, join a match and battle players worldwide.</p><a class="play gold" href="https://shellshockers.io/" target="_blank" rel="noopener noreferrer">PLAY SHELL SHOCKERS ↗</a></article>
-<article class="game" data-genres="arcade action sports"><div class="icon">🏂</div><h2>SNOW RIDER 3D</h2><p class="desc">Swerve around trees and rocks, collect gifts and see how far you can make it down the slope.</p><a class="play gold" href="./arcade-pro/snow-rider/">PLAY SNOW RIDER 3D ↗</a></article>
-<article class="game" data-genres="sports action"><div class="icon">⛷️</div><h2>SKI FRENZY</h2><p class="desc">Escape the avalanche and pull off tricks in the original Ski Frenzy game.</p><a class="play gold" href="./arcade-pro/ski-frenzy/">PLAY SKI FRENZY ↗</a></article>
-<article class="game" data-genres="arcade action"><div class="icon">🐔</div><h2>CROSSY ROAD</h2><p class="desc">Hop across busy roads, rivers and railway tracks in the original 3D Crossy Road game.</p><a class="play gold" href="./arcade-pro/crossy-road/">PLAY CROSSY ROAD ↗</a></article>
-
-
-
-<article class="game" data-genres="sports arcade"><div class="icon">🏄</div><h2>EDGE SURF</h2><p class="desc">Ride the waves, dodge obstacles and escape the Kraken in Microsoft Edge’s Surf game.</p><a class="play gold" href="./arcade-pro/edge-surf/">PLAY EDGE SURF ↗</a></article>
-<article class="game" data-genres="arcade puzzle"><div class="icon">🌀</div><h2>ASTRAY</h2><p class="desc">Roll a ball through increasingly tricky 3D mazes using physics and careful steering.</p><a class="play" href="./arcade-pro/astray/">PLAY ASTRAY ↗</a></article>
-<article class="game" data-genres="arcade action"><div class="icon">🌟</div><h2>STARSTRUCK</h2><p class="desc">Pilot a comet, chain star combos, dodge asteroids and chase a new high score.</p><a class="play gold" href="./arcade-pro/starstruck/">PLAY STARSTRUCK ↗</a></article>
-<article class="game" data-genres="arcade action"><div class="icon">🍃</div><h2>SPROUT RUNNER</h2><p class="desc">A colourful side-scrolling platformer. Jump gaps, stomp enemies, collect coins and reach the flag.</p><a class="play gold" href="./arcade-pro/sprout-runner/">PLAY SPROUT RUNNER ↗</a></article>
-<article class="game" data-genres="arcade"><div class="icon">🎮</div><h2>CLASSIC ARCADE</h2><p class="desc">Pong, Snake, Tetris, Flappy Bird and more quick-fire favourites.</p><a class="play" href="./arcade-pro/">PLAY ARCADE ↗</a></article>
-<article class="game" data-genres="racing"><div class="icon">🏎️</div><h2>LIBRECORSA</h2><p class="desc">A full 3D racing experience with cars, circuits and driving.</p><a class="play gold" href="./arcade-pro/librecorsa/">PLAY LIBRECORSA ↗</a></article>
-<article class="game" data-genres="sports arcade"><div class="icon">🎱</div><h2>8-BALL POOL</h2><p class="desc">A polished pool challenge with realistic ball physics, CPU opponents and four difficulty levels.</p><a class="play gold" href="./arcade-pro/8-ball-pool/">PLAY 8-BALL POOL ↗</a></article>
-<article class="game" data-genres="sports action arcade"><div class="icon">🤼</div><h2>GRABSHIFT</h2><p class="desc">A physics brawler. Grab rivals, swing from the arena and battle bots or a friend in local multiplayer.</p><a class="play gold" href="./arcade-pro/grabshift/">PLAY GRABSHIFT ↗</a></article>
-<article class="game" data-genres="sports arcade"><div class="icon">⚽</div><h2>SOCCER RANDOM</h2><p class="desc">Fast, chaotic two-player soccer matches. Jump, kick and score.</p><a class="play gold" href="./arcade-pro/soccer-random/">PLAY SOCCER RANDOM ↗</a></article>
-<article class="game" data-genres="sports action"><div class="icon">⚽</div><h2>WEB SOCCER</h2><p class="desc">A retro-style football match with CPU opponents, local two-player mode, custom formations and gamepad support.</p><a class="play gold" href="./arcade-pro/websoccer/">PLAY WEB SOCCER ↗</a></article>
-<article class="game" data-genres="sports action"><div class="icon">🏆</div><h2>WORLD CUP 2026</h2><p class="desc">A FIFA-style 11v11 football game with 48 national teams. This version opens the creator-hosted demo.</p><a class="play gold" href="https://worldcup2026.modelence.ai/" target="_blank" rel="noopener noreferrer">PLAY WORLD CUP 2026 ↗</a></article>
-<article class="game" data-genres="sports strategy simulation"><div class="icon">🌍</div><h2>7–0 WORLD CUP DRAFT</h2><p class="desc">Draft a World Cup dream team, choose your formation and try to win seven knockout matches in a row. Browser game.</p><a class="play gold" href="https://7-0game.com/" target="_blank" rel="noopener noreferrer">PLAY 7–0 ↗</a></article>
-<article class="game" data-genres="sports strategy simulation"><div class="icon">📋</div><h2>OPENFOOT MANAGER</h2><p class="desc">Run a football club: build your squad, set tactics, handle transfers, training and finances. Official desktop download required.</p><a class="play gold" href="https://www.openfootmanager.com/" target="_blank" rel="noopener noreferrer">GET OPENFOOT MANAGER ↗</a></article>
-
-
-<article class="game" data-genres="sports arcade"><div class="icon">🏀</div><h2>BASKET RANDOM</h2><p class="desc">A silly, fast-paced basketball showdown with unpredictable shots and bounces.</p><a class="play gold" href="./arcade-pro/basket-random/">PLAY BASKET RANDOM ↗</a></article>
-<article class="game" data-genres="sports arcade"><div class="icon">🥊</div><h2>BOXING RANDOM</h2><p class="desc">A wild two-player boxing game. Throw punches and try to stay on your feet.</p><a class="play gold" href="./arcade-pro/boxing-random/">PLAY BOXING RANDOM ↗</a></article>
-<article class="game" data-genres="sports arcade"><div class="icon">🏐</div><h2>VOLLEY RANDOM</h2><p class="desc">A quick-fire volleyball game with unpredictable rallies and two-player action.</p><a class="play gold" href="./arcade-pro/volley-random/">PLAY VOLLEY RANDOM ↗</a></article>
-<article class="game" data-genres="simulation"><div class="icon">✈️</div><h2>F-15 FLIGHT SIM</h2><p class="desc">Climb into the cockpit and take a fighter jet into the skies.</p><a class="play" href="./arcade-pro/f15-flight-sim/">PLAY FLIGHT SIM ↗</a></article>
-<article class="game" data-genres="simulation strategy"><div class="icon">🚇</div><h2>MINI METRO</h2><p class="desc">Draw railway lines, connect stations and keep a growing city moving.</p><a class="play" href="./mini-metro.html">PLAY MINI METRO ↗</a></article>
-<article class="game" data-genres="simulation strategy"><div class="icon">🚗</div><h2>TINY TRAFFIC TOWN</h2><p class="desc">A Mini Motorways-style traffic puzzle. Connect colourful homes and businesses, then beat the gridlock.</p><a class="play gold" href="./tiny-traffic-town.html">PLAY TRAFFIC TOWN ↗</a></article>
-<article class="game" data-genres="arcade"><div class="icon">👾</div><h2>PAC-MAN</h2><p class="desc">Four maps, clever ghost personalities, daily challenges and arcade-style maze runs.</p><a class="play gold" href="./arcade-pro/pacman/">PLAY PAC-MAN ↗</a></article>
-<article class="game" data-genres="puzzle"><div class="icon">🔢</div><h2>2048</h2><p class="desc">Slide, combine and chain number tiles. Reach 2048 without filling the board.</p><a class="play" href="./arcade-pro/2048/">PLAY 2048 ↗</a></article>
-<article class="game" data-genres="arcade action"><div class="icon">🦖</div><h2>T-REX RUNNER</h2><p class="desc">The classic endless desert dash. Jump cacti, duck under birds and chase a new high score.</p><a class="play gold" href="./arcade-pro/trex-runner/">PLAY T-REX ↗</a></article>
-<article class="game" data-genres="puzzle"><div class="icon">⬡</div><h2>HEXTRIS</h2><p class="desc">Rotate a hexagon to catch falling coloured blocks. Match colours, clear combos and survive the rising stack.</p><a class="play" href="./arcade-pro/hextris/">PLAY HEXTRIS ↗</a></article>
-<article class="game" data-genres="arcade action"><div class="icon">⛷️</div><h2>SKIFREE</h2><p class="desc">Ski down an endless mountain, dodge trees and rocks, and try to outrun the monster.</p><a class="play gold" href="./arcade-pro/skifree/">PLAY SKIFREE ↗</a></article>
-<article class="game" data-genres="arcade simulation"><div class="icon">🕳️</div><h2>SNACK HOLE</h2><p class="desc">Control a hungry hole in a colourful 3D city. Swallow bigger objects, earn upgrades and grow into a world-eating void.</p><a class="play" href="./arcade-pro/snack-hole/">PLAY SNACK HOLE ↗</a></article>
-<article class="game" data-genres="arcade action"><div class="icon">🔴</div><h2>SLOPE</h2><p class="desc">Steer a rolling ball down an endless neon track. Dodge red blocks, collect cyan orbs and beat your distance record.</p><a class="play gold" href="./arcade-pro/slope/">PLAY SLOPE ↗</a></article>
-<article class="game" data-genres="action"><div class="icon">🥊</div><h2>MK FIGHTER</h2><p class="desc">A retro arcade fighting game. Challenge a friend in local two-player combat with animated fighters.</p><a class="play gold" href="./arcade-pro/mk-fighter/">PLAY MK FIGHTER ↗</a></article>
-<article class="game" data-genres="strategy puzzle"><div class="icon">🔴</div><h2>CONNECT FOUR</h2><p class="desc">A polished strategy classic. Play the computer or challenge a friend on the same screen.</p><a class="play" href="./connect-four.html">PLAY CONNECT FOUR ↗</a></article>
-
-<article class="game" data-genres="idle puzzle strategy"><div class="icon">🌗</div><h2>GRIDLAND</h2><p class="desc">Match resources by day, build your settlement and survive the monsters that arrive after dark.</p><a class="play gold" href="./arcade-pro/gridland/">PLAY GRIDLAND ↗</a></article>
-<article class="game" data-genres="idle simulation strategy"><div class="icon">⌛</div><h2>PROGRESS KNIGHT</h2><p class="desc">Start with nothing, build skills and careers, manage your lifespan and rise through repeated lives.</p><a class="play" href="./arcade-pro/progress-knight/">PLAY PROGRESS KNIGHT ↗</a></article>
-<article class="game" data-genres="idle simulation strategy"><div class="icon">🧬</div><h2>EVOLVE</h2><p class="desc">Begin as primordial life and develop a civilisation, research, industry and eventually a spacefaring empire.</p><a class="play gold" href="./arcade-pro/evolve/">PLAY EVOLVE ↗</a></article>
-<article class="game" data-genres="simulation strategy"><div class="icon">⛷️</div><h2>SLOPER</h2><p class="desc">Design a mountain ski resort. Draw downhill runs, build lifts, manage guests and keep the slopes running until dusk.</p><a class="play gold" href="./arcade-pro/sloper/">PLAY SLOPER ↗</a></article>
-<article class="game" data-genres="simulation strategy"><div class="icon">🚦</div><h2>TRAFFIC LANE</h2><p class="desc">Build roads across a growing city, connect matching homes and shops, and stop traffic rings from filling.</p><a class="play" href="./arcade-pro/traffic-lane/">PLAY TRAFFIC LANE ↗</a></article>
-<article class="game" data-genres="idle strategy"><div class="icon">🧬</div><h2>TRIMPS</h2><p class="desc">Build a growing army, explore dangerous zones, unlock upgrades and push further in this deep idle strategy game.</p><a class="play gold" href="./arcade-pro/trimps/">PLAY TRIMPS ↗</a></article>
-<article class="game" data-genres="idle adventure"><div class="icon">🦈</div><h2>SHARK GAME</h2><p class="desc">Start with a tiny aquatic world, gather resources, discover new places and grow your shark-filled ecosystem.</p><a class="play" href="./arcade-pro/shark-game/">PLAY SHARK GAME ↗</a></article>
-<article class="game" data-genres="chat"><div class="icon">💬</div><h2>MINDSPACE CHAT</h2><p class="desc">Private chat rooms. Create a room, share its secret join code and talk with friends.</p><a class="play gold" href="./chat.html">OPEN CHAT ↗</a></article>
-<article class="game" data-genres="simulation strategy"><div class="icon">🏙️</div><h2>3D.CITY</h2><p class="desc">Build and manage a living 3D city in your browser, inspired by classic city simulators.</p><a class="play gold" href="./arcade-pro/3d-city/index.html">BUILD YOUR CITY ↗</a></article>
-<article class="game" data-genres="strategy adventure"><div class="icon">🔥</div><h2>A DARK ROOM</h2><p class="desc">Begin beside a dying fire. Gather wood, build a village, explore the wilderness and uncover a strange world.</p><a class="play gold" href="./arcade-pro/dark-room/">PLAY A DARK ROOM ↗</a></article>
 <article class="game" data-genres="arcade puzzle"><div class="icon">🧱</div><h2>STACK</h2><p class="desc">Build the tallest tower you can. Time each moving block perfectly or watch your tower get narrower.</p><a class="play gold" href="./arcade-pro/stack/">PLAY STACK ↗</a></article>
 
 <article class="game" data-genres="arcade action"><div class="icon">🏜️</div><h2>DUNE DASH</h2><p class="desc">A fast desert-runner game, launched through its Unity WebGL build.</p><a class="play gold" href="./arcade-pro/dune-dash/">PLAY DUNE DASH ↗</a></article>
@@ -374,4 +349,21 @@ document.getElementById("personal-record-form").addEventListener("submit",()=>re
 window.addEventListener("mindspace:progress",e=>{const l=levelFor(e.detail.stats.xp);themeButtons.find(b=>b.dataset.theme==="neon").disabled=l.level<10;themeButtons.find(b=>b.dataset.theme==="sunset").disabled=l.level<25;$("player-rank").textContent="Level "+l.level+" · "+l.rank;$("player-summary").textContent=(user?.displayName||"Player")+" · "+l.title+" · "+e.detail.stats.xp.toLocaleString()+" XP";$("player-progress-fill").style.width=l.progress+"%";$("player-progress-label").textContent=l.level>=100?"Maximum level reached":Math.floor(l.xpIntoLevel)+" / "+l.xpForNext+" XP to level "+(l.level+1);});
 </script>
 
+
+<script>
+(()=> {
+ const panel=document.getElementById("arcade-first-visit");
+ const button=document.getElementById("enter-arcade");
+ if(!panel||!button)return;
+ const key="mindspace-arcade-intro-seen-v1";
+ let seen=false;
+ try{seen=localStorage.getItem(key)==="yes"}catch(e){}
+ if(seen){panel.remove();return;}
+ button.addEventListener("click",()=>{
+   try{localStorage.setItem(key,"yes")}catch(e){}
+   panel.remove();
+   document.getElementById("game-search")?.focus();
+ });
+})();
+</script>
 </body></html>
