@@ -97,6 +97,21 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
  .arcade-content{grid-column:1;grid-row:3}
 }
 @media(max-width:520px){.top{align-items:flex-start;flex-direction:column}.toplinks{width:100%;justify-content:flex-start}.arcade-sidebar{margin:0 -2px}}
+
+/* Privacy controls */
+body.distance-privacy .arcade-content,
+body.distance-privacy .arcade-sidebar,
+body.distance-privacy .top{filter:brightness(.68) contrast(.72) saturate(.62) blur(.55px)}
+#privacy-settings{position:fixed;z-index:10000;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:20px}
+#privacy-settings.open{display:flex}
+#privacy-settings .privacy-card{width:min(420px,100%);background:#171717;border:1px solid #444;border-radius:12px;padding:22px;box-shadow:0 18px 70px #000b}
+#privacy-settings h2{margin:0 0 8px}
+#privacy-settings p{color:#aaa;line-height:1.5}
+#privacy-settings label{display:flex;align-items:center;gap:12px;padding:14px 0;border-top:1px solid #333;cursor:pointer}
+#privacy-settings input{width:20px;height:20px;accent-color:var(--mint)}
+#privacy-settings .privacy-close{margin-top:12px;background:var(--mint);color:#08140e;border:0;border-radius:7px;padding:11px 16px;font-weight:800;cursor:pointer}
+#away-cover{display:none;position:fixed;z-index:20000;inset:0;background:#090909;color:#ddd;align-items:center;justify-content:center;font:700 16px system-ui;letter-spacing:2px}
+body.tab-away #away-cover{display:flex}
 </style>
 <script src="mindspace-lock.js" defer></script>
 </head>
@@ -204,6 +219,17 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 <p class="note" id="arcade-note">Mindspace Arcade · Select a game to play. Your study-library unlock stays in place.</p>
 </div>
 </main>
+<div id="privacy-settings" role="dialog" aria-modal="true" aria-labelledby="privacy-title">
+ <div class="privacy-card">
+  <h2 id="privacy-title">Tab privacy</h2>
+  <p>Choose how Mindspace looks when someone might be watching from a distance.</p>
+  <label><input type="checkbox" id="distance-privacy-toggle"> <span><strong>Across-room privacy</strong><br><small>Dim and soften the arcade so details are harder to read from across the room.</small></span></label>
+  <p><small>When you switch to another tab or window, Mindspace will show a neutral cover. It returns when you come back.</small></p>
+  <button type="button" class="privacy-close" id="privacy-close">Done</button>
+ </div>
+</div>
+<div id="away-cover" aria-hidden="true">MINDSPACE</div>
+
 <script>
 (function(){
  const launch=document.getElementById("blank-launch");
@@ -224,53 +250,30 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 
 (function(){
  const button=document.getElementById("tab-privacy");
- if(!button)return;
- const KEY="mindspace-panic-shortcut-v1";
- const readShortcut=()=>{try{return localStorage.getItem(KEY)||"Alt+Shift+M"}catch(e){return "Alt+Shift+M"}};
- let shortcut=readShortcut();
- const originalIcon=(document.querySelector('link[rel~="icon"]')||{}).href||"./brain.svg";
- let coverEnabled=true;
- const coverIcon='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#e9eef7"/><path d="M16 13h22a10 10 0 0 1 10 10v28H26a10 10 0 0 1-10-10z" fill="#35ae88"/><path d="M26 13v38M26 23h13M26 33h13" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>');
- function setCover(active){
-   if(!coverEnabled)return;
-   let icon=document.querySelector('link[rel~="icon"]');
-   if(active){
-     if(!icon){icon=document.createElement("link");icon.rel="icon";document.head.appendChild(icon);}
-     icon.href="./brain.svg";
-   }
+ const panel=document.getElementById("privacy-settings");
+ const toggle=document.getElementById("distance-privacy-toggle");
+ const close=document.getElementById("privacy-close");
+ if(!button||!panel||!toggle||!close)return;
+ const KEY="mindspace-distance-privacy-v1";
+ try{toggle.checked=localStorage.getItem(KEY)==="on"}catch(e){}
+ document.body.classList.toggle("distance-privacy",toggle.checked);
+ toggle.addEventListener("change",()=>{
+   document.body.classList.toggle("distance-privacy",toggle.checked);
+   try{localStorage.setItem(KEY,toggle.checked?"on":"off")}catch(e){}
+ });
+ function openSettings(){panel.classList.add("open");toggle.focus();}
+ function closeSettings(){panel.classList.remove("open");button.focus();}
+ button.addEventListener("click",openSettings);
+ close.addEventListener("click",closeSettings);
+ panel.addEventListener("click",event=>{if(event.target===panel)closeSettings();});
+ document.addEventListener("keydown",event=>{if(event.key==="Escape"&&panel.classList.contains("open"))closeSettings();});
+ function setAway(away){
+   document.body.classList.toggle("tab-away",away);
  }
- document.addEventListener("visibilitychange",()=>setCover(document.hidden));
- window.addEventListener("blur",()=>setCover(true));
- window.addEventListener("focus",()=>setCover(false));
- document.addEventListener("keydown",event=>{
-   const parts=shortcut.split("+");
-   const key=parts[parts.length-1].toLowerCase();
-   const wantsAlt=parts.some(p=>p.toLowerCase()==="alt");
-   const wantsShift=parts.some(p=>p.toLowerCase()==="shift");
-   const wantsCtrl=parts.some(p=>["ctrl","control"].includes(p.toLowerCase()));
-   const wantsMeta=parts.some(p=>p.toLowerCase()==="meta");
-   if(event.key.toLowerCase()===key&&event.altKey===wantsAlt&&event.shiftKey===wantsShift&&event.ctrlKey===wantsCtrl&&event.metaKey===wantsMeta){
-     event.preventDefault();
-     window.location.href="./";
-   }
- });
- button.addEventListener("click",()=>{
-   const next=prompt("Panic shortcut is Alt + Shift + M. Enter a new shortcut as three keys (for example Alt+Shift+M), or leave blank to keep the default.",shortcut);
-   if(next===null)return;
-   const cleaned=next.replace(/\s+/g,"");
-   if(cleaned && !/^(Alt|Ctrl|Control|Shift|Meta)\+(Alt|Ctrl|Control|Shift|Meta)\+[A-Za-z0-9]$/i.test(cleaned)){
-     alert("Use a format such as Alt+Shift+M. The active shortcut remains Alt+Shift+M.");
-     return;
-   }
-   if(cleaned){
-     const parts=cleaned.split("+");
-     shortcut=cleaned;
-     try{localStorage.setItem(KEY,shortcut)}catch(e){}
-   }
-   alert("The browser tab keeps the neutral Mindspace title and changes its icon when the tab loses focus. Panic shortcut: "+shortcut+" returns to the Mindspace home page. This changes only the browser tab icon, not the visible page or browser history.");
- });
+ document.addEventListener("visibilitychange",()=>setAway(document.hidden));
+ window.addEventListener("blur",()=>setAway(true));
+ window.addEventListener("focus",()=>setAway(document.hidden));
 })();
-
 (function(){
  let unlocked=false;
  try{unlocked=localStorage.getItem("ms-arcade-unlocked")==="yes"}catch(e){}
