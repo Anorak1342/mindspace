@@ -58,41 +58,6 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 .collection-games{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.collection-games a{color:#b8f2d9;background:#1b2a24;padding:5px 8px;border-radius:5px;text-decoration:none;font-size:11px}
 @media(max-width:760px){.player-hub{grid-template-columns:1fr}.hub-panel{padding:15px}}
 
-/* Player progression and selectable arcade themes */
-:root{--player-accent:#83e6bd}
-.player-bar,.theme-panel{border:1px solid #343434;background:#101010;border-radius:10px;padding:17px 19px;margin:18px 0}
-.player-bar{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
-.player-bar h2,.theme-panel h2{font-size:20px;margin:0 0 5px}
-.player-muted{font:12px ui-monospace,monospace;color:#999}
-.player-progress{height:8px;border-radius:20px;background:#292929;overflow:hidden;margin-top:10px}
-.player-progress span{display:block;height:100%;background:var(--player-accent);width:0;transition:width .35s}
-.player-bar a{color:var(--player-accent);font-weight:800;text-decoration:none}
-.theme-options{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
-.theme-choice{border:1px solid #444;background:#1b1b1b;color:#eee;border-radius:7px;padding:9px 12px;cursor:pointer;font-weight:750}
-.theme-choice[aria-pressed=true]{border-color:var(--player-accent);box-shadow:0 0 0 1px var(--player-accent) inset}
-.theme-choice:disabled{opacity:.4;cursor:not-allowed}
-.theme-tools{display:flex;gap:14px;align-items:center;flex-wrap:wrap;color:#aaa;font-size:12px}
-.theme-tools label{display:flex;gap:8px;align-items:center}
-.theme-tools input[type=color]{width:34px;height:30px;padding:2px;background:#171717;border:1px solid #444;border-radius:5px}
-.theme-tools input[type=checkbox]{accent-color:var(--player-accent)}
-[data-arcade-theme="neon"]{--bg:#080817;--panel:#11112b;--line:#3b3268;--text:#f5efff;--mint:#67e8f9;--gold:#ff82d1;--player-accent:#67e8f9}
-[data-arcade-theme="neon"] body{background:radial-gradient(ellipse at 15% 0%,#25205a,transparent 40%),radial-gradient(ellipse at 90% 30%,#163b55,transparent 34%),#080817}
-[data-arcade-theme="neon"] .game{background:linear-gradient(145deg,#171438,#101025);border-color:#3b3268;box-shadow:0 8px 25px #05051280}
-[data-arcade-theme="neon"] .game:hover{border-color:#67e8f9}
-[data-arcade-theme="sunset"]{--bg:#1b1014;--panel:#2a171b;--line:#68403b;--text:#fff1dc;--mint:#ffb35c;--gold:#ff756c;--player-accent:#ffb35c}
-[data-arcade-theme="sunset"] body{background:radial-gradient(ellipse at 50% 0%,#63303b,transparent 45%),linear-gradient(180deg,#211217,#130e13)}
-[data-arcade-theme="sunset"] .game{background:linear-gradient(145deg,#3a2024,#25161b);border-color:#68403b}
-[data-arcade-theme="sunset"] .game:hover{border-color:#ffb35c}
-[data-arcade-theme="neon"] .game{border-radius:14px}
-[data-arcade-theme="sunset"] .game{border-radius:3px 14px 3px 14px}
-@keyframes msArcadeGlow{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:.42;transform:translateY(-8px)}}
-@keyframes msThemeDrift{0%{transform:translate3d(-2%,0,0) scale(1)}50%{transform:translate3d(2%,-1%,0) scale(1.05)}100%{transform:translate3d(-2%,0,0) scale(1)}}
-[data-arcade-theme="neon"] body:before,[data-arcade-theme="sunset"] body:before{content:"";position:fixed;z-index:0;pointer-events:none;inset:-15%;opacity:.45;background:radial-gradient(ellipse at 30% 35%,var(--player-accent),transparent 42%),radial-gradient(ellipse at 75% 65%,#a78bfa55,transparent 38%);filter:blur(30px);animation:msThemeDrift 18s ease-in-out infinite}
-.wrap{position:relative;z-index:1}
-[data-arcade-theme="neon"] .hero:after,[data-arcade-theme="sunset"] .hero:after{content:"";display:block;height:2px;margin-top:18px;background:linear-gradient(90deg,transparent,var(--player-accent),transparent);animation:msArcadeGlow 5s ease-in-out infinite}
-@media(max-width:600px){.player-bar{grid-template-columns:1fr}}
-
-
 #arcade-first-visit{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;padding:22px;background:radial-gradient(ellipse at 50% 0%,#263b39 0%,#101512 48%,#080909 100%);color:#f5f2ed}
 .arcade-welcome-card{width:min(680px,100%);padding:clamp(24px,5vw,42px);border:1px solid #ffffff24;border-radius:20px;background:#111715;box-shadow:0 24px 90px #0009}
 .arcade-welcome-card h1{font-size:clamp(38px,7vw,60px);margin:9px 0 8px}.arcade-welcome-intro{margin:0;color:#b5c2bc}
@@ -114,8 +79,15 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 .side-link span{width:19px;text-align:center;color:#83e6bd;font-size:16px}
 .side-link:hover,.side-link.active{background:#1b2922;color:#fff}
 .arcade-content{grid-column:2;grid-row:2;min-width:0}
-.arcade-content .hero{scroll-margin-top:20px}
-.arcade-content section[id],.arcade-content .hub-panel[id]{scroll-margin-top:20px}
+.arcade-page[hidden]{display:none!important}
+.arcade-page{min-width:0;animation:pageIn .16s ease-out}
+.page-heading{margin:0 0 22px}
+.page-heading h1{margin-top:7px}
+@keyframes pageIn{from{opacity:.65;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.arcade-page .player-hub{margin:0;grid-template-columns:1fr}
+.arcade-page .hub-panel{width:100%}
+.arcade-page .hero{margin-bottom:0}
+.arcade-page .daily{margin-top:0}
 .toplinks{gap:8px}
 @media(max-width:850px){
  .wrap{width:calc(100% - 24px);grid-template-columns:1fr;gap:12px}
@@ -135,20 +107,16 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 <header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><nav class="toplinks"><button class="back" id="blank-launch" type="button" hidden>↗ Open blank tab</button><button class="back" id="tab-privacy" type="button">⌘ Tab privacy</button></nav></header>
 <aside class="arcade-sidebar" aria-label="Arcade navigation">
   <div class="sidebar-heading">ARCADE MENU</div>
-  <a class="side-link active" href="#arcade-home"><span>⌂</span> Overview</a>
-  <a class="side-link" href="#daily-feature"><span>✦</span> Game of the day</a>
-  <a class="side-link" href="#all-games"><span>▦</span> All games</a>
+  <a class="side-link active" href="#overview" data-page="overview"><span>⌂</span> Overview</a>
+  <a class="side-link" href="#daily" data-page="daily"><span>✦</span> Game of the day</a>
+  <a class="side-link" href="#all-games-page" data-page="all-games-page"><span>▦</span> All games</a>
   <div class="sidebar-heading side-subhead">YOUR LIBRARY</div>
-  <a class="side-link" href="#recent-games"><span>◷</span> Recently played</a>
-  <a class="side-link" href="#favourite-games"><span>★</span> Favourites</a>
-  <a class="side-link" href="#personal-records"><span>♜</span> Personal records</a>
-  <a class="side-link" href="#game-collections"><span>▤</span> Collections</a>
-  <div class="sidebar-heading side-subhead">SETTINGS</div>
-  <a class="side-link" href="#arcade-themes"><span>◐</span> Appearance</a>
+  <a class="side-link" href="#recent" data-page="recent"><span>◷</span> Recently played</a>
+  <a class="side-link" href="#favourites" data-page="favourites"><span>★</span> Favourites</a>
+  <a class="side-link" href="#records" data-page="records"><span>♜</span> Personal records</a>
+  <a class="side-link" href="#collections" data-page="collections"><span>▤</span> Collections</a>
 </aside>
 <div class="arcade-content">
-<section class="player-bar" id="player-bar"><div><h2 id="player-rank">Your Mindspace level</h2><div class="player-muted" id="player-summary">Sign in through Chat to sync your progress across devices.</div><div class="player-progress"><span id="player-progress-fill"></span></div><div class="player-muted" id="player-progress-label">Your XP progress will appear here.</div></div></section>
-<section class="theme-panel" id="arcade-themes" aria-label="Arcade appearance"><h2>🎨 Arcade themes</h2><div class="player-muted" id="theme-status">Choose your arcade look. New themes unlock as you level up.</div><div class="theme-options"><button class="theme-choice" type="button" data-theme="midnight" aria-pressed="true">🌑 Mindspace Midnight</button><button class="theme-choice" type="button" data-theme="neon" disabled title="Unlock at level 10">⚡ Neon Arcade · Level 10</button><button class="theme-choice" type="button" data-theme="sunset" disabled title="Unlock at level 25">🌇 Pixel Sunset · Level 25</button></div><div class="theme-tools"><label>Accent colour <input id="theme-accent" type="color" value="#83e6bd" aria-label="Choose accent colour"></label><label><input id="theme-sounds" type="checkbox" checked> Theme sounds on</label><span id="theme-save-status">Saved on this device</span></div></section>
 <section class="hero" id="arcade-home"><div class="eyebrow">THE SECRET SIDE QUEST</div><h1>Pick your game.</h1><p class="tagline">Bigger than FlashOS, better than Studydesk.</p><p>Big games, tiny games, racing, puzzles and city-building. Choose a tile and jump in.</p></section>
 <section class="daily" id="daily-feature"><div><div class="daily-label">✦ GAME OF THE DAY</div><h2 id="daily-title">Choosing today’s game…</h2><p id="daily-desc">A fresh pick from the Mindspace arcade.</p></div><a class="play gold" id="daily-link" href="./arcade-pro/">PLAY TODAY’S PICK ↗</a></section>
 
@@ -359,37 +327,73 @@ h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;line-height:1.1;ma
 </script>
 
 <script type="module">
-import {ready,levelFor,recordActivity,getTheme,setTheme,getAccent,setAccent,getSounds,setSounds,currentUser,getCurrentStats} from "./player-system.js";
-const $=id=>document.getElementById(id);
-let soundContext=null;
-function uiSound(){if(!getSounds())return;try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;soundContext=soundContext||new Audio();const osc=soundContext.createOscillator(),gain=soundContext.createGain();osc.type="sine";osc.frequency.setValueAtTime(660,soundContext.currentTime);osc.frequency.exponentialRampToValueAtTime(880,soundContext.currentTime+.08);gain.gain.setValueAtTime(.045,soundContext.currentTime);gain.gain.exponentialRampToValueAtTime(.001,soundContext.currentTime+.12);osc.connect(gain);gain.connect(soundContext.destination);osc.start();osc.stop(soundContext.currentTime+.13);}catch(e){}}
-const themeButtons=[...document.querySelectorAll("[data-theme]")];
-function paintTheme(theme){setTheme(theme);themeButtons.forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.theme===theme)));}
-paintTheme(getTheme());
-if(getAccent()){$("theme-accent").value=getAccent();document.documentElement.style.setProperty("--player-accent",getAccent());}
-$("theme-accent").addEventListener("input",e=>setAccent(e.target.value));
-$("theme-sounds").checked=getSounds();
-$("theme-sounds").addEventListener("change",e=>{setSounds(e.target.checked);$("theme-save-status").textContent=e.target.checked?"Theme sounds enabled":"Theme sounds muted";});
-themeButtons.forEach(b=>b.addEventListener("click",()=>{if(b.disabled)return;paintTheme(b.dataset.theme);uiSound();}));
+import {ready,recordActivity} from "./player-system.js";
 await ready;
-const stats=getCurrentStats();const user=currentUser();
-const level=levelFor(stats?.xp||0);
-$("player-rank").textContent="Level "+level.level+" · "+level.rank;
-$("player-summary").textContent=(user?(user.displayName||"Player"):"Guest player")+" · "+level.title+" · "+(stats?.xp||0).toLocaleString()+" XP";
-$("player-progress-fill").style.width=level.progress+"%";
-$("player-progress-label").textContent=level.level>=100?"Maximum level reached":Math.floor(level.xpIntoLevel)+" / "+level.xpForNext+" XP to level "+(level.level+1);
-themeButtons.find(b=>b.dataset.theme==="neon").disabled=level.level<10;
-themeButtons.find(b=>b.dataset.theme==="sunset").disabled=level.level<25;
-if(getTheme()==="neon"&&level.level<10)paintTheme("midnight");
-if(getTheme()==="sunset"&&level.level<25)paintTheme("midnight");
-$("theme-status").textContent="Midnight is always available. Neon unlocks at level 10; Pixel Sunset unlocks at level 25.";
-const gameLaunches=new Map([...document.querySelectorAll(".game .play")].map(link=>{const card=link.closest(".game");return [link.href,link.getAttribute("href")||card?.querySelector("h2")?.textContent||"arcade"];}));document.addEventListener("click",event=>{const link=event.target.closest("a[href]");if(!link)return;const game=gameLaunches.get(link.href);if(game)recordActivity("game",{game}).catch(console.warn);});
-window.MindspaceSoundsEnabled=getSounds();
-$("theme-sounds").addEventListener("change",e=>{window.MindspaceSoundsEnabled=e.target.checked;if(e.target.checked)uiSound();});
-document.addEventListener("click",event=>{const b=event.target.closest(".favorite-toggle");if(b&&b.getAttribute("aria-pressed")==="false")recordActivity("favourite").catch(console.warn);});
-document.getElementById("collection-form").addEventListener("submit",()=>recordActivity("collection").catch(console.warn));
-document.getElementById("personal-record-form").addEventListener("submit",()=>recordActivity("record").catch(console.warn));
-window.addEventListener("mindspace:progress",e=>{const l=levelFor(e.detail.stats.xp);themeButtons.find(b=>b.dataset.theme==="neon").disabled=l.level<10;themeButtons.find(b=>b.dataset.theme==="sunset").disabled=l.level<25;$("player-rank").textContent="Level "+l.level+" · "+l.rank;$("player-summary").textContent=(user?.displayName||"Player")+" · "+l.title+" · "+e.detail.stats.xp.toLocaleString()+" XP";$("player-progress-fill").style.width=l.progress+"%";$("player-progress-label").textContent=l.level>=100?"Maximum level reached":Math.floor(l.xpIntoLevel)+" / "+l.xpForNext+" XP to level "+(l.level+1);});
+const gameLaunches=new Map([...document.querySelectorAll(".game .play")].map(link=>[link.href,link.getAttribute("href")||link.closest(".game")?.querySelector("h2")?.textContent||"arcade"]));
+document.addEventListener("click",event=>{
+  const link=event.target.closest("a[href]");
+  if(!link)return;
+  const game=gameLaunches.get(link.href);
+  if(game)recordActivity("game",{game}).catch(console.warn);
+});
+document.addEventListener("click",event=>{
+  const b=event.target.closest(".favorite-toggle");
+  if(b&&b.getAttribute("aria-pressed")==="false")recordActivity("favourite").catch(console.warn);
+});
+document.getElementById("collection-form")?.addEventListener("submit",()=>recordActivity("collection").catch(console.warn));
+document.getElementById("personal-record-form")?.addEventListener("submit",()=>recordActivity("record").catch(console.warn));
 </script>
 
-<script>(()=>{const panel=document.getElementById("arcade-first-visit"),button=document.getElementById("enter-arcade");if(!panel||!button)return;const key="mindspace-arcade-intro-seen-v1";let seen=false;try{seen=localStorage.getItem(key)==="yes"}catch(e){}if(seen){panel.remove();return;}button.addEventListener("click",()=>{try{localStorage.setItem(key,"yes")}catch(e){}panel.remove();document.getElementById("game-search")?.focus();});})();</script></body></html>
+<script>(()=>{const panel=document.getElementById("arcade-first-visit"),button=document.getElementById("enter-arcade");if(!panel||!button)return;const key="mindspace-arcade-intro-seen-v1";let seen=false;try{seen=localStorage.getItem(key)==="yes"}catch(e){}if(seen){panel.remove();return;}button.addEventListener("click",()=>{try{localStorage.setItem(key,"yes")}catch(e){}panel.remove();document.getElementById("game-search")?.focus();});})();</script><script>
+(()=>{
+ const content=document.querySelector(".arcade-content");
+ if(!content)return;
+ const makePage=(id)=>{const page=document.createElement("section");page.className="arcade-page";page.id="page-"+id;page.dataset.pageView=id;content.appendChild(page);return page;};
+ const overview=makePage("overview"),daily=makePage("daily"),library=makePage("all-games-page");
+ const recent=makePage("recent"),favourites=makePage("favourites"),records=makePage("records"),collections=makePage("collections");
+ const hero=document.getElementById("arcade-home");
+ const dailyFeature=document.getElementById("daily-feature");
+ const hub=document.getElementById("player-hub");
+ const controls=content.querySelector(".controls");
+ const count=document.getElementById("results-count");
+ const games=document.getElementById("all-games");
+ const note=document.getElementById("arcade-note");
+ if(hero)overview.appendChild(hero);
+ if(dailyFeature)daily.appendChild(dailyFeature);
+ if(controls)library.appendChild(controls);
+ if(count)library.appendChild(count);
+ if(games)library.appendChild(games);
+ if(note)library.appendChild(note);
+ const move=(id,page)=>{const el=document.getElementById(id);if(el)page.appendChild(el);};
+ move("recent-games",recent);
+ move("favourite-games",favourites);
+ move("personal-records",records);
+ move("game-collections",collections);
+ const headings={recent:"Recently Played",favourites:"Your Favourite Games",records:"Personal Records",collections:"Game Collections"};
+ for(const [id,label] of Object.entries(headings)){
+   const page=document.getElementById("page-"+id);
+   const heading=document.createElement("div");
+   heading.className="page-heading";
+   heading.innerHTML='<div class="eyebrow">YOUR ARCADE</div><h1>'+label+'</h1>';
+   page.insertBefore(heading,page.firstChild);
+ }
+ function show(id,updateHash=true){
+   if(!document.getElementById("page-"+id))id="overview";
+   document.querySelectorAll("[data-page-view]").forEach(p=>p.hidden=p.dataset.pageView!==id);
+   document.querySelectorAll(".side-link[data-page]").forEach(a=>{
+     const active=a.dataset.page===id;
+     a.classList.toggle("active",active);
+     if(active)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");
+   });
+   if(updateHash)history.replaceState(null,"","#"+id);
+   window.scrollTo({top:0,behavior:"instant"});
+ }
+ document.querySelectorAll(".side-link[data-page]").forEach(a=>a.addEventListener("click",event=>{
+   event.preventDefault();show(a.dataset.page);
+ }));
+ const initial=location.hash.slice(1);
+ const aliases={"all-games":"all-games-page","daily-feature":"daily","arcade-home":"overview"};
+ show(aliases[initial]||initial||"overview",false);
+ window.addEventListener("hashchange",()=>show(aliases[location.hash.slice(1)]||location.hash.slice(1),false));
+})();
+</script></body></html>
