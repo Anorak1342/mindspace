@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090909"><link rel="icon" type="image/svg+xml" href="./brain.svg">
+<title>Mindspace Shop</title>
+<style>
+:root{color-scheme:dark;--bg:#090909;--panel:#121212;--line:#343434;--text:#f5f2ed;--muted:#999;--mint:#83e6bd;--gold:#f2c46d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,Segoe UI,sans-serif}
+.wrap{width:min(1120px,calc(100% - 36px));margin:auto;padding:24px 0 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:38px}
+.brand{font-weight:900;letter-spacing:.5px}.brand span{color:var(--mint)}
+a.back{color:inherit;text-decoration:none;border:1px solid var(--line);padding:8px 13px;border-radius:7px;font-weight:700}
+.eyebrow{font:900 11px ui-monospace,monospace;letter-spacing:3px;color:var(--mint)}
+h1{font:700 clamp(38px,6vw,58px)/1.05 Georgia,serif;margin:9px 0}
+.intro{color:#aaa;max-width:680px;margin:0 0 25px}
+.wallet{display:flex;gap:12px;flex-wrap:wrap;margin:25px 0 32px}
+.wallet-card{flex:1;min-width:190px;padding:17px 19px;border:1px solid #383838;border-radius:10px;background:#131313}
+.wallet-card small{display:block;color:#999;font:800 10px ui-monospace,monospace;letter-spacing:1.5px}
+.wallet-card strong{display:block;font-size:27px;margin-top:3px;font-variant-numeric:tabular-nums}
+.wallet-card.coins strong{color:var(--gold)}.wallet-card.tokens strong{color:#c6a5ff}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:32px 0 13px}
+h2{font:700 26px Georgia,serif;margin:0}.section-head p{color:#888;font-size:12px;margin:0}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.item{border:1px solid #343434;background:#121212;border-radius:11px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.preview{height:115px;display:grid;place-items:center;font-size:47px;position:relative;background:linear-gradient(135deg,#1a2931,#111)}
+.preview.aurora{background:radial-gradient(ellipse at 30% 25%,#69f0c1aa,transparent 42%),linear-gradient(135deg,#112c3d,#19122f)}
+.preview.ember{background:radial-gradient(ellipse at 70% 25%,#ff9d50aa,transparent 45%),linear-gradient(135deg,#351a1b,#170f18)}
+.preview.void{background:radial-gradient(ellipse at 50% 30%,#9d70ff88,transparent 45%),linear-gradient(135deg,#100c22,#07070d)}
+.preview.royal{background:linear-gradient(135deg,#30204e,#8e6c32)}
+.preview.celestial{background:radial-gradient(ellipse at 50% 35%,#ffe9a4aa,transparent 42%),linear-gradient(135deg,#17142e,#3c2b19)}
+.preview.neon{background:linear-gradient(135deg,#102d31,#351c49)}
+.preview.sunset{background:linear-gradient(135deg,#713c4d,#e18a50)}
+.item-body{padding:14px;display:flex;flex-direction:column;gap:7px;flex:1}
+.item-title{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.item-title strong{font-size:16px}
+.rarity{font:900 9px ui-monospace,monospace;letter-spacing:1px;padding:4px 7px;border-radius:5px;background:#252525;color:#bbb;white-space:nowrap}
+.rarity.rare{color:#83baff;background:#17263a}.rarity.premium{color:#83e6bd;background:#173126}.rarity.legendary{color:#f2c46d;background:#352914}.rarity.exclusive{color:#d0aaff;background:#2c1d3d}
+.item-body p{color:#999;font-size:12px;margin:0;min-height:36px}
+.price{font-weight:850;color:#f2c46d;font-size:13px;margin-top:auto}
+.item-actions{display:flex;gap:7px;margin-top:8px}
+button{border:0;border-radius:6px;padding:9px 11px;font-weight:850;cursor:pointer}
+.buy{background:var(--mint);color:#08140e;flex:1}.equip{background:#282828;color:#eee;border:1px solid #444;flex:1}
+button:disabled{opacity:.45;cursor:not-allowed}
+.notice{color:#999;font-size:12px;margin:12px 0 0}
+#status{min-height:22px;color:var(--mint);font-size:13px;margin:12px 0}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:500px){.grid{grid-template-columns:1fr}.wrap{width:calc(100% - 24px)}header{align-items:flex-start}.preview{height:100px}}
+</style>
+</head>
+<body><main class="wrap">
+<header><div class="brand">mindspace <span>✳ SHOP</span></div><a class="back" href="./arcade.html">← Back to arcade</a></header>
+<div class="eyebrow">THE MINDSPACE COLLECTION</div><h1>Make it yours.</h1>
+<p class="intro">Collect themes and avatars, then equip your favourites. Mindcoins buy shop items. Exclusive rewards are earned through player levels and cannot be purchased.</p>
+<div class="wallet">
+ <div class="wallet-card coins"><small>YOUR MINDCOINS</small><strong id="coins">0 ◈</strong></div>
+ <div class="wallet-card tokens"><small>EXCLUSIVE TOKENS</small><strong id="tokens">0 ✦</strong></div>
+ <div class="wallet-card"><small>PLAYER LEVEL</small><strong id="level">1</strong></div>
+</div>
+<div id="status" role="status" aria-live="polite"></div>
+<section><div class="section-head"><div><div class="eyebrow">CHANGE THE ATMOSPHERE</div><h2>Themes</h2></div><p>Equip a new look anytime.</p></div><div class="grid" id="themes"></div></section>
+<section><div class="section-head"><div><div class="eyebrow">YOUR PLAYER IDENTITY</div><h2>Avatars</h2></div><p>Pick your profile character.</p></div><div class="grid" id="avatars"></div></section>
+<p class="notice">Mindcoins are earned through Mindspace activities. You currently earn 10 for launching a game, 8 for a study session, and smaller amounts for other activities. Exclusive Tokens are awarded once at levels 5, 10, 15, 20 and every five levels after that.</p>
+</main>
+<script type="module">
+import {ready,getCurrentStats,purchaseShopItem,setTheme,setSelectedAvatar} from "./player-system.js";
+const themes=[
+{id:"midnight",name:"Midnight",rarity:"Common",price:0,desc:"The classic dark Mindspace look.",emoji:"🌙",currency:"free"},
+{id:"neon",name:"Neon Circuit",rarity:"Rare",price:450,desc:"Electric colour and arcade energy.",emoji:"⚡"},
+{id:"sunset",name:"Pixel Sunset",rarity:"Premium",price:800,desc:"Warm sunset tones with a retro feel.",emoji:"🌇"},
+{id:"aurora",name:"Aurora",rarity:"Premium",price:950,desc:"Northern-light greens and deep blues.",emoji:"🌌"},
+{id:"ember",name:"Emberfall",rarity:"Rare",price:650,desc:"A fiery palette with molten accents.",emoji:"🔥"},
+{id:"void",name:"The Void",rarity:"Legendary",price:1800,desc:"A mysterious cosmic theme with violet glow.",emoji:"🪐"},
+{id:"royal",name:"Royal Archive",rarity:"Exclusive",desc:"A regal gold-and-violet theme.",emoji:"👑",currency:"exclusive"},
+{id:"celestial",name:"Celestial",rarity:"Exclusive",desc:"A star-forged golden theme.",emoji:"✨",currency:"exclusive"}
+];
+const avatars=[
+{id:"default",name:"Mindspace",rarity:"Common",price:0,desc:"The original Mindspace avatar.",emoji:"✳",currency:"free"},
+{id:"fox",name:"Fox",rarity:"Rare",price:250,desc:"Quick, clever and always curious.",emoji:"🦊"},
+{id:"alien",name:"Alien",rarity:"Rare",price:300,desc:"A visitor from another arcade.",emoji:"👾"},
+{id:"robot",name:"Robot",rarity:"Premium",price:500,desc:"A digital companion with style.",emoji:"🤖"},
+{id:"shark",name:"Shark",rarity:"Premium",price:550,desc:"Make a splash on the leaderboard.",emoji:"🦈"},
+{id:"dragon",name:"Dragon",rarity:"Legendary",price:1200,desc:"A legendary creature for a legendary player.",emoji:"🐉"},
+{id:"phantom",name:"Phantom",rarity:"Exclusive",desc:"A rare identity reserved for level rewards.",emoji:"👻",currency:"exclusive"},
+{id:"crown",name:"The Crown",rarity:"Exclusive",desc:"A royal avatar for your collection.",emoji:"👑",currency:"exclusive"}
+];
+let stats;
+const owned=id=>(stats.ownedShopItems||[]).includes(id);
+function rarityClass(r){return r.toLowerCase()}
+function draw(){
+ document.getElementById("coins").textContent=(stats.mindcoins||0).toLocaleString()+" ◈";
+ document.getElementById("tokens").textContent=(stats.exclusiveTokens||0)+" ✦";
+ document.getElementById("level").textContent=stats.level||1;
+ document.getElementById("themes").innerHTML=themes.map(x=>card(x,"theme")).join("");
+ document.getElementById("avatars").innerHTML=avatars.map(x=>card(x,"avatar")).join("");
+}
+function card(x,type){
+ const id=type+"-"+x.id,has=owned(id),active=type==="theme"?document.documentElement.dataset.arcadeTheme===x.id:stats.selectedAvatar===x.id;
+ const currency=x.currency||"mindcoins",price=currency==="exclusive"?"1 Exclusive Token":currency==="free"?"Free":x.price.toLocaleString()+" ◈";
+ const preview=type==="theme"?'<div class="preview '+x.id+'">'+x.emoji+'</div>':'<div class="preview">'+x.emoji+'</div>';
+ const action=has?'<button class="equip" data-equip="'+type+'" data-id="'+x.id+'" '+(active?'disabled':'')+'>'+(active?"Equipped":"Equip")+'</button>': '<button class="buy" data-buy="'+id+'" data-price="'+(x.price||0)+'" data-currency="'+currency+'">'+(currency==="exclusive"?"Unlock with token":currency==="free"?"Unlock":"Buy · "+price)+'</button>';
+ return '<article class="item">'+preview+'<div class="item-body"><div class="item-title"><strong>'+x.name+'</strong><span class="rarity '+rarityClass(x.rarity)+'">'+x.rarity+'</span></div><p>'+x.desc+'</p><div class="price">'+price+'</div><div class="item-actions">'+action+'</div></div></article>';
+}
+document.addEventListener("click",async e=>{
+ const buy=e.target.closest("[data-buy]"),equip=e.target.closest("[data-equip]");
+ try{
+  if(buy){buy.disabled=true;await purchaseShopItem(buy.dataset.buy,Number(buy.dataset.price),buy.dataset.currency);document.getElementById("status").textContent="Unlocked! It's yours permanently."; }
+  if(equip){equip.disabled=true;if(equip.dataset.equip==="theme")setTheme(equip.dataset.id);else await setSelectedAvatar(equip.dataset.id);document.getElementById("status").textContent="Equipped successfully.";}
+ }catch(err){document.getElementById("status").textContent=err.message; if(buy)buy.disabled=false;if(equip)equip.disabled=false;}
+ stats=getCurrentStats();draw();
+});
+await ready;
+stats=getCurrentStats();
+const savedTheme=localStorage.getItem("mindspace-arcade-theme-v1")||"midnight";
+document.documentElement.dataset.arcadeTheme=savedTheme;
+draw();
+window.addEventListener("mindspace:progress",()=>{stats=getCurrentStats();draw();});
+</script>
+</body></html>
