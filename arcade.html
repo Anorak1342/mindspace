@@ -112,8 +112,16 @@ body.distance-privacy .top{filter:brightness(.68) contrast(.72) saturate(.62) bl
 #privacy-settings .privacy-close{margin-top:12px;background:var(--mint);color:#08140e;border:0;border-radius:7px;padding:11px 16px;font-weight:800;cursor:pointer}
 #away-cover{display:none;position:fixed;z-index:20000;inset:0;background:#090909;color:#ddd;align-items:center;justify-content:center;font:700 16px system-ui;letter-spacing:2px}
 body.tab-away #away-cover{display:flex}
+
+:root[data-arcade-theme="neon"]{--bg:#080d13;--panel:#101b24;--line:#28505a;--text:#eaffff;--muted:#8db8bd;--mint:#67f5e1;--gold:#ff78d1}
+:root[data-arcade-theme="sunset"]{--bg:#160e16;--panel:#24151f;--line:#62404a;--text:#fff0e7;--muted:#c59b91;--mint:#ffb27c;--gold:#ffd16f}
+:root[data-arcade-theme="aurora"]{--bg:#071513;--panel:#10231f;--line:#285447;--text:#eafff4;--muted:#8eb9a8;--mint:#75f2c2;--gold:#a7d7ff}
+:root[data-arcade-theme="ember"]{--bg:#160b0b;--panel:#241212;--line:#60352b;--text:#fff0e8;--muted:#c49a8c;--mint:#ff946b;--gold:#ffd078}
+:root[data-arcade-theme="void"]{--bg:#090611;--panel:#171126;--line:#49346b;--text:#f3edff;--muted:#aa9bc8;--mint:#c29aff;--gold:#f2c46d}
+:root[data-arcade-theme="royal"]{--bg:#100d19;--panel:#20182d;--line:#5d4775;--text:#fff7e8;--muted:#bca9cc;--mint:#d3b1ff;--gold:#f4ce75}
+:root[data-arcade-theme="celestial"]{--bg:#0d0c19;--panel:#19172a;--line:#62543e;--text:#fff8e7;--muted:#c4b89a;--mint:#ffe2a0;--gold:#f7c95c}
 </style>
-<script src="mindspace-lock.js" defer></script>
+<script type="module">import {applyTheme} from "./player-system.js";applyTheme();</script><script src="mindspace-lock.js" defer></script>
 </head>
 <body><section id="arcade-first-visit" role="dialog" aria-modal="true" aria-labelledby="arcade-welcome-title">
 <div class="arcade-welcome-card"><div class="eyebrow">WELCOME TO MINDSPACE ARCADE</div><h1 id="arcade-welcome-title">Ready to play?</h1><p class="arcade-welcome-intro">A big collection of games, without the hunting around.</p>
