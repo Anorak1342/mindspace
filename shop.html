@@ -33,6 +33,7 @@ h2{font:700 26px Georgia,serif;margin:0}.section-head p{color:#888;font-size:12p
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
 .item{border:1px solid #343434;background:#121212;border-radius:11px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
 .preview{height:115px;display:grid;place-items:center;font-size:47px;position:relative;background:linear-gradient(135deg,#1a2931,#111)}
+.avatar-preview{height:115px;display:grid;place-items:center;background:linear-gradient(135deg,#172332,#171222)}.avatar-art{width:96px;height:96px;background-image:url("./assets/mindspace-avatars.webp");background-size:800% 400%;image-rendering:pixelated;background-repeat:no-repeat}
 .preview.aurora{background:radial-gradient(ellipse at 30% 25%,#69f0c1aa,transparent 42%),linear-gradient(135deg,#112c3d,#19122f)}
 .preview.ember{background:radial-gradient(ellipse at 70% 25%,#ff9d50aa,transparent 45%),linear-gradient(135deg,#351a1b,#170f18)}
 .preview.void{background:radial-gradient(ellipse at 50% 30%,#9d70ff88,transparent 45%),linear-gradient(135deg,#100c22,#07070d)}
@@ -84,14 +85,38 @@ const themes=[
 {id:"celestial",name:"Celestial",rarity:"Exclusive",desc:"A star-forged golden theme.",emoji:"✨",currency:"exclusive"}
 ];
 const avatars=[
-{id:"default",name:"Mindspace",rarity:"Common",price:0,desc:"The original Mindspace avatar.",emoji:"✳",currency:"free"},
-{id:"fox",name:"Fox",rarity:"Rare",price:250,desc:"Quick, clever and always curious.",emoji:"🦊"},
-{id:"alien",name:"Alien",rarity:"Rare",price:300,desc:"A visitor from another arcade.",emoji:"👾"},
-{id:"robot",name:"Robot",rarity:"Premium",price:500,desc:"A digital companion with style.",emoji:"🤖"},
-{id:"shark",name:"Shark",rarity:"Premium",price:550,desc:"Make a splash on the leaderboard.",emoji:"🦈"},
-{id:"dragon",name:"Dragon",rarity:"Legendary",price:1200,desc:"A legendary creature for a legendary player.",emoji:"🐉"},
-{id:"phantom",name:"Phantom",rarity:"Exclusive",desc:"A rare identity reserved for level rewards.",emoji:"👻",currency:"exclusive"},
-{id:"crown",name:"The Crown",rarity:"Exclusive",desc:"A royal avatar for your collection.",emoji:"👑",currency:"exclusive"}
+{id:"adventurer",name:"Adventurer",rarity:"Common",price:0,desc:"A classic arcade explorer.",currency:mindcoins,sprite:0},
+{id:"headphones",name:"Headphones",rarity:"Rare",price:250,desc:"Music on. World off.",currency:mindcoins,sprite:1},
+{id:"king",name:"King",rarity:"Legendary",price:1200,desc:"Rule your corner of the arcade.",currency:mindcoins,sprite:2},
+{id:"ninja",name:"Ninja",rarity:"Premium",price:500,desc:"Quiet, quick and precise.",currency:mindcoins,sprite:3},
+{id:"hooded-astronaut",name:"Hooded Astronaut",rarity:"Premium",price:550,desc:"A traveller between worlds.",currency:mindcoins,sprite:4},
+{id:"green-monster",name:"Green Monster",rarity:"Rare",price:300,desc:"A friendly face from somewhere strange.",currency:mindcoins,sprite:5},
+{id:"purple-hair",name:"Purple Hair",rarity:"Rare",price:300,desc:"Bright style, bold energy.",currency:mindcoins,sprite:6},
+{id:"agent",name:"Agent",rarity:"Premium",price:600,desc:"A mysterious arcade operative.",currency:mindcoins,sprite:7},
+{id:"white-hair-hero",name:"White-Hair Hero",rarity:"Rare",price:350,desc:"A cool-headed challenger.",currency:mindcoins,sprite:8},
+{id:"penguin",name:"Penguin",rarity:"Rare",price:300,desc:"Small penguin. Big plans.",currency:mindcoins,sprite:9},
+{id:"astronaut",name:"Astronaut",rarity:"Premium",price:550,desc:"Ready for launch.",currency:mindcoins,sprite:10},
+{id:"wizard",name:"Wizard",rarity:"Legendary",price:1000,desc:"A little magic goes a long way.",currency:mindcoins,sprite:11},
+{id:"red-scarf-rogue",name:"Red Scarf Rogue",rarity:"Rare",price:350,desc:"A quick-footed wanderer.",currency:mindcoins,sprite:12},
+{id:"fox",name:"Fox",rarity:"Rare",price:250,desc:"Quick, clever and curious.",currency:mindcoins,sprite:13},
+{id:"alien",name:"Alien",rarity:"Rare",price:300,desc:"A visitor from another arcade.",currency:mindcoins,sprite:14},
+{id:"skull",name:"Skull",rarity:"Premium",price:650,desc:"A spooky arcade classic.",currency:mindcoins,sprite:15},
+{id:"demon",name:"Demon",rarity:"Exclusive",price:0,desc:"A rare identity earned with an Exclusive Token.",currency:exclusive,sprite:16},
+{id:"princess",name:"Princess",rarity:"Premium",price:600,desc:"Royal style with a fearless streak.",currency:mindcoins,sprite:17},
+{id:"raccoon",name:"Raccoon",rarity:"Rare",price:300,desc:"The night-shift collector.",currency:mindcoins,sprite:18},
+{id:"robot",name:"Robot",rarity:"Premium",price:500,desc:"A digital companion with style.",currency:mindcoins,sprite:19},
+{id:"slime",name:"Slime",rarity:"Rare",price:250,desc:"Squishy, shiny and surprisingly brave.",currency:mindcoins,sprite:20},
+{id:"panda",name:"Panda",rarity:"Rare",price:300,desc:"Calm face. Competitive spirit.",currency:mindcoins,sprite:21},
+{id:"dragon",name:"Dragon",rarity:"Exclusive",price:0,desc:"A legendary creature for a legendary player.",currency:exclusive,sprite:22},
+{id:"shark",name:"Shark",rarity:"Premium",price:550,desc:"Make a splash on the leaderboard.",currency:mindcoins,sprite:23},
+{id:"soldier",name:"Soldier",rarity:"Premium",price:600,desc:"Always ready for the next round.",currency:mindcoins,sprite:24},
+{id:"masked-rogue",name:"Masked Rogue",rarity:"Rare",price:350,desc:"A mysterious challenger.",currency:mindcoins,sprite:25},
+{id:"ghost",name:"Ghost",rarity:"Exclusive",price:0,desc:"A rare identity reserved for level rewards.",currency:exclusive,sprite:26},
+{id:"shadow",name:"Shadow",rarity:"Legendary",price:1000,desc:"A mysterious figure from the dark.",currency:mindcoins,sprite:27},
+{id:"royal-hero",name:"Royal Hero",rarity:"Exclusive",price:0,desc:"A royal avatar for your collection.",currency:exclusive,sprite:28},
+{id:"cyberpunk",name:"Cyberpunk",rarity:"Legendary",price:1100,desc:"Neon streets. Arcade legend.",currency:mindcoins,sprite:29},
+{id:"cat-hood",name:"Cat Hood",rarity:"Rare",price:300,desc:"A little feline flair.",currency:mindcoins,sprite:30},
+{id:"forest-ranger",name:"Forest Ranger",rarity:"Premium",price:600,desc:"Guardian of the pixel wilds.",currency:mindcoins,sprite:31}
 ];
 let stats;
 const owned=id=>(stats.ownedShopItems||[]).includes(id);
@@ -106,7 +131,7 @@ function draw(){
 function card(x,type){
  const id=type+"-"+x.id,has=owned(id),active=type==="theme"?document.documentElement.dataset.arcadeTheme===x.id:stats.selectedAvatar===x.id;
  const currency=x.currency||"mindcoins",price=currency==="exclusive"?"1 Exclusive Token":currency==="free"?"Free":x.price.toLocaleString()+" ◈";
- const preview=type==="theme"?'<div class="preview '+x.id+'">'+x.emoji+'</div>':'<div class="preview">'+x.emoji+'</div>';
+ const col=Number(x.sprite)%8,row=Math.floor(Number(x.sprite)/8); const posX=(col/7)*100,posY=(row/3)*100; const preview=type==="theme"?'<div class="preview '+x.id+'">'+x.emoji+'</div>':'<div class="avatar-preview"><div class="avatar-art" role="img" aria-label="'+x.name+' avatar" style="background-position:'+posX+'% '+posY+'%"></div></div>';
  const action=has?'<button class="equip" data-equip="'+type+'" data-id="'+x.id+'" '+(active?'disabled':'')+'>'+(active?"Equipped":"Equip")+'</button>': '<button class="buy" data-buy="'+id+'" data-price="'+(x.price||0)+'" data-currency="'+currency+'">'+(currency==="exclusive"?"Unlock with token":currency==="free"?"Unlock":"Buy · "+price)+'</button>';
  return '<article class="item">'+preview+'<div class="item-body"><div class="item-title"><strong>'+x.name+'</strong><span class="rarity '+rarityClass(x.rarity)+'">'+x.rarity+'</span></div><p>'+x.desc+'</p><div class="price">'+price+'</div><div class="item-actions">'+action+'</div></div></article>';
 }
