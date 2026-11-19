@@ -33,7 +33,7 @@ h2{font:700 26px Georgia,serif;margin:0}.section-head p{color:#888;font-size:12p
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
 .item{border:1px solid #343434;background:#121212;border-radius:11px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
 .preview{height:115px;display:grid;place-items:center;font-size:47px;position:relative;background:linear-gradient(135deg,#1a2931,#111)}
-.avatar-preview{height:115px;display:grid;place-items:center;background:linear-gradient(135deg,#172332,#171222);overflow:hidden}.avatar-art{display:block;width:96px;height:96px;flex:none;background-image:url("/mindspace/assets/mindspace-avatars.webp");background-size:768px 384px;background-repeat:no-repeat;image-rendering:pixelated;image-rendering:crisp-edges}
+.avatar-preview{height:132px;display:grid;place-items:center;background:linear-gradient(135deg,#172332,#171222);overflow:hidden}.avatar-art{display:block;width:112px;height:112px;flex:none;background-image:url("./assets/mindspace-avatars.webp");background-size:896px 448px;background-repeat:no-repeat;image-rendering:pixelated;image-rendering:crisp-edges;filter:drop-shadow(0 5px 8px #0009)}
 .preview.aurora{background:radial-gradient(ellipse at 30% 25%,#69f0c1aa,transparent 42%),linear-gradient(135deg,#112c3d,#19122f)}
 .preview.ember{background:radial-gradient(ellipse at 70% 25%,#ff9d50aa,transparent 45%),linear-gradient(135deg,#351a1b,#170f18)}
 .preview.void{background:radial-gradient(ellipse at 50% 30%,#9d70ff88,transparent 45%),linear-gradient(135deg,#100c22,#07070d)}
@@ -73,7 +73,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <p class="notice">Mindcoins are earned through Mindspace activities. You currently earn 10 for launching a game, 8 for a study session, and smaller amounts for other activities. Exclusive Tokens are awarded once at levels 5, 10, 15, 20 and every five levels after that.</p>
 </main>
 <script type="module">
-import {ready,getCurrentStats,purchaseShopItem,setTheme,setSelectedAvatar} from "./player-system.js";
+import {ready,getCurrentStats,purchaseShopItem,setTheme,setSelectedAvatar,redeemSecretCode} from "./player-system.js";
 const themes=[
 {id:"midnight",name:"Midnight",rarity:"Common",price:0,desc:"The classic dark Mindspace look.",emoji:"🌙",currency:"free"},
 {id:"neon",name:"Neon Circuit",rarity:"Rare",price:450,desc:"Electric colour and arcade energy.",emoji:"⚡"},
@@ -131,7 +131,7 @@ function draw(){
 function card(x,type){
  const id=type+"-"+x.id,has=owned(id),active=type==="theme"?document.documentElement.dataset.arcadeTheme===x.id:stats.selectedAvatar===x.id;
  const currency=x.currency||"mindcoins",price=currency==="exclusive"?"1 Exclusive Token":currency==="free"?"Free":x.price.toLocaleString()+" ◈";
- const col=Number(x.sprite)%8,row=Math.floor(Number(x.sprite)/8); const posX=-(col*96),posY=-(row*96); const preview=type==="theme"?'<div class="preview '+x.id+'">'+x.emoji+'</div>':'<div class="avatar-preview"><div class="avatar-art" role="img" aria-label="'+x.name+' avatar" style="background-position:'+posX+'px '+posY+'px"></div></div>';
+ const col=Number(x.sprite)%8,row=Math.floor(Number(x.sprite)/8); const posX=-(col*112),posY=-(row*112); const preview=type==="theme"?'<div class="preview '+x.id+'">'+x.emoji+'</div>':'<div class="avatar-preview"><div class="avatar-art" role="img" aria-label="'+x.name+' avatar" style="background-position:'+posX+'px '+posY+'px"></div></div>';
  const action=has?'<button class="equip" data-equip="'+type+'" data-id="'+x.id+'" '+(active?'disabled':'')+'>'+(active?"Equipped":"Equip")+'</button>': '<button class="buy" data-buy="'+id+'" data-price="'+(x.price||0)+'" data-currency="'+currency+'">'+(currency==="exclusive"?"Unlock with token":currency==="free"?"Unlock":"Buy · "+price)+'</button>';
  return '<article class="item">'+preview+'<div class="item-body"><div class="item-title"><strong>'+x.name+'</strong><span class="rarity '+rarityClass(x.rarity)+'">'+x.rarity+'</span></div><p>'+x.desc+'</p><div class="price">'+price+'</div><div class="item-actions">'+action+'</div></div></article>';
 }
@@ -148,6 +148,7 @@ stats=getCurrentStats();
 const savedTheme=localStorage.getItem("mindspace-arcade-theme-v1")||"midnight";
 document.documentElement.dataset.arcadeTheme=savedTheme;
 draw();
+let coinTapCount=0,coinTapTimer;const coinWallet=document.querySelector(".wallet-card.coins");if(coinWallet){coinWallet.title="";coinWallet.style.cursor="pointer";coinWallet.addEventListener("click",()=>{coinTapCount++;clearTimeout(coinTapTimer);coinTapTimer=setTimeout(()=>coinTapCount=0,1800);if(coinTapCount>=5){coinTapCount=0;const code=prompt("You found a hidden Mindspace code. Enter the code:");if(code!==null)redeemSecretCode(code).then(()=>{document.getElementById("status").textContent="Secret reward claimed: +900 Mindcoins!";stats=getCurrentStats();draw();}).catch(err=>{document.getElementById("status").textContent=err.message;});}});}
 window.addEventListener("mindspace:progress",()=>{stats=getCurrentStats();draw();});
 </script>
 </body></html>
