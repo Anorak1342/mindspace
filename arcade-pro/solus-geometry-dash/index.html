@@ -1,7 +1,14 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>(()=>{const s=document.createElement("script");s.src=new URL("../../mindspace-lock.js",location.href).href;s.defer=true;document.head.appendChild(s)})();</script><title>Geometry Dash</title><script id="mindspace-game-privacy">(function(){const original=(document.querySelector('link[rel~="icon"]')||{}).href||new URL("../../brain.svg",location.href).href;const hidden='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#e9eef7"/><path d="M16 13h22a10 10 0 0 1 10 10v28H26a10 10 0 0 1-10-10z" fill="#35ae88"/><path d="M26 13v38M26 23h13M26 33h13" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>');function icon(active){let el=document.querySelector('link[rel~="icon"]');if(!el){el=document.createElement("link");el.rel="icon";document.head.appendChild(el)}el.href=active?hidden:original}document.addEventListener("visibilitychange",()=>icon(document.hidden));window.addEventListener("blur",()=>icon(true));window.addEventListener("focus",()=>icon(false));document.addEventListener("keydown",e=>{let v="Alt+Shift+M";try{v=localStorage.getItem("mindspace-panic-shortcut-v1")||v}catch(_){}const p=v.split("+"),k=p[p.length-1].toLowerCase(),has=n=>p.some(x=>x.toLowerCase()===n);if(e.key.toLowerCase()===k&&e.altKey===has("alt")&&e.shiftKey===has("shift")&&e.ctrlKey===(has("ctrl")||has("control"))&&e.metaKey===has("meta")){e.preventDefault();location.href="../../"}})})();</script></head><body style="margin:0;background:#080808">
-<div style="position:fixed;z-index:5;top:10px;left:50%;transform:translateX(-50%);padding:7px 12px;border-radius:20px;background:#101010d9;border:1px solid #ffffff30;color:#eee;font:12px system-ui,sans-serif;pointer-events:none;text-align:center;white-space:nowrap">Click the game, then use <b>Space</b>, <b>↑</b> or mouse click to jump</div>
-<iframe id="geometry-dash-game" title="Geometry Dash game" src="https://katsugachi.github.io/geometry-dash-fork/" tabindex="0" allow="autoplay; fullscreen; gamepad" allowfullscreen style="position:fixed;top:0;left:0;width:100%;height:100%;border:none;"></iframe>
-<script>
-(()=>{const game=document.getElementById("geometry-dash-game");if(!game)return;game.addEventListener("load",()=>{try{game.focus()}catch(e){}});window.addEventListener("pointerdown",()=>{try{game.focus()}catch(e){}},{passive:true});})();
-</script>
-</body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080808">
+<title>Mindspace Arcade Game</title>
+<link rel="icon" href="../../brain.svg">
+<style>html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#080808}iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#080808}</style>
+</head>
+<body>
+<iframe title="Game" src="./game.html" allow="autoplay; fullscreen; gamepad; clipboard-read; clipboard-write; accelerometer; gyroscope; xr-spatial-tracking" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads allow-modals allow-orientation-lock"></iframe>
+</body>
+</html>
