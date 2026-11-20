@@ -1,0 +1,51 @@
+body {
+  background-color: #D0D0D0;
+  font-family: "BioRhyme", serif;
+}
+
+.github {
+  -o-object-fit: cover;
+  object-fit: cover;
+  width: 55px;
+}
+
+.linkedin {
+  -o-object-fit: cover;
+  object-fit: cover;
+  width: 40px;
+  margin-top: 8px;
+}
+
+.portfolio {
+  -o-object-fit: cover;
+  object-fit: cover;
+  width: 40px;
+  margin-left: 10px;
+  margin-top: 8px;
+  margin-right: 50px;
+}
+
+.title {
+  margin: auto;
+  width: 8%;
+  font-weight: bolder;
+  font-size: 20px;
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+}
+
+.nav-bar {
+  margin: 0px auto;
+}
+
+#audio-on-button {
+  -o-object-fit: cover;
+  object-fit: cover;
+  width: 40px;
+  margin-top: 10px;
+}
+
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIndlYnBhY2s6Ly8vLi9zcmMvc3R5bGVzL2luZGV4LnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDSztFQUNBO0FBQ0w7O0FBRUE7RUFDSTtFQUNHO0VBQ0g7QUFDSjs7QUFFQTtFQUNJO0VBQ0c7RUFDSDtFQUNBO0FBQ0o7O0FBRUE7RUFDSztFQUNHO0VBQ0o7RUFDQTtFQUNBO0VBQ0E7QUFDSjs7QUFFQTtFQUNHO0VBQ0Y7RUFDRTtFQUNBO0FBQ0g7O0FBRUE7RUFDSTtFQUNEO0FBQ0g7O0FBSUE7RUFDSTtBQURKOztBQUlBO0VBQ0U7RUFDRztFQUNIO0VBQ0E7QUFERixDIiwiZmlsZSI6Im1haW4uY3NzIiwic291cmNlc0NvbnRlbnQiOlsiYm9keSB7XG4gICAgIGJhY2tncm91bmQtY29sb3I6ICNEMEQwRDA7XG4gICAgIGZvbnQtZmFtaWx5OiAnQmlvUmh5bWUnLCBzZXJpZjtcbiB9XG5cbi5naXRodWIge1xuICAgIC1vLW9iamVjdC1maXQ6IGNvdmVyO1xuICAgICAgIG9iamVjdC1maXQ6IGNvdmVyO1xuICAgIHdpZHRoOiA1NXB4O1xufVxuXG4ubGlua2VkaW4ge1xuICAgIC1vLW9iamVjdC1maXQ6IGNvdmVyO1xuICAgICAgIG9iamVjdC1maXQ6IGNvdmVyO1xuICAgIHdpZHRoOiA0MHB4O1xuICAgIG1hcmdpbi10b3A6IDhweDtcbn1cblxuLnBvcnRmb2xpbyB7XG4gICAgIC1vLW9iamVjdC1maXQ6IGNvdmVyO1xuICAgICAgICBvYmplY3QtZml0OiBjb3ZlcjtcbiAgICB3aWR0aDogNDBweDtcbiAgICBtYXJnaW4tbGVmdDogMTBweDtcbiAgICBtYXJnaW4tdG9wOiA4cHg7XG4gICAgbWFyZ2luLXJpZ2h0OiA1MHB4O1xufVxuXG4udGl0bGUgIHsgICBcbiAgIG1hcmdpbjogYXV0bztcblx0d2lkdGg6IDglO1xuICAgZm9udC13ZWlnaHQ6IGJvbGRlcjtcbiAgIGZvbnQtc2l6ZTogMjBweDtcbn1cblxuLnNvY2lhbC1saW5rcyB7XG4gICAgZGlzcGxheTogZmxleDtcbiAgIGp1c3RpZnktY29udGVudDogY2VudGVyO1xufVxuXG5cblxuLm5hdi1iYXIge1xuICAgIG1hcmdpbjowcHggYXV0bztcbn1cblxuI2F1ZGlvLW9uLWJ1dHRvbiB7XG4gIC1vLW9iamVjdC1maXQ6IGNvdmVyO1xuICAgICBvYmplY3QtZml0OiBjb3ZlcjtcbiAgd2lkdGg6IDQwcHg7XG4gIG1hcmdpbi10b3A6IDEwcHg7XG59XG5cblxuXG5cblxuXG4iXSwic291cmNlUm9vdCI6IiJ9*/

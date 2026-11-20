@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="./dist/main.css" />
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=BioRhyme&display=swap" rel="stylesheet">
+    <title>Dog Run</title>
+    <style>
+        canvas {
+            border: 1px solid black;  
+
+        }
+        
+       
+    </style>
+
+    <meta name="description" content="_" />
+    <meta name="title" property="og:title" content="Dog Run" />
+    <meta property="og:type" content="_" />
+    <meta name="image" property="og:image" content="https://media.giphy.com/media/CSFpwI1wk2giZF9KUY/giphy.gif" />
+    <meta name="description" property="og:description" content="Dog Run is a web game inspired by temple run. Users will play as a `dog` and will have to navigate through obstacles by jumping. 
+    Similarly to temple run, the User will be able to run and jump. Points are based on time and stored via local storage. 
+    Once a user hits an obstacle, the game will then be over." />
+    <meta name="author" content="Christopher Lee" />
+
+    <link rel='icon' href="src/assets/corgiicon.png" type="image/png"/>
+
+</head>
+
+<body>
+    <audio id="music_bg" loop></audio>
+   <canvas id= "canvas">
+   </canvas>
+    <div class="nav-bar">
+        <div class="title">Dog Run</div>
+        <div class="social-links">
+        <div class="github-link">
+            <a href='https://github.com/clee1996/Dog-Run' target="_blank"><img class="github"
+                    src="./src/assets/github.png"></a>
+        </div>
+        <div class="linkedin-link">
+            <a href="https://www.linkedin.com/in/christopher-lee-7b48b6134/" target="_blank"><img class='linkedin'
+                    src="./src/assets/linkedin.svg"></a>
+        </div>
+        <div class="portfolio-link">
+            <a href="https://clee1996.github.io/" target="_blank"><img src="src/assets/portfolio.png"
+                    class="portfolio" /></a>
+        </div>
+        <div>
+        <img id="audio-on-button"src="src/assets/sound_icon.png">
+        </div>
+        </div>
+    </div>
+
+   <script src = "./src/dog.js"></script>
+    
+</body>
+
+</html>
