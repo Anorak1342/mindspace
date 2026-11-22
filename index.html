@@ -96,7 +96,7 @@ body{background:radial-gradient(ellipse at 8% 0%,#e3eaff,transparent 40%),radial
 @media(max-width:760px){.school-links{grid-template-columns:1fr}}
 /* Personal Layout Studio */
 .layout-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 18px;align-items:start}.layout-grid>section{min-width:0;margin:0}.layout-grid>section.layout-half{grid-column:span 1}.layout-grid>section.layout-full{grid-column:1/-1}.layout-grid.layout-editing>section{outline:2px dashed #8a78df;outline-offset:7px;border-radius:12px;cursor:grab}.layout-grid.layout-editing>section.layout-dragging{opacity:.45}.layout-grid.layout-editing>section.layout-drop-target{outline-color:#278c70;background:#d9f4e922}@media(max-width:760px){.layout-grid{grid-template-columns:1fr;gap:22px}.layout-grid>section.layout-half,.layout-grid>section.layout-full{grid-column:1/-1}}
-.layout-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px}.layout-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px;padding:11px 12px;background:#f6f8fc;border:1px solid var(--line);border-radius:12px;margin:8px 0}.layout-row strong{font-size:13px}.layout-row small{display:block;color:var(--muted);font-size:10px}.layout-row select{max-width:110px;padding:7px;border:1px solid var(--line);border-radius:8px;background:white;color:#30364b}.layout-row button{padding:7px 9px;border-radius:8px;background:#e9edf6;color:#30364b}.layout-hint,.profile-help{font-size:12px;color:var(--muted);margin:8px 0 14px}.layout-move{grid-column:1/-1;display:flex;gap:7px;flex-wrap:wrap}.daily-actions{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:9px}.daily-actions small{color:var(--muted)}
+.layout-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px}.layout-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px;padding:11px 12px;background:#f6f8fc;border:1px solid var(--line);border-radius:12px;margin:8px 0}.layout-row strong{font-size:13px}.layout-row small{display:block;color:var(--muted);font-size:10px}.layout-row select{max-width:110px;padding:7px;border:1px solid var(--line);border-radius:8px;background:white;color:#30364b}.layout-row button{padding:7px 9px;border-radius:8px;background:#e9edf6;color:#30364b}.layout-hint{font-size:12px;color:var(--muted);margin:8px 0 14px}
 
 /* Personal profile, colour themes and daily reflections */
 .profile-open{display:flex;align-items:center;gap:8px;padding:5px 10px 5px 5px;border:1px solid var(--line);border-radius:99px;background:#fff;color:var(--text);font-weight:750;font-size:12px}
@@ -189,82 +189,47 @@ year7Decks.forEach(seed=>{
 if(!Array.isArray(decks)||!decks.length){decks=JSON.parse(JSON.stringify(starter));decksChanged=true;}
 if(decksChanged)save();
 
-/* Reliable personal layout and profile customisation. */
+/* Layout Studio: personal section order, visibility, widths and starter presets. */
 const layoutSections=()=>[...document.querySelectorAll("#mainContent > section[data-layout-id]")];
 const layoutDefaults=[
- {id:"welcome",title:"Welcome banner"},
- {id:"school",title:"School learning"},
- {id:"decks",title:"Study decks"},
- {id:"toolkit",title:"Focus toolkit"}
+ {id:"welcome",title:"Welcome banner",visible:true,size:"full"},
+ {id:"school",title:"School learning",visible:true,size:"full"},
+ {id:"decks",title:"Study decks",visible:true,size:"full"},
+ {id:"toolkit",title:"Focus toolkit",visible:true,size:"full"}
 ];
 const layoutPresets={
- classic:{order:["welcome","school","decks","toolkit"],hidden:[],half:[]},
- gamer:{order:["welcome","decks","toolkit","school"],hidden:["school"],half:["toolkit"]},
- study:{order:["welcome","decks","toolkit","school"],hidden:[],half:["toolkit"]},
- minimal:{order:["welcome","decks","toolkit","school"],hidden:["school","toolkit"],half:[]}
+ classic:{name:"Classic",order:["welcome","school","decks","toolkit"],hidden:[],half:[]},
+ gamer:{name:"Gamer",order:["welcome","decks","toolkit","school"],hidden:["school"],half:["toolkit"]},
+ study:{name:"Study",order:["welcome","decks","toolkit","school"],hidden:[],half:["toolkit"]},
+ minimal:{name:"Minimal",order:["welcome","decks","toolkit","school"],hidden:["school","toolkit"],half:[]}
 };
-function normaliseLayout(value){
- const valid=layoutDefaults.map(x=>x.id),v=value&&typeof value==="object"?value:{};
- const order=Array.isArray(v.order)?v.order.filter((id,i,a)=>valid.includes(id)&&a.indexOf(id)===i):[];
- valid.forEach(id=>{if(!order.includes(id))order.push(id)});
- return {order,hidden:Array.isArray(v.hidden)?v.hidden.filter(id=>valid.includes(id)):[],half:Array.isArray(v.half)?v.half.filter(id=>valid.includes(id)):[]};
-}
-function readLayout(){try{return normaliseLayout(JSON.parse(localStorage.getItem("ms-layout")||"null"))}catch(e){return normaliseLayout(null)}}
+function readLayout(){try{const saved=JSON.parse(localStorage.getItem("ms-layout")||"null");if(saved&&Array.isArray(saved.order))return saved}catch(e){}return {order:layoutDefaults.map(x=>x.id),hidden:[],half:[]}}
 let currentLayout=readLayout();
-function applyLayout(){
- const root=$("#mainContent");if(!root)return;
- const byId=new Map(layoutSections().map(el=>[el.dataset.layoutId,el]));
- currentLayout.order.forEach(id=>{const el=byId.get(id);if(el)root.append(el)});
- layoutSections().forEach(el=>{
-  const id=el.dataset.layoutId;
-  el.hidden=currentLayout.hidden.includes(id);
-  el.classList.toggle("layout-half",currentLayout.half.includes(id));
-  el.classList.toggle("layout-full",!currentLayout.half.includes(id));
- });
+function applyLayout(){const root=$("#mainContent");if(!root)return;const byId=new Map(layoutSections().map(el=>[el.dataset.layoutId,el]));currentLayout.order.forEach(id=>{const el=byId.get(id);if(el)root.append(el)});layoutSections().forEach(el=>{const id=el.dataset.layoutId;el.hidden=currentLayout.hidden.includes(id);el.classList.toggle("layout-half",currentLayout.half.includes(id));el.classList.toggle("layout-full",!currentLayout.half.includes(id));});}
+function saveLayout(){localStorage.setItem("ms-layout",JSON.stringify(currentLayout));applyLayout();toast("Your layout has been saved.");}
+function layoutEditor(){const names=Object.fromEntries(layoutDefaults.map(x=>[x.id,x.title]));const rows=currentLayout.order.map((id,i)=>{const hidden=currentLayout.hidden.includes(id),half=currentLayout.half.includes(id);return '<div class="layout-row" data-layout-row="'+id+'"><div><strong>'+names[id]+'</strong><small>'+(hidden?"Hidden":half?"Half width":"Full width")+'</small></div><select aria-label="Size for '+names[id]+'" data-size="'+id+'"><option value="full" '+(!half?'selected':'')+'>Full width</option><option value="half" '+(half?'selected':'')+'>Half width</option></select><button type="button" data-visible="'+id+'">'+(hidden?"Show":"Hide")+'</button><div style="grid-column:1/-1;display:flex;gap:6px"><button type="button" data-up="'+id+'" '+(i===0?'disabled':'')+'>↑ Move up</button><button type="button" data-down="'+id+'" '+(i===currentLayout.order.length-1?'disabled':'')+'>↓ Move down</button></div></div>'}).join("");modal("Customise your Mindspace",'<p style="color:var(--muted);font-size:13px">Arrange your home page, choose what appears and decide how much space each section gets. Changes are saved on this device.</p><div class="field"><label>Start with a layout preset</label><select id="layoutPreset" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#f8faff;color:#20263a"><option value="">Choose a preset…</option><option value="classic">Classic · Everything in order</option><option value="gamer">Gamer · Your decks and tools first</option><option value="study">Study · Revision focused</option><option value="minimal">Minimal · Keep it simple</option></select></div><div class="layout-toolbar"><button class="primary" id="layoutDragToggle" type="button">↕ Drag to rearrange</button><button class="secondary" id="layoutReset" type="button">Reset layout</button></div><p class="layout-hint">You can also use the arrows to move sections. Half-width sections sit side by side on larger screens.</p><div id="layoutRows">'+rows+'</div><div class="modal-actions" style="margin-top:16px"><button class="primary" id="layoutSave" type="button">Save my layout</button><button class="secondary" id="layoutDone" type="button">Done</button></div>');
+$("#layoutPreset").onchange=e=>{const p=layoutPresets[e.target.value];if(!p)return;currentLayout={order:[...p.order],hidden:[...p.hidden],half:[...p.half]};layoutEditor();$("#layoutPreset").value=e.target.value};
+$("#layoutReset").onclick=()=>{currentLayout={order:layoutDefaults.map(x=>x.id),hidden:[],half:[]};layoutEditor();toast("Original layout restored. Save to keep it.")};
+$("#layoutSave").onclick=()=>{saveLayout();closeModal()};
+$("#layoutDone").onclick=closeModal;
+$("#layoutRows").querySelectorAll("[data-visible]").forEach(b=>b.onclick=()=>{const id=b.dataset.visible;currentLayout.hidden=currentLayout.hidden.includes(id)?currentLayout.hidden.filter(x=>x!==id):[...currentLayout.hidden,id];layoutEditor()});
+$("#layoutRows").querySelectorAll("[data-size]").forEach(sel=>sel.onchange=()=>{const id=sel.dataset.size;currentLayout.half=sel.value==="half"?[...new Set([...currentLayout.half,id])]:currentLayout.half.filter(x=>x!==id);layoutEditor()});
+$("#layoutRows").querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>moveLayout(b.dataset.up,-1));
+$("#layoutRows").querySelectorAll("[data-down]").forEach(b=>b.onclick=()=>moveLayout(b.dataset.down,1));
+$("#layoutDragToggle").onclick=()=>{closeModal();enableLayoutDragging();toast("Drag sections to rearrange, then press Esc to finish and save.")};
 }
-function saveLayout(){
- currentLayout=normaliseLayout(currentLayout);
- try{localStorage.setItem("ms-layout",JSON.stringify(currentLayout))}
- catch(e){toast("Your browser could not save this layout.");return}
- applyLayout();toast("Your layout has been saved.");
-}
-function moveLayout(id,delta){
- const i=currentLayout.order.indexOf(id),j=i+delta;
- if(i<0||j<0||j>=currentLayout.order.length)return;
- [currentLayout.order[i],currentLayout.order[j]]=[currentLayout.order[j],currentLayout.order[i]];
- layoutEditor();
-}
-function layoutEditor(){
- const names=Object.fromEntries(layoutDefaults.map(x=>[x.id,x.title]));
- const rows=currentLayout.order.map((id,i)=>{
-  const hidden=currentLayout.hidden.includes(id),half=currentLayout.half.includes(id);
-  return '<div class="layout-row"><div><strong>'+names[id]+'</strong><small>'+(hidden?"Hidden":half?"Half width":"Full width")+'</small></div><select aria-label="Size for '+names[id]+'" data-size="'+id+'"><option value="full" '+(!half?'selected':'')+'>Full width</option><option value="half" '+(half?'selected':'')+'>Half width</option></select><button type="button" data-visible="'+id+'">'+(hidden?"Show":"Hide")+'</button><div class="layout-move"><button type="button" data-up="'+id+'" '+(i===0?'disabled':'')+'>↑ Move up</button><button type="button" data-down="'+id+'" '+(i===currentLayout.order.length-1?'disabled':'')+'>↓ Move down</button></div></div>';
- }).join("");
- modal("Customise your Mindspace",'<p class="layout-hint">Reorder sections, hide anything you do not need, and choose full or half width. Changes are saved in this browser.</p><div class="field"><label for="layoutPreset">Choose a starting layout</label><select id="layoutPreset"><option value="">Choose a preset…</option><option value="classic">Classic · Everything</option><option value="gamer">Gamer · Games and tools first</option><option value="study">Study · Revision focused</option><option value="minimal">Minimal · Less clutter</option></select></div><div id="layoutRows">'+rows+'</div><div class="modal-actions"><button class="primary" id="layoutSave">Save layout</button><button class="secondary" id="layoutReset">Reset</button><button class="secondary" id="layoutDone">Close</button></div>');
- $("#layoutPreset").onchange=e=>{
-  const preset=layoutPresets[e.target.value];if(!preset)return;
-  currentLayout=normaliseLayout(preset);layoutEditor();$("#layoutPreset").value=e.target.value;
- };
- $("#layoutRows").querySelectorAll("[data-visible]").forEach(b=>b.onclick=()=>{
-  const id=b.dataset.visible;
-  currentLayout.hidden=currentLayout.hidden.includes(id)?currentLayout.hidden.filter(x=>x!==id):[...currentLayout.hidden,id];
-  layoutEditor();
- });
- $("#layoutRows").querySelectorAll("[data-size]").forEach(s=>s.onchange=()=>{
-  const id=s.dataset.size;
-  currentLayout.half=s.value==="half"?[...new Set([...currentLayout.half,id])]:currentLayout.half.filter(x=>x!==id);
-  layoutEditor();
- });
- $("#layoutRows").querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>moveLayout(b.dataset.up,-1));
- $("#layoutRows").querySelectorAll("[data-down]").forEach(b=>b.onclick=()=>moveLayout(b.dataset.down,1));
- $("#layoutSave").onclick=()=>{saveLayout();closeModal()};
- $("#layoutReset").onclick=()=>{currentLayout=normaliseLayout(null);layoutEditor();toast("Default layout restored. Save to keep it.")};
- $("#layoutDone").onclick=closeModal;
-}
-$("#layoutStudio").addEventListener("click",layoutEditor);
+function moveLayout(id,delta){const i=currentLayout.order.indexOf(id),j=i+delta;if(j<0||j>=currentLayout.order.length)return;[currentLayout.order[i],currentLayout.order[j]]=[currentLayout.order[j],currentLayout.order[i]];layoutEditor()}
+function enableLayoutDragging(){const root=$("#mainContent");root.classList.add("layout-editing");layoutSections().forEach(el=>{el.draggable=true;el.addEventListener("dragstart",layoutDragStart);el.addEventListener("dragover",layoutDragOver);el.addEventListener("drop",layoutDrop);el.addEventListener("dragend",layoutDragEnd)});const stop=()=>{root.classList.remove("layout-editing");layoutSections().forEach(el=>{el.draggable=false;el.classList.remove("layout-dragging","layout-drop-target");el.removeEventListener("dragstart",layoutDragStart);el.removeEventListener("dragover",layoutDragOver);el.removeEventListener("drop",layoutDrop);el.removeEventListener("dragend",layoutDragEnd)});currentLayout.order=layoutSections().map(el=>el.dataset.layoutId);layoutEditor()};window.addEventListener("keydown",function esc(e){if(e.key==="Escape"){window.removeEventListener("keydown",esc);stop()}})}
+function layoutDragStart(e){e.dataTransfer.setData("text/plain",e.currentTarget.dataset.layoutId);e.currentTarget.classList.add("layout-dragging")}
+function layoutDragOver(e){e.preventDefault();e.currentTarget.classList.add("layout-drop-target")}
+function layoutDrop(e){e.preventDefault();const from=e.dataTransfer.getData("text/plain"),to=e.currentTarget.dataset.layoutId;if(!from||from===to)return;const a=currentLayout.order.indexOf(from),b=currentLayout.order.indexOf(to);currentLayout.order.splice(a,1);currentLayout.order.splice(b,0,from);applyLayout()}
+function layoutDragEnd(e){layoutSections().forEach(el=>el.classList.remove("layout-dragging","layout-drop-target"));currentLayout.order=layoutSections().map(el=>el.dataset.layoutId)}
+$("#layoutStudio").onclick=layoutEditor;
 applyLayout();
 
-const profileDefaults={name:"My profile",avatar:"🙂",bio:"A little space that's completely yours.",accent:"#35ae88",background:"#f4f7fb"};
+
+/* Profile data and daily mood sentence are private to this browser. */
+const profileDefaults={name:"My profile",avatar:"🙂",bio:"A little space that's completely yours.",accent:"#35ae88",background:"#f4f7fb",preset:"mint"};
 const profilePresets={
  mint:{accent:"#35ae88",background:"#f4f7fb"},
  ocean:{accent:"#3986c9",background:"#f1f6fc"},
@@ -273,76 +238,44 @@ const profilePresets={
  rose:{accent:"#d56d9b",background:"#fcf2f7"},
  midnight:{accent:"#a18af0",background:"#202238"}
 };
-function escapeProfileText(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function readProfile(){
- try{
-  const saved=JSON.parse(localStorage.getItem("ms-profile")||"{}");
-  const p={...profileDefaults,...(saved&&typeof saved==="object"?saved:{})};
-  if(!/^#[0-9a-f]{6}$/i.test(p.accent))p.accent=profileDefaults.accent;
-  if(!/^#[0-9a-f]{6}$/i.test(p.background))p.background=profileDefaults.background;
-  return p;
- }catch(e){return {...profileDefaults}}
-}
+function readProfile(){try{return {...profileDefaults,...JSON.parse(localStorage.getItem("ms-profile")||"{}")}}catch(e){return {...profileDefaults}}}
 let userProfile=readProfile();
 function applyProfile(){
- const p=userProfile,root=document.documentElement,dark=p.background.toLowerCase()==="#202238";
+ const p=userProfile,root=document.documentElement;
  root.style.setProperty("--mint",p.accent);
  root.style.setProperty("--profile-accent",p.accent);
  root.style.setProperty("--bg",p.background);
- root.style.setProperty("--panel",dark?"#292c46":"#ffffff");
- root.style.setProperty("--panel2",dark?"#343854":"#e9eef7");
- root.style.setProperty("--text",dark?"#f4f3ff":"#20263a");
- root.style.setProperty("--muted",dark?"#b8b5d0":"#68728b");
- root.style.setProperty("--line",dark?"#454965":"#dce3ef");
- document.body.style.background=dark
-  ?"radial-gradient(ellipse at 8% 0%,#39385d,transparent 40%),radial-gradient(ellipse at 95% 8%,#244c50,transparent 32%),var(--bg)"
-  :"radial-gradient(ellipse at 8% 0%,#e3eaff,transparent 40%),radial-gradient(ellipse at 95% 8%,#ddf6ec,transparent 32%),var(--bg)";
- document.body.style.color=dark?"#f4f3ff":"#20263a";
- document.querySelectorAll(".primary").forEach(b=>b.style.background=p.accent);
- const avatar=$("#headerAvatar"),name=$("#profileName");
- if(avatar)avatar.textContent=p.avatar||"🙂";
- if(name)name.textContent=p.name||"My profile";
-}
-function localDateKey(date=new Date()){
- return [date.getFullYear(),String(date.getMonth()+1).padStart(2,"0"),String(date.getDate()).padStart(2,"0")].join("-");
+ const dark=p.background.toLowerCase()==="#202238";
+ if(dark){
+  root.style.setProperty("--panel","#292c46");root.style.setProperty("--panel2","#343854");root.style.setProperty("--text","#f4f3ff");root.style.setProperty("--muted","#b8b5d0");root.style.setProperty("--line","#454965");
+  document.body.style.background="radial-gradient(ellipse at 8% 0%,#39385d,transparent 40%),radial-gradient(ellipse at 95% 8%,#244c50,transparent 32%),var(--bg)";
+  document.body.style.color="#f4f3ff";
+ }else{
+  root.style.setProperty("--panel","#ffffff");root.style.setProperty("--panel2","#e9eef7");root.style.setProperty("--text","#20263a");root.style.setProperty("--muted","#68728b");root.style.setProperty("--line","#dce3ef");
+  document.body.style.background="radial-gradient(ellipse at 8% 0%,#e3eaff,transparent 40%),radial-gradient(ellipse at 95% 8%,#ddf6ec,transparent 32%),var(--bg)";
+  document.body.style.color="#20263a";
+ }
+ root.style.setProperty("--mint",p.accent);
+ document.querySelectorAll(".primary").forEach(b=>{b.style.background=p.accent});
+ const av=$("#headerAvatar"),name=$("#profileName");if(av)av.textContent=p.avatar||"🙂";if(name)name.textContent=p.name||"My profile";
 }
 function readDaily(){try{return JSON.parse(localStorage.getItem("ms-daily-reflections")||"{}")}catch(e){return {}}}
 function profileEditor(){
- const p=userProfile,today=localDateKey(),entries=readDaily(),todayEntry=entries[today]||{mood:"🙂",sentence:""};
- const swatches=Object.entries(profilePresets).map(([key,v])=>'<button type="button" class="theme-swatch" data-theme="'+key+'" aria-label="'+key+' colour palette" aria-pressed="false" style="background:'+v.accent+'"></button>').join("");
- const dates=Object.keys(entries).filter(d=>entries[d]&&typeof entries[d]==="object").sort().reverse().slice(0,7);
- const history=dates.map(date=>'<article><time>'+escapeProfileText(date)+'</time><p>'+escapeProfileText(entries[date].mood||"🙂")+' '+escapeProfileText(entries[date].sentence||"")+'</p></article>').join("");
- modal("Your personal profile",'<div class="profile-card"><div class="profile-preview"><div class="profile-avatar" id="profilePreviewAvatar">'+escapeProfileText(p.avatar)+'</div><div><strong id="profilePreviewName">'+escapeProfileText(p.name)+'</strong><p id="profilePreviewBio">'+escapeProfileText(p.bio)+'</p></div></div></div><div class="profile-fields"><div class="field"><label for="editProfileName">Display name</label><input id="editProfileName" maxlength="24" value="'+escapeProfileText(p.name)+'" placeholder="Your name"></div><div class="field"><label for="editProfileAvatar">Avatar emoji</label><input id="editProfileAvatar" maxlength="4" value="'+escapeProfileText(p.avatar)+'" placeholder="🙂"></div><div class="field" style="grid-column:1/-1"><label for="editProfileBio">Short bio</label><textarea id="editProfileBio" maxlength="100" placeholder="A little about you…">'+escapeProfileText(p.bio)+'</textarea></div></div><div class="profile-card"><strong>Choose your main colours</strong><p class="profile-help">Pick a palette or set your own accent and background.</p><div class="theme-swatches">'+swatches+'</div><div class="color-pair"><label>Accent colour<input type="color" id="profileAccent" value="'+p.accent+'"></label><label>Background colour<input type="color" id="profileBackground" value="'+p.background+'"></label></div></div><div class="profile-card daily-entry"><strong>Daily feeling</strong><p class="profile-help">Write one sentence about how today feels. Your reflection is saved privately in this browser.</p><div class="field"><label for="dailyMood">Mood</label><select id="dailyMood"><option>🙂</option><option>😄</option><option>😌</option><option>😐</option><option>😔</option><option>😣</option><option>😴</option><option>🤩</option><option>😤</option><option>🥰</option></select></div><textarea id="dailySentence" maxlength="180" placeholder="Today I feel…">'+escapeProfileText(todayEntry.sentence)+'</textarea><div class="daily-actions"><small id="dailyCount">0 / 180</small><button class="primary" id="saveDaily" type="button">Save today's sentence</button></div></div><div class="profile-card"><strong>Recent reflections</strong><div class="daily-history">'+(history||'<p class="profile-help">Your saved daily sentences will appear here.</p>')+'</div></div><div class="modal-actions"><button class="primary" id="saveProfile" type="button">Save profile</button><button class="secondary" id="closeProfile" type="button">Close</button></div>');
- const get=id=>document.getElementById(id);
- const syncPreview=()=>{
-  get("profilePreviewName").textContent=get("editProfileName").value.trim()||"My profile";
-  get("profilePreviewBio").textContent=get("editProfileBio").value;
-  get("profilePreviewAvatar").textContent=get("editProfileAvatar").value.trim()||"🙂";
- };
- ["editProfileName","editProfileBio","editProfileAvatar"].forEach(id=>get(id).addEventListener("input",syncPreview));
- const updateCount=()=>get("dailyCount").textContent=get("dailySentence").value.length+" / 180";
- updateCount();get("dailySentence").addEventListener("input",updateCount);
- get("dailyMood").value=todayEntry.mood||"🙂";
- get("saveDaily").onclick=()=>{
-  const sentence=get("dailySentence").value.trim();
-  if(!sentence){toast("Write a sentence first.");return;}
-  const saved=readDaily();saved[today]={mood:get("dailyMood").value,sentence};
-  try{localStorage.setItem("ms-daily-reflections",JSON.stringify(saved));toast("Today's reflection has been saved.");profileEditor()}
-  catch(e){toast("Your browser could not save today's reflection.")}
- };
- get("saveProfile").onclick=()=>{
-  userProfile={...userProfile,name:get("editProfileName").value.trim()||"My profile",avatar:get("editProfileAvatar").value.trim()||"🙂",bio:get("editProfileBio").value.trim(),accent:get("profileAccent").value,background:get("profileBackground").value};
-  try{localStorage.setItem("ms-profile",JSON.stringify(userProfile));applyProfile();toast("Your profile has been saved.");closeModal()}
-  catch(e){toast("Your browser could not save your profile.")}
- };
- get("closeProfile").onclick=closeModal;
- $("#modalBody").querySelectorAll("[data-theme]").forEach(b=>b.onclick=()=>{
-  const palette=profilePresets[b.dataset.theme];
-  get("profileAccent").value=palette.accent;get("profileBackground").value=palette.background;
-  $("#modalBody").querySelectorAll("[data-theme]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
- });
+ const p=userProfile,today=new Date().toLocaleDateString("en-CA"),entries=readDaily(),todayEntry=entries[today]||{mood:"🙂",sentence:""};
+ const swatches=Object.entries(profilePresets).map(([key,v])=>'<button type="button" class="theme-swatch" data-theme="'+key+'" aria-label="'+key+' theme" aria-pressed="'+(p.preset===key)+'" style="background:'+v.accent+'"></button>').join("");
+ const history=Object.keys(entries).sort().reverse().slice(0,7).map(date=>'<article><time>'+date+'</time><p>'+escapeProfileText(entries[date].mood||"")+" "+escapeProfileText(entries[date].sentence||"")+'</p></article>').join("");
+ modal("Your personal profile",'<div class="profile-card"><div class="profile-preview"><div class="profile-avatar" id="profilePreviewAvatar">'+escapeProfileText(p.avatar)+'</div><div><strong id="profilePreviewName">'+escapeProfileText(p.name)+'</strong><p id="profilePreviewBio">'+escapeProfileText(p.bio)+'</p></div></div></div><div class="profile-fields"><div class="field"><label>Display name</label><input id="editProfileName" maxlength="24" value="'+escapeProfileText(p.name)+'" placeholder="Your name"></div><div class="field"><label>Choose an avatar</label><input id="editProfileAvatar" maxlength="4" value="'+escapeProfileText(p.avatar)+'" placeholder="🙂"></div><div class="field" style="grid-column:1/-1"><label>Short bio</label><textarea id="editProfileBio" maxlength="100" placeholder="A little about you...">'+escapeProfileText(p.bio)+'</textarea></div></div><div class="profile-card"><strong>Choose your main colours</strong><p style="font-size:12px;color:var(--muted);margin:4px 0">Pick a palette or set your own accent and background.</p><div class="theme-swatches">'+swatches+'</div><div class="color-pair"><label>Accent colour<input type="color" id="profileAccent" value="'+p.accent+'"></label><label>Background colour<input type="color" id="profileBackground" value="'+p.background+'"></label></div></div><div class="profile-card daily-entry"><strong>Today's feeling</strong><p style="font-size:12px;color:var(--muted);margin:4px 0 10px">One sentence to capture how today feels. Only you can see this on this device.</p><div class="field"><label>Choose a mood</label><select id="dailyMood" style="padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:#20263a"><option>🙂</option><option>😄</option><option>😌</option><option>😐</option><option>😔</option><option>😣</option><option>😴</option><option>🤩</option><option>😤</option><option>🥰</option></select></div><textarea id="dailySentence" maxlength="180" placeholder="Today I feel...">'+escapeProfileText(todayEntry.sentence)+'</textarea><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:9px"><small id="dailyCount" style="color:var(--muted)">0 / 180</small><button class="primary" id="saveDaily">Save today's sentence</button></div></div><div class="profile-card"><strong>Recent reflections</strong><div class="daily-history">'+(history||'<p style="font-size:12px;color:var(--muted)">Your saved daily sentences will appear here.</p>')+'</div></div><div class="modal-actions"><button class="primary" id="saveProfile">Save profile</button><button class="secondary" id="closeProfile">Close</button></div>');
+ const syncPreview=()=>{$("#profilePreviewName").textContent=$("#editProfileName").value||"My profile";$("#profilePreviewBio").textContent=$("#editProfileBio").value;$("#profilePreviewAvatar").textContent=$("#editProfileAvatar").value||"🙂"};
+ ["editProfileName","editProfileBio","editProfileAvatar"].forEach(id=>$("#"+id).addEventListener("input",syncPreview));
+ const count=()=>$("#dailyCount").textContent=$("#dailySentence").value.length+" / 180";count();$("#dailySentence").addEventListener("input",count);
+ $("#dailyMood").value=todayEntry.mood||"🙂";
+ $("#saveDaily").onclick=()=>{const sentence=$("#dailySentence").value.trim();if(!sentence){toast("Write a sentence first.");return}const data=readDaily();data[today]={mood:$("#dailyMood").value,sentence};localStorage.setItem("ms-daily-reflections",JSON.stringify(data));toast("Today's reflection has been saved.");profileEditor()};
+ $("#saveProfile").onclick=()=>{userProfile={...userProfile,name:$("#editProfileName").value.trim()||"My profile",avatar:$("#editProfileAvatar").value.trim()||"🙂",bio:$("#editProfileBio").value.trim(),accent:$("#profileAccent").value,background:$("#profileBackground").value};userProfile.preset="custom";localStorage.setItem("ms-profile",JSON.stringify(userProfile));applyProfile();toast("Your profile has been saved.");closeModal()};
+ $("#closeProfile").onclick=closeModal;
+ $("#modalBody").querySelectorAll("[data-theme]").forEach(b=>b.onclick=()=>{const key=b.dataset.theme,v=profilePresets[key];userProfile.preset=key;$("#profileAccent").value=v.accent;$("#profileBackground").value=v.background;$("#modalBody").querySelectorAll("[data-theme]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)))});
 }
-$("#profileOpen").addEventListener("click",profileEditor);
+function escapeProfileText(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+$("#profileOpen").onclick=profileEditor;
 applyProfile();
 
 function toast(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2100)}
