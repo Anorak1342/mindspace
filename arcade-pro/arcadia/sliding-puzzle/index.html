@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>15 Puzzle - Arcadia</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: #0A0A12; color: #E5E7EB;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex; justify-content: center; align-items: flex-start;
+    min-height: 100%; padding: 16px;
+    -webkit-tap-highlight-color: transparent; overflow-x: hidden;
+  }
+  .game { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 14px; }
+  .header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 {
+    font-size: 34px; font-weight: 800; letter-spacing: -1px;
+    background: linear-gradient(90deg, #7C3AED, #22D3EE);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .stats { display: flex; gap: 8px; }
+  .stat {
+    background: #14141f; border: 1px solid rgba(124,58,237,0.25);
+    border-radius: 10px; padding: 6px 14px; text-align: center; min-width: 78px;
+  }
+  .stat .label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #8B8BA0; }
+  .stat .value { font-size: 18px; font-weight: 700; color: #E5E7EB; font-variant-numeric: tabular-nums; }
+  .hint { font-size: 13px; color: #8B8BA0; line-height: 1.4; }
+  .controls { display: flex; justify-content: flex-end; }
+  button {
+    background: linear-gradient(90deg, #7C3AED, #22D3EE);
+    color: #0A0A12; border: none; border-radius: 8px;
+    padding: 9px 18px; font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: transform 0.1s; font-family: inherit;
+  }
+  button:active { transform: scale(0.96); }
+  .board-wrap { display: flex; justify-content: center; }
+  .board {
+    --size: min(420px, calc(100vw - 32px));
+    --pad: 10px;
+    --gap: 10px;
+    --cell: calc((var(--size) - var(--pad) * 2 - var(--gap) * 3) / 4);
+    width: var(--size); height: var(--size);
+    position: relative; background: #14141f;
+    border: 1px solid rgba(124,58,237,0.2);
+    border-radius: 12px; padding: var(--pad);
+    touch-action: none; user-select: none;
+  }
+  .slot {
+    position: absolute; width: var(--cell); height: var(--cell);
+    background: rgba(255,255,255,0.025); border-radius: 8px;
+    transform: translate(calc(var(--c) * (var(--cell) + var(--gap))), calc(var(--r) * (var(--cell) + var(--gap))));
+  }
+  .tile {
+    position: absolute; width: var(--cell); height: var(--cell);
+    border-radius: 8px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; color: #fff; font-size: calc(var(--cell) * 0.42); line-height: 1;
+    background: linear-gradient(135deg, #7C3AED, #5B3FBF);
+    box-shadow: 0 4px 12px rgba(124,58,237,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+    transition: transform 0.16s ease, box-shadow 0.1s;
+    transform: translate(calc(var(--c) * (var(--cell) + var(--gap))), calc(var(--r) * (var(--cell) + var(--gap))));
+  }
+  .tile:hover { box-shadow: 0 6px 16px rgba(124,58,237,0.55), inset 0 1px 0 rgba(255,255,255,0.2); }
+  .tile:active { box-shadow: 0 2px 6px rgba(124,58,237,0.4); }
+  .tile.movable { background: linear-gradient(135deg, #7C3AED, #22D3EE); }
+  .tile.solved { background: linear-gradient(135deg, #22D3EE, #67E8F9); color: #0A0A12; }
+  .overlay {
+    position: absolute; inset: 0; background: rgba(10,10,18,0.85);
+    border-radius: 12px; display: none; align-items: center; justify-content: center; z-index: 10;
+  }
+  .overlay.show { display: flex; }
+  .overlay-card { text-align: center; padding: 24px; }
+  .overlay-card h2 {
+    font-size: 28px; margin-bottom: 8px;
+    background: linear-gradient(90deg, #7C3AED, #22D3EE);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .overlay-card p { color: #B5B5C8; margin-bottom: 16px; font-size: 14px; }
+  .overlay-buttons { display: flex; gap: 10px; justify-content: center; }
+  .overlay-buttons button { background: linear-gradient(90deg, #7C3AED, #22D3EE); color: #0A0A12; border: none; }
+</style>
+</head>
+<body>
+<div class="game">
+  <div class="header">
+    <h1>15 Puzzle</h1>
+    <div class="stats">
+      <div class="stat"><div class="label">Moves</div><div class="value" id="moves">0</div></div>
+      <div class="stat"><div class="label">Time</div><div class="value" id="time">00:00</div></div>
+    </div>
+  </div>
+  <p class="hint">Slide tiles into the blank to order them 1 to 15. Click a tile or swipe to move.</p>
+  <div class="controls"><button id="restart">Shuffle &amp; Restart</button></div>
+  <div class="board-wrap">
+    <div class="board" id="board">
+      <div class="overlay" id="overlay">
+        <div class="overlay-card">
+          <h2>Solved!</h2>
+          <p id="win-text">Nice work.</p>
+          <div class="overlay-buttons"><button id="overlay-restart">Play again</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var N = 4;
+  var board = document.getElementById('board');
+  var movesEl = document.getElementById('moves');
+  var timeEl = document.getElementById('time');
+  var restartBtn = document.getElementById('restart');
+  var overlay = document.getElementById('overlay');
+  var overlayRestart = document.getElementById('overlay-restart');
+  var winText = document.getElementById('win-text');
+
+  var state = [];       // 16 cells, value 1..15 or 0 for blank
+  var blankIdx = 15;
+  var moves = 0;
+  var timerStart = 0;
+  var timerHandle = null;
+  var started = false;
+  var won = false;
+  var tileElements = {}; // value -> element
+
+  function buildSlots() {
+    for (var r = 0; r < N; r++) for (var c = 0; c < N; c++) {
+      var d = document.createElement('div');
+      d.className = 'slot';
+      d.style.setProperty('--r', r);
+      d.style.setProperty('--c', c);
+      board.appendChild(d);
+    }
+  }
+
+  function solvedState() {
+    var s = [];
+    for (var i = 1; i <= 15; i++) s.push(i);
+    s.push(0);
+    return s;
+  }
+
+  function neighbors(idx) {
+    var r = Math.floor(idx / N), c = idx % N;
+    var out = [];
+    if (r > 0) out.push(idx - N);
+    if (r < N - 1) out.push(idx + N);
+    if (c > 0) out.push(idx - 1);
+    if (c < N - 1) out.push(idx + 1);
+    return out;
+  }
+
+  function shuffle() {
+    state = solvedState();
+    blankIdx = 15;
+    var last = -1;
+    for (var i = 0; i < 80; i++) {
+      var nb = neighbors(blankIdx).filter(function (x) { return x !== last; });
+      var pick = nb[Math.floor(Math.random() * nb.length)];
+      last = blankIdx;
+      state[blankIdx] = state[pick];
+      state[pick] = 0;
+      blankIdx = pick;
+    }
+    // ensure not already solved
+    if (isSolved()) {
+      var nb2 = neighbors(blankIdx);
+      var pick2 = nb2[0];
+      state[blankIdx] = state[pick2];
+      state[pick2] = 0;
+      blankIdx = pick2;
+    }
+  }
+
+  function isSolved() {
+    for (var i = 0; i < 15; i++) if (state[i] !== i + 1) return false;
+    return state[15] === 0;
+  }
+
+  function buildTiles() {
+    // remove old
+    for (var v in tileElements) { tileElements[v].remove(); }
+    tileElements = {};
+    for (var i = 0; i < 16; i++) {
+      var val = state[i];
+      if (val === 0) continue;
+      var el = document.createElement('div');
+      el.className = 'tile';
+      el.textContent = val;
+      el.setAttribute('data-val', val);
+      (function (value) {
+        el.addEventListener('click', function () { tryMoveValue(value); });
+      })(val);
+      board.appendChild(el);
+      tileElements[val] = el;
+    }
+  }
+
+  function idxToRC(idx) {
+    return { r: Math.floor(idx / N), c: idx % N };
+  }
+
+  function render() {
+    for (var i = 0; i < 16; i++) {
+      var val = state[i];
+      if (val === 0) continue;
+      var el = tileElements[val];
+      var rc = idxToRC(i);
+      el.style.setProperty('--r', rc.r);
+      el.style.setProperty('--c', rc.c);
+      var movable = neighbors(blankIdx).indexOf(i) !== -1;
+      el.classList.toggle('movable', movable && !won);
+      // highlight if in correct position
+      el.classList.toggle('solved', val === i + 1);
+    }
+  }
+
+  function tryMoveValue(value) {
+    if (won) return;
+    // find tile index
+    var idx = state.indexOf(value);
+    var nb = neighbors(blankIdx);
+    if (nb.indexOf(idx) === -1) {
+      // check same row/col for multi-slide
+      tryMultiSlide(idx);
+      return;
+    }
+    doMove(idx);
+  }
+
+  function tryMultiSlide(idx) {
+    var br = Math.floor(blankIdx / N), bc = blankIdx % N;
+    var tr = Math.floor(idx / N), tc = idx % N;
+    if (tr === br && tc !== bc) {
+      // same row, slide horizontally
+      var dir = tc < bc ? 1 : -1; // direction blank moves
+      var cur = blankIdx;
+      while ((cur % N) !== tc) {
+        var next = cur - dir; // tile to move into blank
+        state[cur] = state[next];
+        state[next] = 0;
+        cur = next;
+        moves++;
+      }
+      blankIdx = cur;
+      afterMove();
+    } else if (tc === bc && tr !== br) {
+      var dir2 = tr < br ? 1 : -1;
+      var cur2 = blankIdx;
+      while (Math.floor(cur2 / N) !== tr) {
+        var next2 = cur2 - dir2 * N;
+        state[cur2] = state[next2];
+        state[next2] = 0;
+        cur2 = next2;
+        moves++;
+      }
+      blankIdx = cur2;
+      afterMove();
+    }
+  }
+
+  function doMove(idx) {
+    state[blankIdx] = state[idx];
+    state[idx] = 0;
+    blankIdx = idx;
+    moves++;
+    afterMove();
+  }
+
+  function afterMove() {
+    if (!started) { started = true; timerStart = Date.now(); timerHandle = setInterval(tickTime, 250); }
+    movesEl.textContent = moves;
+    render();
+    if (isSolved()) {
+      won = true;
+      if (timerHandle) { clearInterval(timerHandle); timerHandle = null; }
+      render();
+      var secs = Math.floor((Date.now() - timerStart) / 1000);
+      winText.textContent = 'Solved in ' + moves + ' moves and ' + fmtTime(secs) + '.';
+      overlay.classList.add('show');
+    }
+  }
+
+  function tickTime() {
+    var secs = Math.floor((Date.now() - timerStart) / 1000);
+    timeEl.textContent = fmtTime(secs);
+  }
+  function fmtTime(s) {
+    var m = Math.floor(s / 60), ss = s % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (ss < 10 ? '0' : '') + ss;
+  }
+
+  function reset() {
+    if (timerHandle) { clearInterval(timerHandle); timerHandle = null; }
+    won = false; moves = 0; started = false;
+    movesEl.textContent = '0'; timeEl.textContent = '00:00';
+    overlay.classList.remove('show');
+    shuffle();
+    buildTiles();
+    render();
+  }
+
+  // swipe handling
+  var touchStart = null;
+  board.addEventListener('touchstart', function (e) {
+    if (e.touches.length === 1) touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, { passive: true });
+  board.addEventListener('touchend', function (e) {
+    if (!touchStart) return;
+    var t = e.changedTouches[0];
+    var dx = t.clientX - touchStart.x, dy = t.clientY - touchStart.y;
+    var ax = Math.abs(dx), ay = Math.abs(dy);
+    if (Math.max(ax, ay) < 24) { touchStart = null; return; }
+    var br = Math.floor(blankIdx / N), bc = blankIdx % N;
+    if (ax > ay) {
+      // horizontal swipe: swipe right => tile left of blank moves right => need blank to have left neighbor
+      if (dx > 0 && bc > 0) doMove(blankIdx - 1);
+      else if (dx < 0 && bc < N - 1) doMove(blankIdx + 1);
+    } else {
+      if (dy > 0 && br > 0) doMove(blankIdx - N);
+      else if (dy < 0 && br < N - 1) doMove(blankIdx + N);
+    }
+    touchStart = null;
+  }, { passive: true });
+
+  // keyboard
+  window.addEventListener('keydown', function (e) {
+    var br = Math.floor(blankIdx / N), bc = blankIdx % N;
+    var map = {
+      ArrowLeft: bc < N - 1 ? blankIdx + 1 : -1,
+      ArrowRight: bc > 0 ? blankIdx - 1 : -1,
+      ArrowUp: br < N - 1 ? blankIdx + N : -1,
+      ArrowDown: br > 0 ? blankIdx - N : -1
+    };
+    if (map[e.key] !== undefined && map[e.key] !== -1) {
+      e.preventDefault();
+      doMove(map[e.key]);
+    }
+  });
+
+  restartBtn.addEventListener('click', reset);
+  overlayRestart.addEventListener('click', reset);
+
+  buildSlots();
+  reset();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Memory Match — Arcadia</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Inter,system-ui,sans-serif;background:#0A0A12;color:#ECECF5;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+  h1{font-family:Syne,sans-serif;font-weight:800;font-size:22px;margin-bottom:4px}
+  .hint{color:#9a9ab5;font-size:12px;margin-bottom:14px}
+  .hud{display:flex;gap:18px;margin-bottom:16px}
+  .hud .s{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 16px;text-align:center;min-width:80px}
+  .hud .s b{font-family:Syne,sans-serif;font-size:18px;display:block;font-variant-numeric:tabular-nums}
+  .hud .s span{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#9a9ab5}
+  #board{display:grid;grid-template-columns:repeat(4,72px);gap:10px}
+  @media(max-width:380px){#board{grid-template-columns:repeat(4,64px);gap:8px}}
+  .card{width:72px;height:72px;perspective:600px;cursor:pointer}
+  @media(max-width:380px){.card{width:64px;height:64px}}
+  .inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+  .card.flipped .inner,.card.done .inner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;border-radius:11px;display:grid;place-items:center;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:1px solid rgba(255,255,255,.1)}
+  .back{background:linear-gradient(135deg,#7C3AED,#22D3EE);box-shadow:0 0 18px -6px rgba(124,58,237,.7)}
+  .back::after{content:'';width:24px;height:24px;border:2px solid rgba(255,255,255,.6);border-radius:6px;transform:rotate(45deg)}
+  .front{background:#14142a;transform:rotateY(180deg)}
+  .front svg{width:38px;height:38px}
+  .card.done .front{background:rgba(34,211,238,.12);border-color:rgba(34,211,238,.5);box-shadow:0 0 14px -4px rgba(34,211,238,.6)}
+  .btn{margin-top:18px;padding:10px 18px;border-radius:10px;background:linear-gradient(90deg,#7C3AED,#9333ea);color:#fff;font-weight:600;border:none;cursor:pointer;font-size:14px}
+  .btn:hover{filter:brightness(1.1)}
+  .ov{position:fixed;inset:0;background:rgba(10,10,18,.85);display:none;place-items:center;backdrop-filter:blur(4px)}
+  .ov.show{display:grid}
+  .ov .box{text-align:center;padding:28px 36px;background:#14142a;border:1px solid rgba(255,255,255,.12);border-radius:16px}
+  .ov h2{font-family:Syne,sans-serif;font-size:26px;margin-bottom:6px;color:#22D3EE}
+  .ov p{color:#9a9ab5;margin-bottom:16px}
+</style>
+</head>
+<body>
+  <h1>Memory Match</h1>
+  <p class="hint">Flip cards two at a time · find all 8 pairs</p>
+  <div class="hud"><div class="s"><b id="mv">0</b><span>Moves</span></div><div class="s"><b id="tm">0:00</b><span>Time</span></div></div>
+  <div id="board"></div>
+  <button class="btn" id="restart">New game</button>
+  <div class="ov" id="ov"><div class="box"><h2>Solved</h2><p id="ovm"></p><button class="btn" id="ovr">Play again</button></div></div>
+<script>
+(function(){
+  var board=document.getElementById('board'),mvEl=document.getElementById('mv'),tmEl=document.getElementById('tm'),ov=document.getElementById('ov'),ovm=document.getElementById('ovm');
+  var shapes=[
+    {c:'#22D3EE',d:'<circle cx="19" cy="19" r="13"/>'},
+    {c:'#7C3AED',d:'<rect x="6" y="6" width="26" height="26" rx="3"/>'},
+    {c:'#F59E0B',d:'<polygon points="19,4 34,32 4,32"/>'},
+    {c:'#10B981',d:'<polygon points="19,4 34,19 19,34 4,19"/>'},
+    {c:'#F43F5E',d:'<path d="M19 31C7 22 4 15 9 10c3-3 7-1 10 3 3-4 7-6 10-3 5 5 2 12-10 21z"/>'},
+    {c:'#A855F7',d:'<polygon points="19,3 22,15 34,15 24,23 27,35 19,28 11,35 14,23 4,15 16,15"/>'},
+    {c:'#2DD4BF',d:'<rect x="4" y="16" width="30" height="6" rx="3"/><rect x="16" y="4" width="6" height="30" rx="3"/>'},
+    {c:'#FB7185',d:'<circle cx="19" cy="19" r="14"/><circle cx="19" cy="19" r="6" fill="#0A0A12"/>'}
+  ];
+  var cards=[],flipped=[],locked=false,moves=0,matched=0,t0=null,ti=null;
+  function svg(s){return '<svg viewBox="0 0 38 38" fill="'+s.c+'">'+s.d+'</svg>';}
+  function init(){
+    cards=[];flipped=[];locked=false;moves=0;matched=0;if(ti)clearInterval(ti);t0=null;tmEl.textContent='0:00';mvEl.textContent='0';
+    var deck=[];for(var i=0;i<8;i++){deck.push(i);deck.push(i);}
+    for(var i=deck.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=deck[i];deck[i]=deck[j];deck[j]=t;}
+    board.innerHTML='';
+    deck.forEach(function(s,i){var c=document.createElement('div');c.className='card';c.dataset.i=i;c.dataset.s=s;
+      c.innerHTML='<div class="inner"><div class="face back"></div><div class="face front">'+svg(shapes[s])+'</div></div>';
+      c.onclick=function(){flip(c);};board.appendChild(c);cards.push(c);});
+  }
+  function flip(c){
+    if(locked)return;if(c.classList.contains('flipped')||c.classList.contains('done'))return;
+    if(!t0){t0=Date.now();ti=setInterval(function(){var s=Math.floor((Date.now()-t0)/1000);tmEl.textContent=Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);},250);}
+    c.classList.add('flipped');flipped.push(c);
+    if(flipped.length===2){moves++;mvEl.textContent=moves;locked=true;
+      var a=flipped[0],b=flipped[1];
+      if(a.dataset.s===b.dataset.s){setTimeout(function(){a.classList.add('done');a.classList.remove('flipped');b.classList.add('done');b.classList.remove('flipped');flipped=[];locked=false;matched++;if(matched===8)win();},450);}
+      else{setTimeout(function(){a.classList.remove('flipped');b.classList.remove('flipped');flipped=[];locked=false;},750);}}
+  }
+  function win(){if(ti)clearInterval(ti);setTimeout(function(){ov.classList.add('show');ovm.textContent=moves+' moves in '+tmEl.textContent;},400);}
+  document.getElementById('restart').onclick=function(){ov.classList.remove('show');init();};
+  document.getElementById('ovr').onclick=function(){ov.classList.remove('show');init();};
+  init();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Wordle - Arcadia</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    background: #0A0A12;
+    color: #E6E6F0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+  #app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 8px 14px;
+    min-height: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  header {
+    width: 100%;
+    text-align: center;
+    padding: 6px 0 4px;
+    border-bottom: 1px solid #1c1c33;
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .subtitle {
+    font-size: 12px;
+    color: #8a8aa8;
+    margin-top: 2px;
+  }
+  #message {
+    height: 22px;
+    line-height: 22px;
+    font-size: 12px;
+    color: #b8b8d0;
+    text-align: center;
+    margin: 4px 0 6px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  #grid {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+  }
+  .tile {
+    width: 52px;
+    height: 52px;
+    border: 2px solid #2a2a44;
+    background: #1c1c33;
+    color: #E6E6F0;
+    font-size: 28px;
+    font-weight: 800;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s ease, background 0.3s ease, border-color 0.3s ease;
+  }
+  @media (max-width: 380px) {
+    .tile { width: 46px; height: 46px; font-size: 24px; }
+  }
+  @media (max-width: 320px) {
+    .tile { width: 40px; height: 40px; font-size: 20px; }
+  }
+  .tile.filled { border-color: #4a4a6a; transform: scale(1.08); }
+  .tile.flip { animation: flip 0.5s ease forwards; }
+  @keyframes flip {
+    0% { transform: rotateX(0); }
+    50% { transform: rotateX(90deg); }
+    100% { transform: rotateX(0); }
+  }
+  .tile.correct { background: #22c55e; border-color: #22c55e; color: #0A0A12; }
+  .tile.present { background: #eab308; border-color: #eab308; color: #0A0A12; }
+  .tile.absent { background: #3a3a52; border-color: #3a3a52; color: #8a8aa8; }
+  .row.shake { animation: shake 0.4s ease; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+  .row.bounce .tile { animation: bounce 0.6s ease; }
+  .row.bounce .tile:nth-child(2) { animation-delay: 0.08s; }
+  .row.bounce .tile:nth-child(3) { animation-delay: 0.16s; }
+  .row.bounce .tile:nth-child(4) { animation-delay: 0.24s; }
+  .row.bounce .tile:nth-child(5) { animation-delay: 0.32s; }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-18px); }
+    60% { transform: translateY(-18px); }
+  }
+  #keyboard {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: auto;
+  }
+  .keyrow {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+  }
+  .key {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 50px;
+    border-radius: 6px;
+    background: #3a3a52;
+    color: #E6E6F0;
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.05s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .key:active { transform: scale(0.94); }
+  .key.wide { flex: 1.6 1 0; font-size: 11px; }
+  .key.correct { background: #22c55e; color: #0A0A12; }
+  .key.present { background: #eab308; color: #0A0A12; }
+  .key.absent { background: #1f1f30; color: #555570; }
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  #overlay.show { display: flex; }
+  .modal {
+    background: #14142a;
+    border: 1px solid #2a2a44;
+    border-radius: 12px;
+    padding: 24px 28px;
+    text-align: center;
+    max-width: 320px;
+    width: calc(100% - 40px);
+  }
+  .modal h2 { font-size: 24px; margin-bottom: 8px; }
+  .modal .answer {
+    font-size: 14px;
+    color: #8a8aa8;
+    margin-bottom: 18px;
+    letter-spacing: 2px;
+  }
+  .modal .answer b { color: #22D3EE; font-weight: 800; }
+  .modal button {
+    background: #22D3EE;
+    color: #0A0A12;
+    border: none;
+    padding: 12px 22px;
+    font-size: 15px;
+    font-weight: 800;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .modal button:active { transform: scale(0.96); }
+  #resetTop {
+    background: none;
+    border: 1px solid #2a2a44;
+    color: #8a8aa8;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+  }
+  #resetTop:active { transform: scale(0.96); }
+  .topRow { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 6px; }
+  .topRow .spacer { width: 60px; }
+  .topRow h1 { flex: 1; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="topRow">
+      <span class="spacer"></span>
+      <h1>Wordle</h1>
+      <button id="resetTop">New</button>
+    </div>
+    <div class="subtitle">Guess the 5-letter word in 6 tries</div>
+  </header>
+
+  <div id="message"></div>
+  <div id="grid"></div>
+  <div id="keyboard"></div>
+</div>
+
+<div id="overlay">
+  <div class="modal">
+    <h2 id="modalTitle">Solved!</h2>
+    <div class="answer">The word was <b id="modalWord">-----</b></div>
+    <button id="modalBtn">New Game</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- Word list (common 5-letter English words) ----
+  var WORDS = [
+    "about","above","abuse","actor","acute","admit","adopt","adult","after","again",
+    "agent","agree","ahead","alarm","album","alert","alike","alive","allow","alone",
+    "along","alter","among","anger","angle","angry","apart","apple","apply","arena",
+    "argue","arise","array","aside","asset","audio","audit","avoid","award","aware",
+    "badly","baker","bases","basic","basis","beach","began","begin","begun","being",
+    "below","bench","billy","birth","black","blame","blind","block","blood","board",
+    "boost","booth","bound","brain","brand","bread","break","breed","brief","bring",
+    "broad","broke","brown","build","built","buyer","cable","calif","carry","catch",
+    "cause","chain","chair","chart","chase","cheap","check","chest","chief","child",
+    "china","chose","civil","claim","class","clean","clear","click","clock","close",
+    "coach","coast","could","count","court","cover","craft","crash","cream","crime",
+    "cross","crowd","crown","curve","cycle","daily","dance","dated","dealt","death",
+    "debut","delay","depth","doing","doubt","dozen","draft","drama","drawn","dream",
+    "dress","drill","drink","drive","drove","dying","eager","early","earth","eight",
+    "elite","empty","enemy","enjoy","enter","entry","equal","error","event","every",
+    "exact","exist","extra","faith","false","fault","fiber","field","fifth","fifty",
+    "fight","final","first","fixed","flash","fleet","floor","fluid","focus","force",
+    "forth","forty","forum","found","frame","frank","fraud","fresh","front","fruit",
+    "fully","funny","giant","given","glass","globe","going","grace","grade","grand",
+    "grant","grass","great","green","gross","group","grown","guard","guess","guest",
+    "guide","happy","harry","heart","heavy","hence","henry","horse","hotel","house",
+    "human","ideal","image","index","inner","input","issue","japan","jimmy","joint",
+    "jones","judge","known","label","large","laser","later","laugh","layer","learn",
+    "lease","least","leave","legal","level","lewis","light","limit","links","lives",
+    "local","logic","loose","lower","lucky","lunch","lying","magic","major","maker",
+    "march","maria","match","maybe","mayor","meant","media","metal","might","minor",
+    "minus","mixed","model","money","month","moral","motor","mount","mouse","mouth",
+    "movie","music","needs","never","newly","night","noise","north","noted","novel",
+    "nurse","occur","ocean","offer","often","order","other","ought","paint","panel",
+    "paper","party","peace","peter","phase","phone","photo","piece","pilot","pitch",
+    "place","plain","plane","plant","plate","point","pound","power","press","price",
+    "pride","prime","print","prior","prize","proof","proud","prove","queen","quick",
+    "quiet","quite","radio","raise","range","rapid","ratio","reach","ready","refer",
+    "right","rival","river","robin","roger","roman","rough","round","route","royal",
+    "rural","scale","scene","scope","score","sense","serve","seven","shall","shape",
+    "share","sharp","sheet","shelf","shell","shift","shirt","shock","shoot","short",
+    "shown","sight","since","sixth","sixty","sized","skill","sleep","slide","small",
+    "smart","smile","smith","smoke","solid","solve","sorry","sound","south","space",
+    "spare","speak","speed","spend","spent","split","spoke","sport","staff","stage",
+    "stake","stand","start","state","steam","steel","stick","still","stock","stone",
+    "stood","store","storm","story","strip","stuck","study","stuff","style","sugar",
+    "suite","super","sweet","table","taken","taste","taxes","teach","teeth","terry",
+    "texas","thank","theft","their","theme","there","these","thick","thing","think",
+    "third","those","three","threw","throw","tight","times","tired","title","today",
+    "topic","total","touch","tough","tower","track","trade","train","treat","trend",
+    "trial","tried","tries","truck","truly","trust","truth","twice","under","undue",
+    "union","unity","until","upper","upset","urban","usage","usual","valid","value",
+    "video","virus","visit","vital","voice","waste","watch","water","wheel","where",
+    "which","while","white","whole","whose","woman","women","world","worry","worse",
+    "worst","worth","would","wound","write","wrong","wrote","yield","young","youth"
+  ];
+
+  // normalize list (all lowercase, dedupe, length-5 alpha)
+  var wordSet = {};
+  var validSet = {};
+  WORDS.forEach(function(w){
+    var lw = w.toLowerCase();
+    if (lw.length === 5 && /^[a-z]+$/.test(lw)) {
+      wordSet[lw] = true;
+      validSet[lw] = true;
+    }
+  });
+  var wordArr = Object.keys(wordSet);
+
+  var KEYBOARD = [
+    ["q","w","e","r","t","y","u","i","o","p"],
+    ["a","s","d","f","g","h","j","k","l"],
+    ["enter","z","x","c","v","b","n","m","back"]
+  ];
+
+  var answer = "";
+  var currentRow = 0;
+  var currentCol = 0;
+  var guesses = []; // array of arrays
+  var gameOver = false;
+  var keyStates = {}; // letter -> 'correct'|'present'|'absent'
+  var busy = false;
+
+  var gridEl = document.getElementById("grid");
+  var kbEl = document.getElementById("keyboard");
+  var msgEl = document.getElementById("message");
+  var overlayEl = document.getElementById("overlay");
+  var modalTitle = document.getElementById("modalTitle");
+  var modalWord = document.getElementById("modalWord");
+  var modalBtn = document.getElementById("modalBtn");
+  var resetTop = document.getElementById("resetTop");
+
+  function buildGrid() {
+    gridEl.innerHTML = "";
+    for (var r = 0; r < 6; r++) {
+      var row = document.createElement("div");
+      row.className = "row";
+      row.dataset.row = r;
+      for (var c = 0; c < 5; c++) {
+        var t = document.createElement("div");
+        t.className = "tile";
+        t.dataset.row = r;
+        t.dataset.col = c;
+        row.appendChild(t);
+      }
+      gridEl.appendChild(row);
+    }
+  }
+
+  function buildKeyboard() {
+    kbEl.innerHTML = "";
+    KEYBOARD.forEach(function(krow){
+      var div = document.createElement("div");
+      div.className = "keyrow";
+      krow.forEach(function(k){
+        var btn = document.createElement("button");
+        btn.className = "key";
+        btn.dataset.key = k;
+        if (k === "enter" || k === "back") {
+          btn.classList.add("wide");
+          btn.textContent = k === "enter" ? "Enter" : "Del";
+        } else {
+          btn.textContent = k.toUpperCase();
+        }
+        btn.addEventListener("click", function(e){
+          e.preventDefault();
+          handleKey(k);
+        });
+        div.appendChild(btn);
+      });
+      kbEl.appendChild(div);
+    });
+  }
+
+  function newGame() {
+    answer = wordArr[Math.floor(Math.random() * wordArr.length)];
+    currentRow = 0;
+    currentCol = 0;
+    guesses = [];
+    gameOver = false;
+    keyStates = {};
+    busy = false;
+    msgEl.textContent = "";
+    overlayEl.classList.remove("show");
+    buildGrid();
+    buildKeyboard();
+    // For dev: console.log("Answer:", answer);
+  }
+
+  function showMessage(text, persist) {
+    msgEl.textContent = text;
+    if (!persist) {
+      setTimeout(function(){
+        if (msgEl.textContent === text) msgEl.textContent = "";
+      }, 1800);
+    }
+  }
+
+  function handleKey(k) {
+    if (gameOver || busy) return;
+    if (k === "enter") {
+      submitGuess();
+    } else if (k === "back") {
+      if (currentCol > 0) {
+        currentCol--;
+        setTile(currentRow, currentCol, "");
+      }
+    } else if (/^[a-z]$/.test(k)) {
+      if (currentCol < 5) {
+        setTile(currentRow, currentCol, k);
+        currentCol++;
+      }
+    }
+  }
+
+  function setTile(r, c, letter) {
+    var tile = gridEl.querySelector('.tile[data-row="'+r+'"][data-col="'+c+'"]');
+    if (!tile) return;
+    tile.textContent = letter ? letter.toUpperCase() : "";
+    if (letter) tile.classList.add("filled");
+    else tile.classList.remove("filled");
+  }
+
+  function getRowWord(r) {
+    var w = "";
+    for (var c = 0; c < 5; c++) {
+      var tile = gridEl.querySelector('.tile[data-row="'+r+'"][data-col="'+c+'"]');
+      w += (tile.textContent || "").toLowerCase();
+    }
+    return w;
+  }
+
+  function shakeRow(r) {
+    var row = gridEl.querySelector('.row[data-row="'+r+'"]');
+    if (!row) return;
+    row.classList.remove("shake");
+    void row.offsetWidth;
+    row.classList.add("shake");
+    setTimeout(function(){ row.classList.remove("shake"); }, 450);
+  }
+
+  // Standard Wordle coloring with proper duplicate handling
+  function evaluateGuess(guess, target) {
+    var result = new Array(5).fill("absent");
+    var targetArr = target.split("");
+    var guessArr = guess.split("");
+    var counts = {};
+    for (var i = 0; i < 5; i++) {
+      counts[targetArr[i]] = (counts[targetArr[i]] || 0) + 1;
+    }
+    // Pass 1: correct positions
+    for (i = 0; i < 5; i++) {
+      if (guessArr[i] === targetArr[i]) {
+        result[i] = "correct";
+        counts[guessArr[i]]--;
+      }
+    }
+    // Pass 2: present elsewhere
+    for (i = 0; i < 5; i++) {
+      if (result[i] === "correct") continue;
+      if (counts[guessArr[i]] > 0) {
+        result[i] = "present";
+        counts[guessArr[i]]--;
+      }
+    }
+    return result;
+  }
+
+  function keyRank(s) {
+    return s === "correct" ? 3 : s === "present" ? 2 : 1;
+  }
+
+  function updateKeyState(letter, state) {
+    var cur = keyStates[letter];
+    if (!cur || keyRank(state) > keyRank(cur)) {
+      keyStates[letter] = state;
+      var btn = kbEl.querySelector('.key[data-key="'+letter+'"]');
+      if (btn) {
+        btn.classList.remove("correct","present","absent");
+        btn.classList.add(state);
+      }
+    }
+  }
+
+  function submitGuess() {
+    if (currentCol < 5) {
+      shakeRow(currentRow);
+      showMessage("Not enough letters");
+      return;
+    }
+    var guess = getRowWord(currentRow);
+    if (!validSet[guess]) {
+      shakeRow(currentRow);
+      showMessage("Not in word list");
+      return;
+    }
+    busy = true;
+    var result = evaluateGuess(guess, answer);
+    var row = gridEl.querySelector('.row[data-row="'+currentRow+'"]');
+    var tiles = row.querySelectorAll(".tile");
+    var delay = 0;
+    for (var i = 0; i < 5; i++) {
+      (function(idx, st, letter){
+        setTimeout(function(){
+          tiles[idx].classList.add("flip");
+          setTimeout(function(){
+            tiles[idx].classList.add(st);
+            updateKeyState(letter, st);
+          }, 250);
+        }, delay);
+      })(i, result[i], guess[i]);
+      delay += 280;
+    }
+    setTimeout(function(){
+      busy = false;
+      var won = result.every(function(s){ return s === "correct"; });
+      if (won) {
+        gameOver = true;
+        row.classList.add("bounce");
+        endGame(true);
+      } else {
+        currentRow++;
+        currentCol = 0;
+        if (currentRow >= 6) {
+          gameOver = true;
+          endGame(false);
+        }
+      }
+    }, delay + 100);
+  }
+
+  function endGame(won) {
+    setTimeout(function(){
+      modalTitle.textContent = won ? ("Solved in " + (currentRow + 1) + "!") : "No more guesses";
+      modalWord.textContent = answer.toUpperCase();
+      overlayEl.classList.add("show");
+    }, won ? 900 : 400);
+  }
+
+  // Physical keyboard
+  document.addEventListener("keydown", function(e){
+    if (overlayEl.classList.contains("show")) {
+      if (e.key === "Enter") { newGame(); }
+      return;
+    }
+    var k = e.key.toLowerCase();
+    if (k === "enter") { handleKey("enter"); e.preventDefault(); }
+    else if (k === "backspace") { handleKey("back"); e.preventDefault(); }
+    else if (/^[a-z]$/.test(k)) { handleKey(k); }
+  });
+
+  modalBtn.addEventListener("click", newGame);
+  resetTop.addEventListener("click", newGame);
+
+  newGame();
+})();
+</script>
+</body>
+</html>

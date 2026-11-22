@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Pong — Arcadia</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: #0A0A12; color: #e7e7f5;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; overflow: hidden; }
+  #wrap { width: 100%; height: 100%; display: flex; flex-direction: column;
+    align-items: center; padding: 10px; }
+  header { text-align: center; }
+  h1 { font-size: 22px; letter-spacing: 3px; color: #22D3EE; text-transform: uppercase; font-weight: 700; }
+  .sub { font-size: 11px; color: #8a8aa5; margin-top: 3px; }
+  #hud { display: flex; gap: 40px; justify-content: center; align-items: baseline;
+    margin: 10px 0; font-size: 14px; }
+  #hud .side { text-align: center; }
+  #hud .side small { color: #8a8aa5; display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+  #hud .side b { font-size: 32px; font-weight: 800; }
+  #hud .you b { color: #22D3EE; }
+  #hud .cpu b { color: #7C3AED; }
+  #hud .vs { color: #5a5a78; font-size: 12px; padding: 0 6px; }
+  #stage { position: relative; width: min(94vw, 720px); height: min(70vh, 460px); }
+  canvas { width: 100%; height: 100%; display: block; background: #07070F;
+    border: 1px solid #1c1c33; border-radius: 8px; touch-action: none; }
+  .overlay { position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px; background: rgba(10,10,18,0.86);
+    border-radius: 8px; text-align: center; padding: 16px; }
+  .overlay h2 { font-size: 28px; letter-spacing: 2px; text-transform: uppercase; }
+  .overlay.win h2 { color: #2DD4BF; }
+  .overlay.lose h2 { color: #F43F5E; }
+  .overlay.start h2 { color: #22D3EE; }
+  .overlay p { color: #cfcfe6; font-size: 13px; max-width: 300px; line-height: 1.5; }
+  .btn { background: #22D3EE; color: #0A0A12; border: none; padding: 12px 24px;
+    border-radius: 6px; font-family: inherit; font-weight: 700; letter-spacing: 1px;
+    cursor: pointer; text-transform: uppercase; font-size: 13px; }
+  .btn:hover { background: #67e8f9; }
+  .hidden { display: none !important; }
+  .target { color: #8a8aa5; font-size: 11px; margin-top: 8px; text-align: center; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>Pong</h1>
+    <div class="sub">Mouse / touch / arrows to move. First to 7 wins.</div>
+  </header>
+  <div id="hud">
+    <div class="side you"><small>You</small><b id="pscore">0</b></div>
+    <div class="vs">vs</div>
+    <div class="side cpu"><small>CPU</small><b id="cscore">0</b></div>
+  </div>
+  <div id="stage">
+    <canvas id="cv" width="720" height="460"></canvas>
+    <div id="start" class="overlay start">
+      <h2>Pong</h2>
+      <p>Move your left paddle with mouse, touch, or arrow keys. Each rally speeds the ball up. First to 7 points wins the match.</p>
+      <button class="btn" id="startBtn">Start Match</button>
+    </div>
+    <div id="win" class="overlay win hidden">
+      <h2>You Win</h2>
+      <p class="stat">Final: <b id="winP">0</b> - <b id="winC">0</b></p>
+      <button class="btn" id="winBtn">Play Again</button>
+    </div>
+    <div id="lose" class="overlay lose hidden">
+      <h2>CPU Wins</h2>
+      <p class="stat">Final: <b id="loseP">0</b> - <b id="loseC">0</b></p>
+      <button class="btn" id="loseBtn">Restart</button>
+    </div>
+  </div>
+  <div class="target">First to 7 points takes the match.</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var cv = document.getElementById('cv');
+  var ctx = cv.getContext('2d');
+  var W = cv.width, H = cv.height;
+  var pscoreEl = document.getElementById('pscore');
+  var cscoreEl = document.getElementById('cscore');
+  var startO = document.getElementById('start');
+  var winO = document.getElementById('win');
+  var loseO = document.getElementById('lose');
+  var winPEl = document.getElementById('winP');
+  var winCEl = document.getElementById('winC');
+  var losePEl = document.getElementById('loseP');
+  var loseCEl = document.getElementById('loseC');
+
+  var PADDLE_W = 12, PADDLE_H = 92;
+  var BALL_R = 8;
+  var BASE_SPEED = 360;
+  var SPEED_INC = 28;
+  var MAX_SPEED = 820;
+  var AI_MAX_SPEED = 360;
+  var WIN_SCORE = 7;
+
+  var player, cpu, ball, pscore, cscore, running, started, last, serveTimer, paused;
+
+  function reset(){
+    player = { x: 24, y: H/2 - PADDLE_H/2, w: PADDLE_W, h: PADDLE_H, vy: 0 };
+    cpu = { x: W - 24 - PADDLE_W, y: H/2 - PADDLE_H/2, w: PADDLE_W, h: PADDLE_H };
+    ball = { x: W/2, y: H/2, vx: 0, vy: 0, r: BALL_R, speed: BASE_SPEED };
+    pscore = 0; cscore = 0;
+    running = false; paused = false;
+    serveTimer = 0.8;
+    pscoreEl.textContent = '0';
+    cscoreEl.textContent = '0';
+    ball.vx = 0; ball.vy = 0;
+  }
+
+  function serve(toLeft){
+    ball.x = W/2; ball.y = H/2;
+    ball.speed = BASE_SPEED;
+    var dir = toLeft ? -1 : 1;
+    var angle = (Math.random() * 0.5 - 0.25) * Math.PI; // small angle
+    ball.vx = Math.cos(angle) * ball.speed * dir;
+    ball.vy = Math.sin(angle) * ball.speed;
+    running = true;
+  }
+
+  function pointScored(playerScored){
+    if (playerScored) pscore++; else cscore++;
+    pscoreEl.textContent = pscore;
+    cscoreEl.textContent = cscore;
+    running = false;
+    if (pscore >= WIN_SCORE){ endGame(true); return; }
+    if (cscore >= WIN_SCORE){ endGame(false); return; }
+    serveTimer = 0.8;
+    ball.x = W/2; ball.y = H/2; ball.vx = 0; ball.vy = 0;
+    // Serve toward the player who conceded the point.
+    ball._serveLeft = playerScored ? false : true;
+  }
+
+  function endGame(playerWon){
+    running = false;
+    started = false; // stop loop until restart? we'll keep drawing but freeze
+    if (playerWon){
+      winPEl.textContent = pscore;
+      winCEl.textContent = cscore;
+      winO.classList.remove('hidden');
+    } else {
+      losePEl.textContent = pscore;
+      loseCEl.textContent = cscore;
+      loseO.classList.remove('hidden');
+    }
+  }
+
+  function update(dt){
+    if (paused) return;
+    if (!running){
+      if (serveTimer > 0){
+        serveTimer -= dt;
+        if (serveTimer <= 0){
+          serve(ball._serveLeft);
+        }
+      }
+      return;
+    }
+
+    // player paddle (keyboard control if vy set)
+    player.y += player.vy * dt;
+    if (player.y < 0) player.y = 0;
+    if (player.y + player.h > H) player.y = H - player.h;
+
+    // AI: track ball with capped speed, with slight reaction lag/imperfection
+    var target = ball.y - cpu.h/2;
+    // Add some imperfection — only react when ball moves toward AI
+    if (ball.vx > 0){
+      // predict ball y at cpu.x (simple, no wall reflection prediction)
+      var dx = cpu.x - ball.x;
+      if (dx > 0){
+        var t = dx / Math.abs(ball.vx);
+        var predicted = ball.y + ball.vy * t;
+        // reflect off walls
+        while (predicted < 0 || predicted > H){
+          if (predicted < 0) predicted = -predicted;
+          if (predicted > H) predicted = 2*H - predicted;
+        }
+        // add small random error to make AI beatable
+        target = predicted - cpu.h/2 + (Math.random()*60 - 30);
+      }
+    } else {
+      // drift toward center while waiting
+      target = H/2 - cpu.h/2 + (Math.random()*40 - 20);
+    }
+    var dy = target - cpu.y;
+    var step = AI_MAX_SPEED * dt;
+    if (Math.abs(dy) <= step) cpu.y = target;
+    else cpu.y += Math.sign(dy) * step;
+    if (cpu.y < 0) cpu.y = 0;
+    if (cpu.y + cpu.h > H) cpu.y = H - cpu.h;
+
+    // ball movement
+    ball.x += ball.vx * dt;
+    ball.y += ball.vy * dt;
+
+    // top/bottom walls
+    if (ball.y - ball.r < 0){ ball.y = ball.r; ball.vy = -ball.vy; }
+    else if (ball.y + ball.r > H){ ball.y = H - ball.r; ball.vy = -ball.vy; }
+
+    // player paddle collision
+    if (ball.vx < 0 &&
+        ball.x - ball.r <= player.x + player.w &&
+        ball.x - ball.r >= player.x - 4 &&
+        ball.y >= player.y - ball.r && ball.y <= player.y + player.h + ball.r){
+      var hit = (ball.y - (player.y + player.h/2)) / (player.h/2);
+      hit = Math.max(-1, Math.min(1, hit));
+      bouncePaddle(player, hit);
+    }
+    // cpu paddle collision
+    if (ball.vx > 0 &&
+        ball.x + ball.r >= cpu.x &&
+        ball.x + ball.r <= cpu.x + cpu.w + 4 &&
+        ball.y >= cpu.y - ball.r && ball.y <= cpu.y + cpu.h + ball.r){
+      var hit2 = (ball.y - (cpu.y + cpu.h/2)) / (cpu.h/2);
+      hit2 = Math.max(-1, Math.min(1, hit2));
+      bouncePaddle(cpu, hit2);
+    }
+
+    // out of bounds -> point
+    if (ball.x + ball.r < 0){
+      // cpu scores
+      pointScored(false);
+    } else if (ball.x - ball.r > W){
+      // player scores
+      pointScored(true);
+    }
+  }
+
+  function bouncePaddle(p, hit){
+    ball.speed = Math.min(MAX_SPEED, ball.speed + SPEED_INC);
+    var angle = hit * (Math.PI/3); // -60..60 degrees from horizontal
+    var dir = (p === player) ? 1 : -1;
+    ball.vx = Math.cos(angle) * ball.speed * dir;
+    ball.vy = Math.sin(angle) * ball.speed;
+    // place ball just outside paddle to avoid sticking
+    if (p === player) ball.x = p.x + p.w + ball.r + 0.5;
+    else ball.x = p.x - ball.r - 0.5;
+  }
+
+  function draw(){
+    var g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0, '#0A0A12');
+    g.addColorStop(1, '#0c0c1a');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,W,H);
+
+    // center dashed line
+    ctx.strokeStyle = 'rgba(124,58,237,0.35)';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([10, 14]);
+    ctx.beginPath();
+    ctx.moveTo(W/2, 10); ctx.lineTo(W/2, H-10);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // center circle
+    ctx.strokeStyle = 'rgba(34,211,238,0.18)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(W/2, H/2, 56, 0, Math.PI*2);
+    ctx.stroke();
+
+    // player paddle
+    drawPaddle(player, '#22D3EE');
+    // cpu paddle
+    drawPaddle(cpu, '#7C3AED');
+
+    // ball
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = '#22D3EE';
+    ctx.shadowBlur = 16;
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // big scores in the background
+    ctx.fillStyle = 'rgba(124,58,237,0.10)';
+    ctx.font = 'bold 120px ui-monospace, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(pscore), W/2 - 90, H/2);
+    ctx.fillStyle = 'rgba(34,211,238,0.10)';
+    ctx.fillText(String(cscore), W/2 + 90, H/2);
+    ctx.textBaseline = 'alphabetic';
+  }
+
+  function drawPaddle(p, color){
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 14;
+    roundRect(ctx, p.x, p.y, p.w, p.h, 4);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    roundRect(ctx, p.x+2, p.y+3, p.w-4, 4, 2);
+    ctx.fill();
+  }
+
+  function roundRect(c, x, y, w, h, r){
+    c.beginPath();
+    c.moveTo(x+r, y);
+    c.lineTo(x+w-r, y);
+    c.quadraticCurveTo(x+w, y, x+w, y+r);
+    c.lineTo(x+w, y+h-r);
+    c.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    c.lineTo(x+r, y+h);
+    c.quadraticCurveTo(x, y+h, x, y+h-r);
+    c.lineTo(x, y+r);
+    c.quadraticCurveTo(x, y, x+r, y);
+    c.closePath();
+  }
+
+  function loop(now){
+    if (!started) return;
+    var dt = Math.min(0.033, (now - last) / 1000);
+    last = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  function startGame(){
+    reset();
+    started = true;
+    startO.classList.add('hidden');
+    winO.classList.add('hidden');
+    loseO.classList.remove('hidden'); // ensure cleared
+    loseO.classList.add('hidden');
+    // initial serve direction
+    ball._serveLeft = Math.random() < 0.5;
+    last = performance.now();
+    requestAnimationFrame(loop);
+  }
+
+  // input
+  function pointerToPaddle(clientY){
+    var rect = cv.getBoundingClientRect();
+    var y = (clientY - rect.top) * (H / rect.height);
+    player.y = y - player.h/2;
+    if (player.y < 0) player.y = 0;
+    if (player.y + player.h > H) player.y = H - player.h;
+  }
+  cv.addEventListener('mousemove', function(e){ pointerToPaddle(e.clientY); });
+  cv.addEventListener('touchstart', function(e){
+    if (e.touches.length) pointerToPaddle(e.touches[0].clientY);
+    e.preventDefault();
+  }, {passive:false});
+  cv.addEventListener('touchmove', function(e){
+    if (e.touches.length) pointerToPaddle(e.touches[0].clientY);
+    e.preventDefault();
+  }, {passive:false});
+
+  var keys = {};
+  window.addEventListener('keydown', function(e){
+    keys[e.key] = true;
+    if (e.key === 'ArrowUp') { player.vy = -480; e.preventDefault(); }
+    else if (e.key === 'ArrowDown') { player.vy = 480; e.preventDefault(); }
+    else if (e.key === ' ' || e.key === 'Enter'){
+      if (!started) startGame();
+    }
+  });
+  window.addEventListener('keyup', function(e){
+    keys[e.key] = false;
+    if (e.key === 'ArrowUp' && !keys['ArrowDown']) player.vy = 0;
+    if (e.key === 'ArrowDown' && !keys['ArrowUp']) player.vy = 0;
+    if (keys['ArrowUp']) player.vy = -480;
+    if (keys['ArrowDown']) player.vy = 480;
+  });
+
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('winBtn').addEventListener('click', startGame);
+  document.getElementById('loseBtn').addEventListener('click', startGame);
+
+  reset();
+  started = false;
+  draw();
+})();
+</script>
+</body>
+</html>

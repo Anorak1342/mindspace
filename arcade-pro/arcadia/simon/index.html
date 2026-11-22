@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Simon &middot; Arcadia</title>
+<style>
+  :root {
+    --bg: #0A0A12;
+    --panel: #14141f;
+    --panel-2: #1b1b2b;
+    --text: #E5E7EB;
+    --muted: #8b8ba0;
+    --border: #2a2a3c;
+    --accent: #22D3EE;
+    --pad-green: #1f8b4c;
+    --pad-red: #b8323a;
+    --pad-yellow: #c79a1e;
+    --pad-blue: #2a6bd6;
+    --pad-green-lit: #4cf08a;
+    --pad-red-lit: #ff6b73;
+    --pad-yellow-lit: #ffd86b;
+    --pad-blue-lit: #6bb0ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(circle at 50% 0%, #16162a 0%, var(--bg) 60%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 18px 14px 30px;
+    min-height: 100%;
+    user-select: none;
+  }
+  h1 { font-size: clamp(22px, 6vw, 30px); letter-spacing: 1px; margin-bottom: 4px; font-weight: 700; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 16px; text-align: center; }
+  .info {
+    display: flex; gap: 16px; margin-bottom: 16px; align-items: center;
+  }
+  .info-block { text-align: center; }
+  .info-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .info-value { font-size: 24px; font-weight: 700; color: var(--accent); }
+  .simon {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.45);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 0;
+  }
+  .pad {
+    cursor: pointer;
+    transition: filter .08s ease, transform .08s ease;
+    border: 4px solid var(--bg);
+  }
+  .pad.tl { background: var(--pad-green); border-radius: 100% 0 0 0; }
+  .pad.tr { background: var(--pad-red); border-radius: 0 100% 0 0; }
+  .pad.bl { background: var(--pad-yellow); border-radius: 0 0 0 100%; }
+  .pad.br { background: var(--pad-blue); border-radius: 0 0 100% 0; }
+  .pad.tl.lit { background: var(--pad-green-lit); filter: brightness(1.4) drop-shadow(0 0 12px var(--pad-green-lit)); }
+  .pad.tr.lit { background: var(--pad-red-lit); filter: brightness(1.4) drop-shadow(0 0 12px var(--pad-red-lit)); }
+  .pad.bl.lit { background: var(--pad-yellow-lit); filter: brightness(1.4) drop-shadow(0 0 12px var(--pad-yellow-lit)); }
+  .pad.br.lit { background: var(--pad-blue-lit); filter: brightness(1.4) drop-shadow(0 0 12px var(--pad-blue-lit)); }
+  .pad:active:not(.disabled) { transform: scale(0.985); }
+  .pad.disabled { cursor: default; }
+  .hub {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32%; height: 32%;
+    background: var(--bg);
+    border-radius: 50%;
+    border: 4px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    font-size: clamp(20px, 6vw, 28px);
+    font-weight: 700;
+    box-shadow: inset 0 0 18px rgba(0,0,0,0.7);
+  }
+  .status { margin-top: 16px; font-size: 14px; min-height: 22px; text-align: center; color: var(--muted); }
+  .status.alert { color: var(--pad-red-lit); font-weight: 700; }
+  .status.success { color: var(--accent); font-weight: 700; }
+  .controls { margin-top: 12px; display: flex; gap: 10px; }
+  button.btn {
+    background: var(--accent); color: #06121a; border: none; border-radius: 10px;
+    padding: 11px 22px; font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: .5px;
+    transition: filter .15s ease, transform .08s ease;
+  }
+  button.btn:hover { filter: brightness(1.1); }
+  button.btn:active { transform: scale(0.97); }
+  button.btn:disabled { opacity: .5; cursor: not-allowed; }
+  button.btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  button.btn.ghost:hover { background: var(--panel); }
+  footer { margin-top: auto; padding-top: 18px; font-size: 11px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+  <h1>SIMON</h1>
+  <p class="subtitle">Repeat the growing sequence. One mistake ends the game.</p>
+
+  <div class="info">
+    <div class="info-block"><div class="info-label">Round</div><div class="info-value" id="round">0</div></div>
+    <div class="info-block"><div class="info-label">Best</div><div class="info-value" id="best">0</div></div>
+  </div>
+
+  <div class="simon" id="simon">
+    <div class="pad tl" data-pad="0"></div>
+    <div class="pad tr" data-pad="1"></div>
+    <div class="pad bl" data-pad="2"></div>
+    <div class="pad br" data-pad="3"></div>
+    <div class="hub" id="hub">--</div>
+  </div>
+
+  <div class="status" id="status">Press Start to begin.</div>
+
+  <div class="controls">
+    <button class="btn" id="startBtn">Start</button>
+    <button class="btn ghost" id="resetBestBtn">Reset Best</button>
+  </div>
+
+  <footer>Arcadia &middot; Simon</footer>
+
+<script>
+(function () {
+  "use strict";
+  var PADS = [
+    { freq: 329.63, cls: "tl" }, // E4 green
+    { freq: 261.63, cls: "tr" }, // C4 red
+    { freq: 392.00, cls: "bl" }, // G4 yellow
+    { freq: 220.00, cls: "br" }  // A3 blue
+  ];
+  var BEST_KEY = "arcadia_simon_best";
+
+  var simonDom, statusEl, roundEl, bestEl, hub, startBtn, resetBestBtn;
+  var pads = [];
+  var sequence = [];
+  var inputIdx = 0;
+  var round = 0;
+  var best = 0;
+  var acceptingInput = false;
+  var playing = false;
+  var audioCtx = null;
+
+  function loadBest() {
+    try {
+      var v = parseInt(localStorage.getItem(BEST_KEY) || "0", 10);
+      best = isNaN(v) ? 0 : v;
+    } catch (e) { best = 0; }
+  }
+  function saveBest() {
+    try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
+  }
+
+  function ensureAudio() {
+    if (!audioCtx) {
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      } catch (e) { audioCtx = null; }
+    }
+    if (audioCtx && audioCtx.state === "suspended") {
+      audioCtx.resume().catch(function () {});
+    }
+  }
+
+  function playTone(freq, duration) {
+    if (!audioCtx) return;
+    try {
+      var now = audioCtx.currentTime;
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.18, now + 0.01);
+      gain.gain.setValueAtTime(0.18, now + duration - 0.05);
+      gain.gain.linearRampToValueAtTime(0, now + duration);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + duration);
+    } catch (e) {}
+  }
+
+  function playErrorTone() {
+    if (!audioCtx) return;
+    try {
+      var now = audioCtx.currentTime;
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(180, now);
+      osc.frequency.exponentialRampToValueAtTime(70, now + 0.5);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.5);
+    } catch (e) {}
+  }
+
+  function lightPad(padIdx, duration, cb) {
+    var pad = pads[padIdx];
+    pad.classList.add("lit");
+    playTone(PADS[padIdx].freq, duration / 1000);
+    setTimeout(function () {
+      pad.classList.remove("lit");
+      if (cb) cb();
+    }, duration);
+  }
+
+  function setStatus(text, cls) {
+    statusEl.textContent = text;
+    statusEl.className = "status" + (cls ? " " + cls : "");
+  }
+
+  function setHub(text) { hub.textContent = text; }
+
+  function setPadsDisabled(disabled) {
+    pads.forEach(function (p) {
+      if (disabled) p.classList.add("disabled");
+      else p.classList.remove("disabled");
+    });
+  }
+
+  function nextRound() {
+    round++;
+    sequence.push(Math.floor(Math.random() * 4));
+    roundEl.textContent = round;
+    setHub(String(round));
+    setPadsDisabled(true);
+    acceptingInput = false;
+    setStatus("Watch the sequence...");
+    playSequence();
+  }
+
+  function playSequence() {
+    var i = 0;
+    var speed = Math.max(280, 600 - round * 20);
+    var gap = Math.max(120, 280 - round * 8);
+    function step() {
+      if (i >= sequence.length) {
+        acceptingInput = true;
+        inputIdx = 0;
+        setPadsDisabled(false);
+        setStatus("Your turn. Repeat it.");
+        return;
+      }
+      var padIdx = sequence[i];
+      lightPad(padIdx, speed, function () {
+        i++;
+        setTimeout(step, gap);
+      });
+    }
+    step();
+  }
+
+  function onPadClick(e) {
+    if (!acceptingInput) return;
+    ensureAudio();
+    var padIdx = parseInt(e.currentTarget.dataset.pad, 10);
+    lightPad(padIdx, 200);
+    if (sequence[inputIdx] === padIdx) {
+      inputIdx++;
+      if (inputIdx >= sequence.length) {
+        acceptingInput = false;
+        setPadsDisabled(true);
+        setStatus("Correct!", "success");
+        if (round > best) {
+          best = round;
+          bestEl.textContent = best;
+          saveBest();
+        }
+        setTimeout(nextRound, 800);
+      }
+    } else {
+      acceptingInput = false;
+      setPadsDisabled(true);
+      playErrorTone();
+      setStatus("Wrong! Game over at round " + round + ".", "alert");
+      setHub("X");
+      playing = false;
+      startBtn.disabled = false;
+      startBtn.textContent = "Start";
+    }
+  }
+
+  function startGame() {
+    ensureAudio();
+    sequence = [];
+    round = 0;
+    inputIdx = 0;
+    playing = true;
+    roundEl.textContent = "0";
+    setHub("--");
+    startBtn.disabled = true;
+    startBtn.textContent = "Playing";
+    setStatus("Get ready...");
+    setTimeout(nextRound, 600);
+  }
+
+  function resetBest() {
+    best = 0;
+    bestEl.textContent = "0";
+    saveBest();
+  }
+
+  function init() {
+    simonDom = document.getElementById("simon");
+    statusEl = document.getElementById("status");
+    roundEl = document.getElementById("round");
+    bestEl = document.getElementById("best");
+    hub = document.getElementById("hub");
+    startBtn = document.getElementById("startBtn");
+    resetBestBtn = document.getElementById("resetBestBtn");
+    pads = Array.prototype.slice.call(document.querySelectorAll(".pad"));
+    pads.forEach(function (p) { p.addEventListener("click", onPadClick); });
+    startBtn.addEventListener("click", startGame);
+    resetBestBtn.addEventListener("click", resetBest);
+    loadBest();
+    bestEl.textContent = best;
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

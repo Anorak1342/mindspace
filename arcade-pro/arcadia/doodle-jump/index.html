@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Doodle Jump - Arcadia</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    background: #0A0A12;
+    color: #E6E6F0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+  #wrap {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 5;
+    text-align: center;
+    padding: 10px 14px 0;
+    pointer-events: none;
+  }
+  h1 {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #E6E6F0;
+  }
+  .subtitle {
+    font-size: 11px;
+    color: #8a8aa8;
+    margin-top: 3px;
+    letter-spacing: 1px;
+  }
+  #hud {
+    position: absolute;
+    top: 50px; left: 0; right: 0;
+    text-align: center;
+    z-index: 5;
+    pointer-events: none;
+  }
+  #score {
+    font-size: 32px;
+    font-weight: 900;
+    color: #22D3EE;
+    text-shadow: 0 0 14px rgba(34,211,238,0.4);
+    line-height: 1;
+  }
+  #best {
+    font-size: 11px;
+    color: #8a8aa8;
+    margin-top: 3px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    flex: 1;
+  }
+  #overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10,10,18,0.88);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    text-align: center;
+    padding: 20px;
+  }
+  #overlay.hidden { display: none; }
+  #overlay h2 {
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  #overlay .final {
+    font-size: 14px;
+    color: #8a8aa8;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+  #overlay .final b { color: #22D3EE; font-size: 22px; }
+  #overlay .hint {
+    font-size: 12px;
+    color: #555570;
+    margin: 16px 0 20px;
+    max-width: 280px;
+    line-height: 1.55;
+  }
+  #overlay button {
+    background: #22D3EE;
+    color: #0A0A12;
+    border: none;
+    padding: 13px 30px;
+    font-size: 15px;
+    font-weight: 800;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  #overlay button:active { transform: scale(0.96); }
+  .controls {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .controls.show { opacity: 0.35; }
+  .controls .half {
+    flex: 1;
+    height: 90px;
+    background: linear-gradient(to top, rgba(34,211,238,0.18), rgba(34,211,238,0));
+    border-top: 2px solid rgba(34,211,238,0.25);
+  }
+  .controls .half.right {
+    background: linear-gradient(to top, rgba(124,58,237,0.18), rgba(124,58,237,0));
+    border-top-color: rgba(124,58,237,0.25);
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>Doodle Jump</h1>
+    <div class="subtitle">Arrow keys or tilt screen. Land on platforms.</div>
+  </header>
+  <div id="hud">
+    <div id="score">0</div>
+    <div id="best">Best 0</div>
+  </div>
+  <canvas id="game"></canvas>
+  <div class="controls" id="controls">
+    <div class="half left"></div>
+    <div class="half right"></div>
+  </div>
+  <div id="overlay">
+    <h2 id="ovTitle">Doodle Jump</h2>
+    <div class="final" id="ovFinal">Bounce as high as you can.</div>
+    <div class="hint">Use left/right arrow keys, or touch the left or right half of the screen to steer. You wrap around the edges. Don't fall off the bottom.</div>
+    <button id="startBtn">Start</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var canvas = document.getElementById("game");
+  var ctx = canvas.getContext("2d");
+  var scoreEl = document.getElementById("score");
+  var bestEl = document.getElementById("best");
+  var overlay = document.getElementById("overlay");
+  var ovTitle = document.getElementById("ovTitle");
+  var ovFinal = document.getElementById("ovFinal");
+  var startBtn = document.getElementById("startBtn");
+  var controlsEl = document.getElementById("controls");
+
+  var STORAGE_KEY = "arcadiaDoodleJumpBest";
+  var best = 0;
+  try { best = parseInt(localStorage.getItem(STORAGE_KEY) || "0", 10) || 0; } catch(e) {}
+  bestEl.textContent = "Best " + best;
+
+  var DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+  var W = 0, H = 0;
+
+  // Game constants
+  var PLAYER_W = 36;
+  var PLAYER_H = 36;
+  var GRAVITY = 1500;          // px/s^2
+  var BOUNCE_VY = -820;        // bounce velocity on platform hit
+  var MOVE_ACCEL = 2200;       // horizontal acceleration from input
+  var MOVE_MAX = 320;          // max horizontal speed
+  var FRICTION = 0.86;         // applied each frame when no input (independent axes)
+  var PLATFORM_W = 70;
+  var PLATFORM_H = 14;
+  var MIN_GAP = 60;
+  var MAX_GAP = 110;
+  var SCROLL_THRESHOLD = 0.42; // when player y (relative) above this fraction of H, scroll
+  var START_PLATFORMS = 14;
+
+  // Platform types: 'normal' (green), 'moving' (purple, slides), 'breakable' (cracks after one bounce)
+  var PLATFORM_TYPES = ["normal","normal","normal","normal","moving","normal","breakable","normal","normal","moving"];
+
+  // State
+  var player = null;
+  var platforms = [];
+  var cameraY = 0;       // world Y at top of screen
+  var maxHeight = 0;     // in world units (decreasing y = up)
+  var startY = 0;        // player start world Y
+  var running = false;
+  var gameOver = false;
+  var lastTime = 0;
+  var keys = { left: false, right: false };
+  var touchSide = 0; // -1 left, 1 right, 0 none
+  var particles = [];
+  var brokenPlatforms = []; // visual falling pieces
+
+  function resize() {
+    DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+    W = canvas.clientWidth;
+    H = canvas.clientHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  window.addEventListener("resize", resize);
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function randInt(a, b) { return Math.floor(rand(a, b + 1)); }
+
+  function generatePlatform(yWorld) {
+    var x = rand(8, W - PLATFORM_W - 8);
+    // Difficulty: as we go higher, increase chance of moving/breakable
+    var heightClimbed = Math.max(0, startY - yWorld);
+    var difficulty = Math.min(1, heightClimbed / 4000);
+    var type = "normal";
+    var roll = Math.random();
+    if (roll < 0.18 + difficulty * 0.22) type = "moving";
+    else if (roll < 0.30 + difficulty * 0.30) type = "breakable";
+    var p = {
+      x: x, y: yWorld, w: PLATFORM_W, h: PLATFORM_H, type: type,
+      vx: type === "moving" ? (Math.random() < 0.5 ? -1 : 1) * rand(40, 90) : 0,
+      broken: false
+    };
+    return p;
+  }
+
+  function initWorld() {
+    platforms = [];
+    particles = [];
+    brokenPlatforms = [];
+    cameraY = 0;
+    maxHeight = 0;
+    // Place player at ~80% from top of screen
+    var playerScreenY = H * 0.78;
+    var playerWorldY = cameraY + playerScreenY;
+    startY = playerWorldY;
+    // Spawn a guaranteed platform directly under the player
+    platforms.push({
+      x: W/2 - PLATFORM_W/2, y: playerWorldY + PLAYER_H, w: PLATFORM_W, h: PLATFORM_H,
+      type: "normal", vx: 0, broken: false
+    });
+    // Generate platforms upward (decreasing y) - in world coords
+    var y = playerWorldY - 60;
+    while (y > cameraY - H) {
+      var p = generatePlatform(y);
+      platforms.push(p);
+      y -= rand(MIN_GAP, MAX_GAP);
+    }
+    player = {
+      x: W/2 - PLAYER_W/2,
+      y: playerWorldY,
+      vx: 0,
+      vy: 0,
+      facing: 1
+    };
+  }
+
+  function startGame() {
+    resize();
+    overlay.classList.add("hidden");
+    initWorld();
+    running = true;
+    gameOver = false;
+    scoreEl.textContent = "0";
+    lastTime = performance.now();
+    if (!loopRunning) {
+      loopRunning = true;
+      requestAnimationFrame(loop);
+    }
+  }
+
+  function endGame() {
+    running = false;
+    gameOver = true;
+    var score = Math.floor(maxHeight / 10);
+    if (score > best) {
+      best = score;
+      try { localStorage.setItem(STORAGE_KEY, String(best)); } catch(e) {}
+      bestEl.textContent = "Best " + best;
+    }
+    ovTitle.textContent = "Game Over";
+    ovFinal.innerHTML = "Height climbed: <b>" + score + "</b><br>Best " + best;
+    startBtn.textContent = "Play Again";
+    setTimeout(function(){
+      overlay.classList.remove("hidden");
+    }, 500);
+  }
+
+  function update(dt) {
+    // Horizontal input
+    var ax = 0;
+    if (keys.left) ax -= MOVE_ACCEL;
+    if (keys.right) ax += MOVE_ACCEL;
+    if (touchSide !== 0) ax += touchSide * MOVE_ACCEL;
+    if (ax !== 0) {
+      player.vx += ax * dt;
+      player.facing = ax > 0 ? 1 : -1;
+    } else {
+      player.vx *= Math.pow(FRICTION, dt * 60);
+      if (Math.abs(player.vx) < 4) player.vx = 0;
+    }
+    // Clamp horizontal speed
+    if (player.vx > MOVE_MAX) player.vx = MOVE_MAX;
+    if (player.vx < -MOVE_MAX) player.vx = -MOVE_MAX;
+    player.x += player.vx * dt;
+    // Wrap around horizontal edges
+    if (player.x + PLAYER_W < 0) player.x = W;
+    else if (player.x > W) player.x = -PLAYER_W;
+
+    // Vertical: gravity
+    player.vy += GRAVITY * dt;
+    var prevY = player.y;
+    player.y += player.vy * dt;
+
+    // Check platform collisions (only when falling)
+    if (player.vy > 0) {
+      for (var i = 0; i < platforms.length; i++) {
+        var p = platforms[i];
+        if (p.broken) continue;
+        // AABB on x
+        if (player.x + PLAYER_W > p.x && player.x < p.x + p.w) {
+          // Did player's feet cross the platform's top this frame?
+          var feetPrev = prevY + PLAYER_H;
+          var feetNow = player.y + PLAYER_H;
+          if (feetPrev <= p.y && feetNow >= p.y && feetNow <= p.y + p.h + 8) {
+            // Bounce
+            player.y = p.y - PLAYER_H;
+            player.vy = BOUNCE_VY;
+            if (p.type === "breakable") {
+              // Break on landing: player gets the bounce, but the platform
+              // shatters so it cannot be reused on the way down.
+              p.broken = true;
+              spawnBreakParticles(p);
+            } else {
+              spawnBounceParticles(p);
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    // Update moving platforms
+    for (var j = 0; j < platforms.length; j++) {
+      var mp = platforms[j];
+      if (mp.type === "moving" && !mp.broken) {
+        mp.x += mp.vx * dt;
+        if (mp.x < 4) { mp.x = 4; mp.vx = -mp.vx; }
+        if (mp.x + mp.w > W - 4) { mp.x = W - 4 - mp.w; mp.vx = -mp.vx; }
+      }
+    }
+
+    // Scrolling: if player is above threshold (small y in screen space), move camera down
+    var playerScreenY = player.y - cameraY;
+    var thresholdY = H * SCROLL_THRESHOLD;
+    if (playerScreenY < thresholdY) {
+      var delta = thresholdY - playerScreenY;
+      cameraY -= delta;
+      // Track max height climbed (startY - currentTopOfPlayer)
+      var climbed = startY - (player.y);
+      if (climbed > maxHeight) maxHeight = climbed;
+    }
+
+    // Update score
+    var score = Math.floor(maxHeight / 10);
+    scoreEl.textContent = String(score);
+
+    // Remove platforms below screen and spawn above
+    var bottomLimit = cameraY + H + 60;
+    var topLimit = cameraY - H;
+    // Remove below
+    platforms = platforms.filter(function(p){ return p.y < bottomLimit; });
+    // Add above: ensure there are platforms up to topLimit
+    var highestY = Infinity;
+    for (var k = 0; k < platforms.length; k++) {
+      if (platforms[k].y < highestY) highestY = platforms[k].y;
+    }
+    if (highestY === Infinity) highestY = cameraY + H * 0.5;
+    while (highestY > topLimit) {
+      highestY -= rand(MIN_GAP, MAX_GAP);
+      var np = generatePlatform(highestY);
+      // Make sure x is not too far from previous to keep reachable
+      platforms.push(np);
+    }
+
+    // Update particles
+    for (var pi = particles.length - 1; pi >= 0; pi--) {
+      var pt = particles[pi];
+      pt.vy += 800 * dt;
+      pt.x += pt.vx * dt;
+      pt.y += pt.vy * dt;
+      pt.life -= dt;
+      if (pt.life <= 0) particles.splice(pi, 1);
+    }
+
+    // Update broken platform visuals
+    for (var bi = brokenPlatforms.length - 1; bi >= 0; bi--) {
+      var bp = brokenPlatforms[bi];
+      bp.vy += 1500 * dt;
+      bp.y += bp.vy * dt;
+      bp.rot += bp.vrot * dt;
+      if (bp.y - cameraY > H + 60) brokenPlatforms.splice(bi, 1);
+    }
+
+    // Game over: player fell below the screen
+    if (player.y - cameraY > H + 40) {
+      endGame();
+    }
+  }
+
+  function spawnBounceParticles(p) {
+    for (var i = 0; i < 6; i++) {
+      particles.push({
+        x: p.x + p.w/2 + rand(-12, 12),
+        y: p.y,
+        vx: rand(-80, 80),
+        vy: rand(-160, -40),
+        life: 0.5,
+        color: "#22D3EE",
+        size: rand(2, 4)
+      });
+    }
+  }
+  function spawnBreakParticles(p) {
+    // Add a few falling pieces
+    var pieceCount = 3;
+    for (var i = 0; i < pieceCount; i++) {
+      brokenPlatforms.push({
+        x: p.x + (p.w / pieceCount) * i,
+        y: p.y,
+        w: p.w / pieceCount - 2,
+        h: p.h,
+        color: p.type === "breakable" ? "#a855f7" : "#22D3EE",
+        vy: rand(-60, 0),
+        vrot: rand(-4, 4),
+        rot: 0
+      });
+    }
+    // Sparks
+    for (var j = 0; j < 10; j++) {
+      particles.push({
+        x: p.x + p.w/2 + rand(-15, 15),
+        y: p.y,
+        vx: rand(-120, 120),
+        vy: rand(-200, -40),
+        life: 0.6,
+        color: "#c4b5fd",
+        size: rand(2, 4)
+      });
+    }
+  }
+
+  function draw() {
+    // Background
+    var grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, "#0A0A12");
+    grad.addColorStop(1, "#0d0d22");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle stars (static for performance)
+    if (!draw._stars) {
+      draw._stars = [];
+      for (var s = 0; s < 40; s++) {
+        draw._stars.push({ x: Math.random(), y: Math.random(), r: Math.random() * 1.4 + 0.4, a: Math.random() * 0.5 + 0.2 });
+      }
+    }
+    for (var i = 0; i < draw._stars.length; i++) {
+      var st = draw._stars[i];
+      // Parallax: shift y a bit with camera
+      var sy = (st.y * H + (cameraY * 0.05)) % H;
+      if (sy < 0) sy += H;
+      ctx.fillStyle = "rgba(200,210,255," + st.a + ")";
+      ctx.beginPath();
+      ctx.arc(st.x * W, sy, st.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Translate world by -cameraY
+    ctx.save();
+    ctx.translate(0, -cameraY);
+
+    // Draw platforms
+    for (var j = 0; j < platforms.length; j++) {
+      drawPlatform(platforms[j]);
+    }
+    // Draw broken pieces
+    for (var bi = 0; bi < brokenPlatforms.length; bi++) {
+      var bp = brokenPlatforms[bi];
+      ctx.save();
+      ctx.translate(bp.x + bp.w/2, bp.y + bp.h/2);
+      ctx.rotate(bp.rot);
+      ctx.fillStyle = bp.color;
+      ctx.fillRect(-bp.w/2, -bp.h/2, bp.w, bp.h);
+      ctx.restore();
+    }
+    // Draw player
+    drawPlayer();
+    // Draw particles
+    for (var pi = 0; pi < particles.length; pi++) {
+      var pt = particles[pi];
+      ctx.globalAlpha = Math.max(0, Math.min(1, pt.life / 0.5));
+      ctx.fillStyle = pt.color;
+      ctx.fillRect(pt.x - pt.size/2, pt.y - pt.size/2, pt.size, pt.size);
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  function drawPlatform(p) {
+    var color, accent;
+    if (p.type === "moving") { color = "#7C3AED"; accent = "#a78bfa"; }
+    else if (p.type === "breakable") { color = "#a855f7"; accent = "#c4b5fd"; }
+    else { color = "#22c55e"; accent = "#86efac"; }
+    // Body
+    ctx.fillStyle = color;
+    roundRect(p.x, p.y, p.w, p.h, 6);
+    ctx.fill();
+    // Top highlight
+    ctx.fillStyle = accent;
+    roundRect(p.x + 2, p.y + 2, p.w - 4, 3, 2);
+    ctx.fill();
+    // Crack marks on breakable
+    if (p.type === "breakable") {
+      ctx.strokeStyle = "rgba(0,0,0,0.35)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(p.x + p.w * 0.3, p.y + 2);
+      ctx.lineTo(p.x + p.w * 0.35, p.y + p.h - 2);
+      ctx.moveTo(p.x + p.w * 0.65, p.y + 2);
+      ctx.lineTo(p.x + p.w * 0.6, p.y + p.h - 2);
+      ctx.stroke();
+    }
+  }
+
+  function drawPlayer() {
+    var cx = player.x + PLAYER_W / 2;
+    var cy = player.y + PLAYER_H / 2;
+    // Body
+    ctx.fillStyle = "#22D3EE";
+    roundRect(player.x, player.y, PLAYER_W, PLAYER_H, 9);
+    ctx.fill();
+    // Glow
+    ctx.fillStyle = "rgba(34,211,238,0.25)";
+    roundRect(player.x - 4, player.y - 4, PLAYER_W + 8, PLAYER_H + 8, 12);
+    ctx.fill();
+    // Eyes
+    var eyeY = player.y + 13;
+    var eyeOffset = player.facing > 0 ? 3 : -3;
+    ctx.fillStyle = "#0A0A12";
+    ctx.beginPath();
+    ctx.arc(cx - 7 + eyeOffset, eyeY, 3.5, 0, Math.PI * 2);
+    ctx.arc(cx + 7 + eyeOffset, eyeY, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+    // Eye highlights
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(cx - 6 + eyeOffset, eyeY - 1, 1, 0, Math.PI * 2);
+    ctx.arc(cx + 8 + eyeOffset, eyeY - 1, 1, 0, Math.PI * 2);
+    ctx.fill();
+    // Mouth (smile)
+    ctx.strokeStyle = "#0A0A12";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx + eyeOffset * 0.4, player.y + 22, 5, 0.15 * Math.PI, 0.85 * Math.PI);
+    ctx.stroke();
+  }
+
+  function roundRect(x, y, w, h, r) {
+    if (w < 2 * r) r = w / 2;
+    if (h < 2 * r) r = h / 2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  var loopRunning = false;
+  function loop(t) {
+    var dt = Math.min(0.05, (t - lastTime) / 1000);
+    lastTime = t;
+    if (running) update(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // Input handling
+  window.addEventListener("keydown", function(e){
+    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") { keys.left = true; e.preventDefault(); }
+    else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") { keys.right = true; e.preventDefault(); }
+    else if (e.code === "Space" || e.key === "Enter") {
+      if (!running) { startGame(); e.preventDefault(); }
+    }
+  });
+  window.addEventListener("keyup", function(e){
+    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") keys.left = false;
+    else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.right = false;
+  });
+
+  // Touch / pointer steering
+  function pointerSide(clientX) {
+    return clientX < W / 2 ? -1 : 1;
+  }
+  function onTouchStart(e) {
+    if (!running) return;
+    e.preventDefault();
+    if (e.touches && e.touches.length > 0) {
+      touchSide = pointerSide(e.touches[0].clientX);
+      controlsEl.classList.add("show");
+    }
+  }
+  function onTouchMove(e) {
+    if (!running) return;
+    e.preventDefault();
+    if (e.touches && e.touches.length > 0) {
+      touchSide = pointerSide(e.touches[0].clientX);
+    }
+  }
+  function onTouchEnd(e) {
+    touchSide = 0;
+    controlsEl.classList.remove("show");
+  }
+  // Pointer events cover mouse + touch
+  canvas.addEventListener("pointerdown", function(e){
+    if (!running) return;
+    e.preventDefault();
+    touchSide = pointerSide(e.clientX);
+    controlsEl.classList.add("show");
+  });
+  canvas.addEventListener("pointermove", function(e){
+    if (touchSide !== 0 && running) {
+      touchSide = pointerSide(e.clientX);
+    }
+  });
+  canvas.addEventListener("pointerup", function(){
+    touchSide = 0;
+    controlsEl.classList.remove("show");
+  });
+  canvas.addEventListener("pointercancel", function(){
+    touchSide = 0;
+    controlsEl.classList.remove("show");
+  });
+  canvas.addEventListener("pointerleave", function(){
+    touchSide = 0;
+    controlsEl.classList.remove("show");
+  });
+
+  startBtn.addEventListener("click", startGame);
+
+  // Init
+  resize();
+  // Show idle frame
+  if (!loopRunning) {
+    loopRunning = true;
+    lastTime = performance.now();
+    requestAnimationFrame(loop);
+  }
+})();
+</script>
+</body>
+</html>

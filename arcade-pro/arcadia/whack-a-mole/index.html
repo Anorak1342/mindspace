@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Whack-a-Mole &middot; Arcadia</title>
+<style>
+  :root {
+    --bg: #0A0A12;
+    --panel: #14141f;
+    --panel-2: #1b1b2b;
+    --text: #E5E7EB;
+    --muted: #8b8ba0;
+    --border: #2a2a3c;
+    --accent: #22D3EE;
+    --grass: #1f6b3a;
+    --grass-2: #18492a;
+    --hole: #0c1410;
+    --hole-rim: #2c4a36;
+    --mole: #c97b3c;
+    --mole-2: #8a4f22;
+    --mole-belly: #f0c896;
+    --whacked: #b8323a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(circle at 50% 0%, #16162a 0%, var(--bg) 60%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 18px 14px 30px;
+    min-height: 100%;
+    user-select: none;
+  }
+  h1 { font-size: clamp(22px, 6vw, 30px); letter-spacing: 1px; margin-bottom: 4px; font-weight: 700; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 16px; text-align: center; }
+  .stats {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+    width: 100%; max-width: 420px; margin-bottom: 14px;
+  }
+  .stat-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 9px 6px; text-align: center; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .stat-value { font-size: 22px; font-weight: 700; margin-top: 2px; color: var(--accent); }
+  .stat-card.time .stat-value { color: #f59e0b; }
+  .stat-card.best .stat-value { color: var(--accent); }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 14px;
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 1 / 1;
+    padding: 14px;
+    background: linear-gradient(180deg, var(--grass) 0%, var(--grass-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.4);
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='10' fill='none' stroke='%23fff' stroke-width='2'/><line x1='4' y1='4' x2='24' y2='24' stroke='%23fff' stroke-width='2'/><line x1='24' y1='4' x2='4' y2='24' stroke='%23fff' stroke-width='2'/></svg>") 14 14, crosshair;
+  }
+  .hole {
+    position: relative;
+    background: radial-gradient(ellipse at center 40%, var(--hole) 0%, #06100a 80%);
+    border-radius: 50%;
+    box-shadow: inset 0 8px 14px rgba(0,0,0,0.7), 0 2px 0 var(--hole-rim);
+    overflow: hidden;
+  }
+  .mole {
+    position: absolute;
+    left: 50%;
+    bottom: -70%;
+    transform: translateX(-50%);
+    width: 68%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50% 50% 45% 45%;
+    background: radial-gradient(circle at 35% 30%, var(--mole) 0%, var(--mole-2) 75%);
+    box-shadow: inset 0 -6px 10px rgba(0,0,0,0.35), 0 4px 8px rgba(0,0,0,0.4);
+    transition: bottom .15s cubic-bezier(.4,1.4,.6,1);
+    cursor: pointer;
+  }
+  .mole.up { bottom: 8%; }
+  .mole.whacked {
+    background: radial-gradient(circle at 35% 30%, var(--whacked) 0%, #6b1418 75%);
+    bottom: -70%;
+  }
+  .mole::before, .mole::after {
+    content: "";
+    position: absolute;
+    top: 38%;
+    width: 14%;
+    height: 14%;
+    background: #1a1a1a;
+    border-radius: 50%;
+  }
+  .mole::before { left: 24%; }
+  .mole::after { right: 24%; }
+  .mole .nose {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16%; height: 12%;
+    background: #1a1a1a;
+    border-radius: 50%;
+  }
+  .mole .belly {
+    position: absolute;
+    bottom: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 45%;
+    height: 35%;
+    background: var(--mole-belly);
+    border-radius: 50%;
+    opacity: 0.85;
+  }
+  .status { margin-top: 14px; font-size: 14px; min-height: 22px; text-align: center; color: var(--muted); }
+  .status.alert { color: var(--whacked); font-weight: 700; }
+  .status.success { color: var(--accent); font-weight: 700; }
+  .controls { margin-top: 12px; display: flex; gap: 10px; }
+  button.btn {
+    background: var(--accent); color: #06121a; border: none; border-radius: 10px;
+    padding: 11px 22px; font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: .5px;
+    transition: filter .15s ease, transform .08s ease;
+  }
+  button.btn:hover { filter: brightness(1.1); }
+  button.btn:active { transform: scale(0.97); }
+  button.btn:disabled { opacity: .5; cursor: not-allowed; }
+  button.btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  button.btn.ghost:hover { background: var(--panel); }
+  .score-pop {
+    position: absolute;
+    color: #fff;
+    font-weight: 800;
+    font-size: 22px;
+    pointer-events: none;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    animation: pop 0.6s ease-out forwards;
+  }
+  @keyframes pop {
+    0% { transform: translate(-50%, 0); opacity: 1; }
+    100% { transform: translate(-50%, -40px); opacity: 0; }
+  }
+  footer { margin-top: auto; padding-top: 16px; font-size: 11px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+  <h1>WHACK-A-MOLE</h1>
+  <p class="subtitle">Tap the moles before they hide. 30 seconds. They speed up!</p>
+
+  <div class="stats">
+    <div class="stat-card"><div class="stat-label">Score</div><div class="stat-value" id="score">0</div></div>
+    <div class="stat-card time"><div class="stat-label">Time</div><div class="stat-value" id="time">30</div></div>
+    <div class="stat-card best"><div class="stat-label">Best</div><div class="stat-value" id="best">0</div></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="status" id="status">Press Start to play.</div>
+
+  <div class="controls">
+    <button class="btn" id="startBtn">Start</button>
+    <button class="btn ghost" id="resetBestBtn">Reset Best</button>
+  </div>
+
+  <footer>Arcadia &middot; Whack-a-Mole</footer>
+
+<script>
+(function () {
+  "use strict";
+  var ROUND_TIME = 30; // seconds
+  var BEST_KEY = "arcadia_whackamole_best";
+
+  var gridDom, statusEl, scoreEl, timeEl, bestEl, startBtn, resetBestBtn;
+  var holes = [];
+  var moles = [];
+  var score = 0;
+  var best = 0;
+  var timeLeft = ROUND_TIME;
+  var running = false;
+  var spawnTimer = null;
+  var countdownTimer = null;
+  var activeMoles = {}; // index -> { upTimeout: id, downAt: time }
+  var roundStart = 0;
+
+  function loadBest() {
+    try {
+      var v = parseInt(localStorage.getItem(BEST_KEY) || "0", 10);
+      best = isNaN(v) ? 0 : v;
+    } catch (e) { best = 0; }
+  }
+  function saveBest() {
+    try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
+  }
+
+  function buildGrid() {
+    gridDom.innerHTML = "";
+    holes = [];
+    moles = [];
+    for (var i = 0; i < 9; i++) {
+      var hole = document.createElement("div");
+      hole.className = "hole";
+      var mole = document.createElement("div");
+      mole.className = "mole";
+      mole.dataset.idx = i;
+      var nose = document.createElement("div");
+      nose.className = "nose";
+      var belly = document.createElement("div");
+      belly.className = "belly";
+      mole.appendChild(nose);
+      mole.appendChild(belly);
+      mole.addEventListener("click", onMoleClick);
+      mole.addEventListener("touchstart", onMoleTouch, { passive: false });
+      hole.appendChild(mole);
+      gridDom.appendChild(hole);
+      holes.push(hole);
+      moles.push(mole);
+    }
+  }
+
+  function setStatus(text, cls) {
+    statusEl.textContent = text;
+    statusEl.className = "status" + (cls ? " " + cls : "");
+  }
+
+  function updateScore() { scoreEl.textContent = score; }
+  function updateTime() { timeEl.textContent = Math.max(0, Math.ceil(timeLeft)); }
+
+  function spawnInterval() {
+    // Speeds up from ~1100ms to ~450ms over 30 seconds
+    var elapsed = ROUND_TIME - timeLeft;
+    var t = Math.min(1, elapsed / ROUND_TIME);
+    return 1100 - t * 650;
+  }
+
+  function upDuration() {
+    // Time mole stays up: from ~1100ms to ~650ms
+    var elapsed = ROUND_TIME - timeLeft;
+    var t = Math.min(1, elapsed / ROUND_TIME);
+    return 1100 - t * 450;
+  }
+
+  function popRandomMole() {
+    if (!running) return;
+    // Find a free hole
+    var free = [];
+    for (var i = 0; i < 9; i++) {
+      if (!activeMoles[i]) free.push(i);
+    }
+    if (!free.length) {
+      scheduleSpawn();
+      return;
+    }
+    var idx = free[Math.floor(Math.random() * free.length)];
+    var mole = moles[idx];
+    mole.classList.remove("whacked");
+    mole.classList.add("up");
+    var dur = upDuration();
+    var upTimeout = setTimeout(function () {
+      hideMole(idx, false);
+    }, dur);
+    activeMoles[idx] = { upTimeout: upTimeout };
+    scheduleSpawn();
+  }
+
+  function scheduleSpawn() {
+    if (!running) return;
+    var delay = spawnInterval() * (0.6 + Math.random() * 0.6);
+    spawnTimer = setTimeout(popRandomMole, delay);
+  }
+
+  function hideMole(idx, whacked) {
+    var mole = moles[idx];
+    if (!mole) return;
+    var info = activeMoles[idx];
+    if (info && info.upTimeout) clearTimeout(info.upTimeout);
+    delete activeMoles[idx];
+    if (whacked) {
+      mole.classList.add("whacked");
+      mole.classList.remove("up");
+      setTimeout(function () { mole.classList.remove("whacked"); }, 300);
+    } else {
+      mole.classList.remove("up");
+    }
+  }
+
+  function popScore(holeIdx, points) {
+    var hole = holes[holeIdx];
+    var rect = hole.getBoundingClientRect();
+    var gridRect = gridDom.getBoundingClientRect();
+    var el = document.createElement("div");
+    el.className = "score-pop";
+    el.textContent = "+" + points;
+    el.style.left = (rect.left - gridRect.left + rect.width / 2) + "px";
+    el.style.top = (rect.top - gridRect.top + rect.height / 2 - 20) + "px";
+    gridDom.appendChild(el);
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 600);
+  }
+
+  function onMoleClick(e) {
+    handleWhack(e);
+  }
+  function onMoleTouch(e) {
+    e.preventDefault();
+    handleWhack(e);
+  }
+  function handleWhack(e) {
+    if (!running) return;
+    var mole = e.currentTarget;
+    var idx = parseInt(mole.dataset.idx, 10);
+    if (!activeMoles[idx]) return;
+    score += 1;
+    updateScore();
+    popScore(idx, 1);
+    hideMole(idx, true);
+  }
+
+  function tick() {
+    if (!running) return;
+    var now = Date.now();
+    var elapsed = (now - roundStart) / 1000;
+    timeLeft = ROUND_TIME - elapsed;
+    updateTime();
+    if (timeLeft <= 0) {
+      endRound();
+    }
+  }
+
+  function startGame() {
+    if (running) return;
+    score = 0;
+    updateScore();
+    timeLeft = ROUND_TIME;
+    updateTime();
+    running = true;
+    startBtn.disabled = true;
+    startBtn.textContent = "Playing";
+    setStatus("Go!");
+    roundStart = Date.now();
+    countdownTimer = setInterval(tick, 100);
+    scheduleSpawn();
+  }
+
+  function endRound() {
+    running = false;
+    if (spawnTimer) clearTimeout(spawnTimer);
+    if (countdownTimer) clearInterval(countdownTimer);
+    // Hide all moles
+    for (var i = 0; i < 9; i++) {
+      if (activeMoles[i]) hideMole(i, false);
+    }
+    startBtn.disabled = false;
+    startBtn.textContent = "Restart";
+    if (score > best) {
+      best = score;
+      saveBest();
+      bestEl.textContent = best;
+      setStatus("New best! " + score + " moles whacked.", "success");
+    } else {
+      setStatus("Round over. You whacked " + score + " moles.", "alert");
+    }
+  }
+
+  function resetBest() {
+    best = 0;
+    bestEl.textContent = "0";
+    saveBest();
+    setStatus("Best reset.");
+  }
+
+  function init() {
+    gridDom = document.getElementById("grid");
+    statusEl = document.getElementById("status");
+    scoreEl = document.getElementById("score");
+    timeEl = document.getElementById("time");
+    bestEl = document.getElementById("best");
+    startBtn = document.getElementById("startBtn");
+    resetBestBtn = document.getElementById("resetBestBtn");
+    startBtn.addEventListener("click", startGame);
+    resetBestBtn.addEventListener("click", resetBest);
+    buildGrid();
+    loadBest();
+    bestEl.textContent = best;
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

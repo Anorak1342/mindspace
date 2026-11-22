@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Slither — Arcadia</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{font-family:Inter,system-ui,sans-serif;background:#0A0A12;color:#ECECF5;overflow:hidden}
+  #wrap{position:relative;width:100vw;height:100vh}
+  canvas{width:100%;height:100%;display:block;background:#0A0A12}
+  .hud{position:absolute;top:12px;left:14px;right:14px;display:flex;justify-content:space-between;pointer-events:none}
+  .hud .s{background:rgba(10,10,18,.7);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 12px;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;backdrop-filter:blur(6px)}
+  .hud .s span{color:#9a9ab5;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-right:6px}
+  .ov{position:absolute;inset:0;display:grid;place-items:center;background:rgba(10,10,18,.82);backdrop-filter:blur(4px);text-align:center}
+  .ov.hide{display:none}
+  .ov h2{font-family:Syne,sans-serif;font-size:30px;margin-bottom:6px}
+  .ov p{color:#9a9ab5;margin-bottom:14px;font-size:14px}
+  .btn{padding:12px 22px;border-radius:11px;background:linear-gradient(90deg,#7C3AED,#9333ea);color:#fff;font-weight:600;border:none;cursor:pointer;font-size:15px}
+  .btn:hover{filter:brightness(1.1)}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <div class="hud"><div class="s"><span>Length</span><b id="sc">10</b></div><div class="s"><span>Best</span><b id="bs">10</b></div></div>
+  <div class="ov" id="st"><div><h2>Slither</h2><p>Steer with your mouse. Eat orbs to grow. Don't hit another snake.</p><p style="margin-bottom:14px;font-size:12px">Mouse / Arrow keys to steer</p><button class="btn" id="start">Start</button></div></div>
+  <div class="ov hide" id="go"><div><h2 style="color:#f43f5e">Game over</h2><p id="gos"></p><button class="btn" id="again" style="margin-top:6px">Retry</button></div></div>
+</div>
+<script>
+(function(){
+var cv=document.getElementById('c'),ctx=cv.getContext('2d');
+var W,H;function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}resize();window.addEventListener('resize',resize);
+var scEl=document.getElementById('sc'),bsEl=document.getElementById('bs'),stEl=document.getElementById('st'),goEl=document.getElementById('go'),gosEl=document.getElementById('gos');
+var best=+localStorage.getItem('arcadiaSlitherBest')||10;bsEl.textContent=best;
+var WORLD=2400;
+var snake,bots,orbs,running,score,mouse,boost;
+function reset(){
+  snake={segs:[],ang:0,speed:2.4,r:8,color:'#22D3EE',alive:true};
+  for(var i=0;i<10;i++)snake.segs.push({x:WORLD/2-i*10,y:WORLD/2});
+  bots=[];orbs=[];score=10;running=true;
+  for(var i=0;i<6;i++)spawnBot();
+  for(var i=0;i<120;i++)spawnOrb();
+  stEl.classList.add('hide');goEl.classList.add('hide');
+}
+function spawnBot(){
+  var ang=Math.random()*7;var x=Math.random()*WORLD,y=Math.random()*WORLD;
+  var segs=[];for(var i=0;i<8;i++)segs.push({x:x-i*10,y:y});
+  bots.push({segs:segs,ang:ang,speed:2,r:7,color:['#f43f5e','#F59E0B','#10B981','#A855F7','#FB7185'][Math.floor(Math.random()*5)],alive:true,t:0});
+}
+function spawnOrb(){orbs.push({x:Math.random()*WORLD,y:Math.random()*WORLD,r:4+Math.random()*3,c:Math.random()<0.5?'#7C3AED':'#22D3EE'});}
+function upd(){
+  if(!running)return;
+  // player steer toward mouse
+  var head=snake.segs[0];
+  var camx=head.x-W/2,camy=head.y-H/2;
+  var tx=mouse.x+W/2+camx-W/2,ty=mouse.y+H/2+camy-H/2;
+  tx=mouse.x+camx;ty=mouse.y+camy;
+  var want=Math.atan2(ty-head.y,tx-head.x);
+  var da=want-snake.ang;while(da>Math.PI)da-=7;while(da<-Math.PI)da+=7;
+  snake.ang+=Math.max(-0.12,Math.min(0.12,da));
+  moveSnake(snake,boost?snake.speed*1.7:snake.speed);
+  // eat orbs
+  for(var i=orbs.length-1;i>=0;i--){var o=orbs[i];if(Math.hypot(o.x-head.x,o.y-head.y)<snake.r+o.r){orbs.splice(i,1);grow(snake);score++;scEl.textContent=score;spawnOrb();}}
+  // bots
+  bots.forEach(function(b){b.t++;if(b.t>30){b.t=0;var tgt=orbs[Math.floor(Math.random()*orbs.length)];if(tgt)b.ang=Math.atan2(tgt.y-b.segs[0].y,tgt.x-b.segs[0].x);else b.ang+=Math.random()-0.5;}moveSnake(b,b.speed);
+    // bot eats orbs
+    var bh=b.segs[0];for(var i=orbs.length-1;i>=0;i--){var o=orbs[i];if(Math.hypot(o.x-bh.x,o.y-bh.y)<b.r+o.r){orbs.splice(i,1);grow(b);spawnOrb();}}
+  });
+  // collision: player head vs bot bodies
+  if(snake.alive){
+    bots.forEach(function(b){for(var i=0;i<b.segs.length;i++){if(Math.hypot(b.segs[i].x-head.x,b.segs[i].y-head.y)<snake.r+b.r){die();}}});
+  }
+  // bot vs player body / other bots (simple)
+  bots.forEach(function(b){var bh=b.segs[0];
+    for(var i=2;i<snake.segs.length;i++){if(Math.hypot(snake.segs[i].x-bh.x,snake.segs[i].y-bh.y)<b.r+snake.r){b.alive=false;dropOrbs(b);}}
+    bots.forEach(function(b2){if(b!==b2){for(var i=2;i<b2.segs.length;i++){if(Math.hypot(b2.segs[i].x-bh.x,b2.segs[i].y-bh.y)<b.r+b2.r){b.alive=false;dropOrbs(b);}}}});
+  });
+  bots=bots.filter(function(b){if(!b.alive)return false;return true;});
+  while(bots.length<5)spawnBot();
+}
+function moveSnake(s,spd){var h=s.segs[0];var nx=h.x+Math.cos(s.ang)*spd,ny=h.y+Math.sin(s.ang)*spd;if(nx<0)nx=WORLD;if(nx>WORLD)nx=0;if(ny<0)ny=WORLD;if(ny>WORLD)ny=0;s.segs.unshift({x:nx,y:ny});s.segs.pop();}
+function grow(s){var t=s.segs[s.segs.length-1];s.segs.push({x:t.x,y:t.y});s.segs.push({x:t.x,y:t.y});}
+function dropOrbs(s){for(var i=0;i<s.segs.length;i+=2)orbs.push({x:s.segs[i].x,y:s.segs[i].y,r:5,c:'#22D3EE'});}
+function die(){running=false;snake.alive=false;if(score>best){best=score;localStorage.setItem('arcadiaSlitherBest',best);}bsEl.textContent=best;gosEl.textContent='Length: '+score;goEl.classList.remove('hide');}
+function draw(){
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#0A0A12';ctx.fillRect(0,0,W,H);
+  var head=snake.segs[0];var camx=head.x-W/2,camy=head.y-H/2;
+  // grid
+  ctx.strokeStyle='rgba(124,58,237,.1)';ctx.lineWidth=1;var off=camx%60;
+  for(var x=-off;x<W;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(var y=-(camy%60);y<H;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // world border
+  ctx.strokeStyle='rgba(34,211,238,.3)';ctx.lineWidth=2;ctx.strokeRect(-camx,-camy,WORLD,WORLD);
+  // orbs
+  orbs.forEach(function(o){ctx.fillStyle=o.c;ctx.shadowColor=o.c;ctx.shadowBlur=6;ctx.beginPath();ctx.arc(o.x-camx,o.y-camy,o.r,0,7);ctx.fill();});ctx.shadowBlur=0;
+  // bots
+  bots.forEach(function(b){b.segs.forEach(function(s,i){ctx.fillStyle=b.color;ctx.globalAlpha=i===0?1:0.85;ctx.beginPath();ctx.arc(s.x-camx,s.y-camy,b.r,0,7);ctx.fill();});ctx.globalAlpha=1;});
+  // player
+  snake.segs.forEach(function(s,i){ctx.fillStyle=snake.color;ctx.globalAlpha=i===0?1:0.8;ctx.shadowColor=snake.color;if(i===0)ctx.shadowBlur=12;ctx.beginPath();ctx.arc(s.x-camx,s.y-camy,snake.r,0,7);ctx.fill();ctx.shadowBlur=0;});ctx.globalAlpha=1;
+  // eyes
+  var e=snake.segs[0];ctx.fillStyle='#0A0A12';ctx.beginPath();ctx.arc(e.x-camx+Math.cos(snake.ang-0.5)*4,e.y-camy+Math.sin(snake.ang-0.5)*4,2,0,7);ctx.arc(e.x-camx+Math.cos(snake.ang+0.5)*4,e.y-camy+Math.sin(snake.ang+0.5)*4,2,0,7);ctx.fill();
+}
+function loop(){if(running)upd();draw();requestAnimationFrame(loop);}
+mouse={x:W/2,y:H/2};
+window.addEventListener('mousemove',function(e){mouse.x=e.clientX;mouse.y=e.clientY;});
+window.addEventListener('keydown',function(e){if(e.key==='ArrowLeft')mouse.x-=30;if(e.key==='ArrowRight')mouse.x+=30;if(e.key==='ArrowUp')mouse.y-=30;if(e.key==='ArrowDown')mouse.y+=30;if(e.key===' ')boost=true;});
+window.addEventListener('keyup',function(e){if(e.key===' ')boost=false;});
+document.getElementById('start').onclick=reset;
+document.getElementById('again').onclick=reset;
+reset();running=false;
+loop();
+})();
+</script>
+</body>
+</html>

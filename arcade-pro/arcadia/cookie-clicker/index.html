@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cookie Clicker - Arcadia</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    background: #0A0A12;
+    color: #E6E6F0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
+    user-select: none;
+  }
+  #app {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 12px 14px 30px;
+    min-height: 100%;
+  }
+  header { text-align: center; margin-bottom: 10px; }
+  h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .subtitle {
+    font-size: 12px;
+    color: #8a8aa8;
+    margin-top: 3px;
+  }
+  .resetLink {
+    background: none;
+    border: none;
+    color: #555570;
+    font-size: 11px;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-top: 6px;
+  }
+  #stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 14px 0 20px;
+  }
+  #count {
+    font-size: 38px;
+    font-weight: 800;
+    color: #22D3EE;
+    text-shadow: 0 0 18px rgba(34,211,238,0.4);
+    letter-spacing: 1px;
+    text-align: center;
+  }
+  #countLabel {
+    font-size: 12px;
+    color: #8a8aa8;
+    margin-top: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  #cps {
+    font-size: 13px;
+    color: #b8b8d0;
+    margin-top: 8px;
+    height: 16px;
+  }
+  #cookie {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    margin: 16px 0 8px;
+    cursor: pointer;
+    position: relative;
+    background:
+      radial-gradient(circle at 32% 28%, #d49b5e 0%, #b9763e 40%, #8d5226 100%);
+    box-shadow:
+      0 0 0 4px #6e3f1c,
+      0 14px 30px rgba(0,0,0,0.55),
+      inset 0 -8px 18px rgba(0,0,0,0.35);
+    transition: transform 0.08s ease;
+    overflow: hidden;
+  }
+  #cookie:active { transform: scale(0.94); }
+  /* Chocolate chips on the cookie */
+  .chip {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #4a2a13, #1f1006);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.15);
+  }
+  .chip.c1 { width: 22px; height: 22px; top: 30px; left: 42px; }
+  .chip.c2 { width: 18px; height: 18px; top: 70px; left: 110px; }
+  .chip.c3 { width: 26px; height: 26px; top: 110px; left: 50px; }
+  .chip.c4 { width: 16px; height: 16px; top: 38px; left: 118px; }
+  .chip.c5 { width: 20px; height: 20px; top: 130px; left: 116px; }
+  .chip.c6 { width: 14px; height: 14px; top: 86px; left: 24px; }
+  .chip.c7 { width: 12px; height: 12px; top: 60px; left: 78px; }
+  #clickHint { font-size: 11px; color: #555570; margin-top: 6px; letter-spacing: 1px; }
+  #floatLayer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 30;
+  }
+  .floatPlus {
+    position: absolute;
+    color: #22D3EE;
+    font-weight: 800;
+    font-size: 18px;
+    text-shadow: 0 0 8px rgba(34,211,238,0.5);
+    animation: floatUp 0.9s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-60px); opacity: 0; }
+  }
+  #shop {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  #shop h2 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #8a8aa8;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .upgrade {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #14142a;
+    border: 1px solid #2a2a44;
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    width: 100%;
+    text-align: left;
+    color: inherit;
+    font-family: inherit;
+  }
+  .upgrade:not(:disabled):hover { border-color: #22D3EE; background: #181834; }
+  .upgrade:active { transform: scale(0.99); }
+  .upgrade:disabled { opacity: 0.45; cursor: not-allowed; }
+  .icon {
+    width: 42px; height: 42px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    color: #0A0A12;
+  }
+  .info { flex: 1; min-width: 0; }
+  .name {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 2px;
+  }
+  .desc {
+    font-size: 11px;
+    color: #8a8aa8;
+  }
+  .meta { text-align: right; flex-shrink: 0; }
+  .cost {
+    font-size: 14px;
+    font-weight: 700;
+    color: #22D3EE;
+  }
+  .owned {
+    font-size: 12px;
+    color: #b8b8d0;
+    margin-top: 2px;
+  }
+  /* Per-upgrade icon colors */
+  .icon.cursor { background: #94a3b8; }
+  .icon.grandma { background: #f472b6; }
+  .icon.farm { background: #84cc16; }
+  .icon.factory { background: #f59e0b; }
+  #toast {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%) translateY(40px);
+    background: #14142a;
+    border: 1px solid #22D3EE;
+    color: #E6E6F0;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 40;
+    pointer-events: none;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>Cookie Clicker</h1>
+    <div class="subtitle">Click the cookie. Buy producers. Idle to millions.</div>
+    <button class="resetLink" id="resetBtn">Reset progress</button>
+  </header>
+
+  <div id="stage">
+    <div id="count">0</div>
+    <div id="countLabel">cookies</div>
+    <div id="cps">0.0 per second</div>
+    <div id="cookie" aria-label="Cookie">
+      <span class="chip c1"></span>
+      <span class="chip c2"></span>
+      <span class="chip c3"></span>
+      <span class="chip c4"></span>
+      <span class="chip c5"></span>
+      <span class="chip c6"></span>
+      <span class="chip c7"></span>
+    </div>
+    <div id="clickHint">CLICK THE COOKIE</div>
+  </div>
+
+  <div id="shop">
+    <h2>Shop</h2>
+    <button class="upgrade" data-id="cursor">
+      <div class="icon cursor">C</div>
+      <div class="info">
+        <div class="name">Cursor</div>
+        <div class="desc">Auto-clicks +0.1 / sec each</div>
+      </div>
+      <div class="meta">
+        <div class="cost" data-cost="cursor">15</div>
+        <div class="owned" data-owned="cursor">0 owned</div>
+      </div>
+    </button>
+    <button class="upgrade" data-id="grandma">
+      <div class="icon grandma">G</div>
+      <div class="info">
+        <div class="name">Grandma</div>
+        <div class="desc">Bakes +1 / sec each</div>
+      </div>
+      <div class="meta">
+        <div class="cost" data-cost="grandma">100</div>
+        <div class="owned" data-owned="grandma">0 owned</div>
+      </div>
+    </button>
+    <button class="upgrade" data-id="farm">
+      <div class="icon farm">F</div>
+      <div class="info">
+        <div class="name">Farm</div>
+        <div class="desc">Harvests +8 / sec each</div>
+      </div>
+      <div class="meta">
+        <div class="cost" data-cost="farm">1,100</div>
+        <div class="owned" data-owned="farm">0 owned</div>
+      </div>
+    </button>
+    <button class="upgrade" data-id="factory">
+      <div class="icon factory">F</div>
+      <div class="info">
+        <div class="name">Factory</div>
+        <div class="desc">Mass-produces +47 / sec each</div>
+      </div>
+      <div class="meta">
+        <div class="cost" data-cost="factory">13,000</div>
+        <div class="owned" data-owned="factory">0 owned</div>
+      </div>
+    </button>
+  </div>
+</div>
+
+<div id="floatLayer"></div>
+<div id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "arcadiaCookie";
+  var SAVE_INTERVAL_MS = 3000;
+
+  var UPGRADES = {
+    cursor:  { baseCost: 15,    cps: 0.1, label: "Cursor"  },
+    grandma: { baseCost: 100,   cps: 1.0, label: "Grandma" },
+    farm:    { baseCost: 1100,  cps: 8.0, label: "Farm"    },
+    factory: { baseCost: 13000, cps: 47,  label: "Factory" }
+  };
+  var UPGRADE_ORDER = ["cursor","grandma","farm","factory"];
+
+  var state = {
+    cookies: 0,
+    totalEarned: 0,
+    owned: { cursor: 0, grandma: 0, farm: 0, factory: 0 },
+    cost:  { cursor: 15, grandma: 100, farm: 1100, factory: 13000 }
+  };
+
+  var countEl = document.getElementById("count");
+  var cpsEl = document.getElementById("cps");
+  var cookieEl = document.getElementById("cookie");
+  var floatLayer = document.getElementById("floatLayer");
+  var toastEl = document.getElementById("toast");
+  var resetBtn = document.getElementById("resetBtn");
+
+  function formatNumber(n) {
+    if (n < 1000) {
+      // Show up to 1 decimal if very small, else integer
+      if (n < 10 && n % 1 !== 0) return n.toFixed(1);
+      return Math.floor(n).toString();
+    }
+    var units = [
+      { v: 1e12, s: "T" },
+      { v: 1e9,  s: "B" },
+      { v: 1e6,  s: "M" },
+      { v: 1e3,  s: "K" }
+    ];
+    for (var i = 0; i < units.length; i++) {
+      if (n >= units[i].v) {
+        var val = n / units[i].v;
+        var str = val >= 100 ? val.toFixed(1) : val >= 10 ? val.toFixed(2) : val.toFixed(2);
+        // strip trailing zeros from fixed
+        str = str.replace(/\.?0+$/, "");
+        return str + units[i].s;
+      }
+    }
+    return Math.floor(n).toString();
+  }
+
+  function totalCps() {
+    var total = 0;
+    UPGRADE_ORDER.forEach(function(id){
+      total += state.owned[id] * UPGRADES[id].cps;
+    });
+    return total;
+  }
+
+  function costAfter(id, owned) {
+    // cost *= 1.15 each purchase, starting at baseCost
+    // after k purchases: base * 1.15^k
+    return Math.ceil(UPGRADES[id].baseCost * Math.pow(1.15, owned));
+  }
+
+  function recalcCosts() {
+    UPGRADE_ORDER.forEach(function(id){
+      state.cost[id] = costAfter(id, state.owned[id]);
+    });
+  }
+
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){
+      toastEl.classList.remove("show");
+    }, 1600);
+  }
+
+  function spawnFloat(x, y, text) {
+    var el = document.createElement("div");
+    el.className = "floatPlus";
+    el.textContent = text;
+    el.style.left = (x - 10) + "px";
+    el.style.top = (y - 10) + "px";
+    floatLayer.appendChild(el);
+    setTimeout(function(){
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }, 900);
+  }
+
+  function updateUI() {
+    countEl.textContent = formatNumber(state.cookies);
+    var cps = totalCps();
+    cpsEl.textContent = (cps < 10 ? cps.toFixed(1) : formatNumber(cps)) + " per second";
+    UPGRADE_ORDER.forEach(function(id){
+      var costEl = document.querySelector('[data-cost="'+id+'"]');
+      var ownedEl = document.querySelector('[data-owned="'+id+'"]');
+      if (costEl) costEl.textContent = formatNumber(state.cost[id]);
+      if (ownedEl) ownedEl.textContent = state.owned[id] + " owned";
+      var btn = document.querySelector('.upgrade[data-id="'+id+'"]');
+      if (btn) {
+        if (state.cookies >= state.cost[id]) btn.disabled = false;
+        else btn.disabled = true;
+      }
+    });
+  }
+
+  function buy(id) {
+    var cost = state.cost[id];
+    if (state.cookies < cost) return;
+    state.cookies -= cost;
+    state.owned[id]++;
+    state.cost[id] = costAfter(id, state.owned[id]);
+    updateUI();
+    save();
+  }
+
+  function clickCookie(e) {
+    state.cookies += 1;
+    state.totalEarned += 1;
+    var rect = cookieEl.getBoundingClientRect();
+    var x = (e && e.clientX) ? e.clientX : (rect.left + rect.width / 2);
+    var y = (e && e.clientY) ? e.clientY : (rect.top + rect.height / 2);
+    spawnFloat(x, y, "+1");
+    updateUI();
+  }
+
+  function save() {
+    try {
+      var data = {
+        cookies: state.cookies,
+        totalEarned: state.totalEarned,
+        owned: state.owned,
+        ts: Date.now()
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (err) { /* ignore */ }
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      var data = JSON.parse(raw);
+      if (typeof data.cookies === "number") state.cookies = data.cookies;
+      if (typeof data.totalEarned === "number") state.totalEarned = data.totalEarned;
+      if (data.owned) {
+        UPGRADE_ORDER.forEach(function(id){
+          if (typeof data.owned[id] === "number" && data.owned[id] >= 0) {
+            state.owned[id] = data.owned[id];
+          }
+        });
+      }
+      // Offline earnings (cap to avoid absurd gains)
+      if (data.ts) {
+        var elapsedSec = Math.max(0, (Date.now() - data.ts) / 1000);
+        var capSec = 60 * 60 * 2; // cap 2 hours
+        if (elapsedSec > capSec) elapsedSec = capSec;
+        var cps = totalCps();
+        var earned = cps * elapsedSec;
+        if (earned > 0) {
+          state.cookies += earned;
+          state.totalEarned += earned;
+          if (earned >= 1) {
+            setTimeout(function(){
+              showToast("Welcome back! Earned " + formatNumber(earned) + " while away.");
+            }, 300);
+          }
+        }
+      }
+      recalcCosts();
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  // Wire events
+  cookieEl.addEventListener("click", clickCookie);
+  UPGRADE_ORDER.forEach(function(id){
+    var btn = document.querySelector('.upgrade[data-id="'+id+'"]');
+    if (btn) btn.addEventListener("click", function(){ buy(id); });
+  });
+  resetBtn.addEventListener("click", function(){
+    // Without confirm(), we just reset directly. Use a double-click pattern via toast.
+    if (resetBtn._armed) {
+      resetBtn._armed = false;
+      resetBtn.textContent = "Reset progress";
+      state.cookies = 0;
+      state.totalEarned = 0;
+      state.owned = { cursor: 0, grandma: 0, farm: 0, factory: 0 };
+      recalcCosts();
+      updateUI();
+      save();
+      showToast("Progress reset.");
+    } else {
+      resetBtn._armed = true;
+      resetBtn.textContent = "Click again to confirm";
+      resetBtn.style.color = "#ef4444";
+      clearTimeout(resetBtn._t);
+      resetBtn._t = setTimeout(function(){
+        resetBtn._armed = false;
+        resetBtn.textContent = "Reset progress";
+        resetBtn.style.color = "";
+      }, 2500);
+    }
+  });
+
+  // Auto-production tick (10 FPS for smooth cookie growth)
+  var TICK_MS = 100;
+  setInterval(function(){
+    var cps = totalCps();
+    if (cps > 0) {
+      var gain = cps * (TICK_MS / 1000);
+      state.cookies += gain;
+      state.totalEarned += gain;
+      updateUI();
+    }
+  }, TICK_MS);
+
+  // Save periodically
+  setInterval(save, SAVE_INTERVAL_MS);
+  // Save on unload / pagehide
+  window.addEventListener("beforeunload", save);
+  window.addEventListener("pagehide", save);
+  document.addEventListener("visibilitychange", function(){
+    if (document.hidden) save();
+  });
+
+  // Init
+  load();
+  recalcCosts();
+  updateUI();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Reaction Time &middot; Arcadia</title>
+<style>
+  :root {
+    --bg: #0A0A12;
+    --panel: #14141f;
+    --panel-2: #1b1b2b;
+    --text: #E5E7EB;
+    --muted: #8b8ba0;
+    --border: #2a2a3c;
+    --accent: #22D3EE;
+    --red: #b8323a;
+    --red-lit: #ff5a64;
+    --green: #1f8b4c;
+    --green-lit: #4cf08a;
+    --blue: #2a6bd6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(circle at 50% 0%, #16162a 0%, var(--bg) 60%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 18px 14px 30px;
+    min-height: 100%;
+    user-select: none;
+  }
+  h1 { font-size: clamp(22px, 6vw, 30px); letter-spacing: 1px; margin-bottom: 4px; font-weight: 700; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 16px; text-align: center; }
+  .pad {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    height: 50vh;
+    min-height: 280px;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color .15s ease, box-shadow .15s ease;
+    padding: 20px;
+    touch-action: manipulation;
+  }
+  .pad.idle {
+    background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+    color: var(--text);
+  }
+  .pad.waiting {
+    background: radial-gradient(circle at 50% 50%, var(--red) 0%, #5a1418 90%);
+    color: #fff;
+    box-shadow: 0 0 40px rgba(184,50,58,0.4) inset;
+  }
+  .pad.go {
+    background: radial-gradient(circle at 50% 50%, var(--green) 0%, #0c3a1c 90%);
+    color: #fff;
+    box-shadow: 0 0 60px rgba(76,240,138,0.5) inset, 0 0 30px rgba(76,240,138,0.4);
+  }
+  .pad.tooearly {
+    background: radial-gradient(circle at 50% 50%, var(--red-lit) 0%, #6b1418 90%);
+    color: #fff;
+  }
+  .pad.done {
+    background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+    color: var(--accent);
+  }
+  .pad-title { font-size: clamp(24px, 7vw, 38px); font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; }
+  .pad-sub { font-size: 14px; color: rgba(255,255,255,0.85); }
+  .pad.idle .pad-sub, .pad.done .pad-sub { color: var(--muted); }
+  .pad.go .pad-title { text-shadow: 0 0 18px rgba(76,240,138,0.6); }
+  .result {
+    margin-top: 14px;
+    width: 100%;
+    max-width: 560px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .result-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+  }
+  .result-title { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .result-avg { font-size: 18px; font-weight: 700; color: var(--accent); }
+  .attempts {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .attempt {
+    flex: 1 1 60px;
+    min-width: 60px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 4px;
+    text-align: center;
+  }
+  .attempt-label { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+  .attempt-value { font-size: 16px; font-weight: 700; color: var(--text); margin-top: 2px; }
+  .attempt.fault .attempt-value { color: var(--red-lit); }
+  .attempt.empty .attempt-value { color: var(--muted); }
+  .stats-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    width: 100%; max-width: 560px; margin-top: 10px;
+  }
+  .stat-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 10px 6px; text-align: center; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .stat-value { font-size: 22px; font-weight: 700; margin-top: 2px; color: var(--accent); }
+  .controls { margin-top: 12px; display: flex; gap: 10px; }
+  button.btn {
+    background: var(--accent); color: #06121a; border: none; border-radius: 10px;
+    padding: 11px 22px; font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: .5px;
+    transition: filter .15s ease, transform .08s ease;
+  }
+  button.btn:hover { filter: brightness(1.1); }
+  button.btn:active { transform: scale(0.97); }
+  button.btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  button.btn.ghost:hover { background: var(--panel); }
+  footer { margin-top: auto; padding-top: 16px; font-size: 11px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+  <h1>REACTION TIME</h1>
+  <p class="subtitle">Wait for green, then click as fast as you can. Don't jump the gun.</p>
+
+  <div class="pad idle" id="pad">
+    <div class="pad-title" id="padTitle">Click to Start</div>
+    <div class="pad-sub" id="padSub">Wait for green, then click.</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">Best ms</div><div class="stat-value" id="best">--</div></div>
+    <div class="stat-card"><div class="stat-label">Avg (last 5)</div><div class="stat-value" id="avg">--</div></div>
+  </div>
+
+  <div class="result">
+    <div class="result-head">
+      <div class="result-title">Last 5 attempts</div>
+      <div class="result-avg" id="resultAvg">--</div>
+    </div>
+    <div class="attempts" id="attempts"></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn ghost" id="resetBtn">Reset Attempts</button>
+    <button class="btn ghost" id="resetBestBtn">Reset Best</button>
+  </div>
+
+  <footer>Arcadia &middot; Reaction Time</footer>
+
+<script>
+(function () {
+  "use strict";
+  var BEST_KEY = "arcadia_reaction_best";
+  var MAX_ATTEMPTS = 5;
+  var MIN_DELAY = 1500, MAX_DELAY = 4000;
+
+  var pad, padTitle, padSub, bestEl, avgEl, resultAvgEl, attemptsEl, resetBtn, resetBestBtn;
+  var state = "idle"; // idle | waiting | go | tooearly | done
+  var goAt = 0;
+  var waitTimer = null;
+  var attempts = [];
+  var best = null;
+
+  function loadBest() {
+    try {
+      var v = parseInt(localStorage.getItem(BEST_KEY) || "", 10);
+      if (!isNaN(v) && v > 0) best = v; else best = null;
+    } catch (e) { best = null; }
+  }
+  function saveBest() {
+    try { if (best != null) localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
+  }
+
+  function setPadClass(cls) {
+    pad.className = "pad " + cls;
+  }
+
+  function setState(newState) {
+    state = newState;
+    if (state === "idle") {
+      setPadClass("idle");
+      padTitle.textContent = "Click to Start";
+      padSub.textContent = "Wait for green, then click.";
+    } else if (state === "waiting") {
+      setPadClass("waiting");
+      padTitle.textContent = "Wait...";
+      padSub.textContent = "Click when it turns green.";
+    } else if (state === "go") {
+      setPadClass("go");
+      padTitle.textContent = "CLICK!";
+      padSub.textContent = "Now!";
+    } else if (state === "tooearly") {
+      setPadClass("tooearly");
+      padTitle.textContent = "Too early!";
+      padSub.textContent = "Click to try again.";
+    } else if (state === "done") {
+      setPadClass("done");
+      padTitle.textContent = lastMs + " ms";
+      padSub.textContent = "Click to go again.";
+    }
+  }
+
+  var lastMs = null;
+
+  function startRound() {
+    if (waitTimer) clearTimeout(waitTimer);
+    setState("waiting");
+    var delay = MIN_DELAY + Math.random() * (MAX_DELAY - MIN_DELAY);
+    waitTimer = setTimeout(function () {
+      setState("go");
+      goAt = performance.now();
+    }, delay);
+  }
+
+  function recordAttempt(ms, fault) {
+    attempts.push({ ms: ms, fault: !!fault });
+    if (attempts.length > MAX_ATTEMPTS) attempts.shift();
+    renderAttempts();
+    renderAvg();
+    if (!fault && (best == null || ms < best)) {
+      best = ms;
+      saveBest();
+      renderBest();
+    }
+  }
+
+  function renderAttempts() {
+    attemptsEl.innerHTML = "";
+    for (var i = 0; i < MAX_ATTEMPTS; i++) {
+      var div = document.createElement("div");
+      div.className = "attempt";
+      var a = attempts[i];
+      if (a == null) {
+        div.classList.add("empty");
+        div.innerHTML = '<div class="attempt-label">#' + (i + 1) + '</div><div class="attempt-value">--</div>';
+      } else if (a.fault) {
+        div.classList.add("fault");
+        div.innerHTML = '<div class="attempt-label">#' + (i + 1) + '</div><div class="attempt-value">FAULT</div>';
+      } else {
+        div.innerHTML = '<div class="attempt-label">#' + (i + 1) + '</div><div class="attempt-value">' + a.ms + '</div>';
+      }
+      attemptsEl.appendChild(div);
+    }
+  }
+
+  function renderAvg() {
+    var valid = attempts.filter(function (a) { return !a.fault; });
+    if (!valid.length) {
+      avgEl.textContent = "--";
+      resultAvgEl.textContent = "--";
+      return;
+    }
+    var sum = 0;
+    for (var i = 0; i < valid.length; i++) sum += valid[i].ms;
+    var avg = Math.round(sum / valid.length);
+    avgEl.textContent = avg;
+    resultAvgEl.textContent = avg + " ms";
+  }
+
+  function renderBest() {
+    bestEl.textContent = best == null ? "--" : best;
+  }
+
+  function onPadClick() {
+    if (state === "idle" || state === "done" || state === "tooearly") {
+      startRound();
+    } else if (state === "waiting") {
+      // Too early
+      if (waitTimer) clearTimeout(waitTimer);
+      recordAttempt(null, true);
+      setState("tooearly");
+    } else if (state === "go") {
+      var ms = Math.round(performance.now() - goAt);
+      lastMs = ms;
+      recordAttempt(ms, false);
+      setState("done");
+    }
+  }
+
+  function resetAttempts() {
+    if (waitTimer) clearTimeout(waitTimer);
+    attempts = [];
+    renderAttempts();
+    renderAvg();
+    setState("idle");
+  }
+
+  function resetBest() {
+    best = null;
+    try { localStorage.removeItem(BEST_KEY); } catch (e) {}
+    renderBest();
+  }
+
+  function init() {
+    pad = document.getElementById("pad");
+    padTitle = document.getElementById("padTitle");
+    padSub = document.getElementById("padSub");
+    bestEl = document.getElementById("best");
+    avgEl = document.getElementById("avg");
+    resultAvgEl = document.getElementById("resultAvg");
+    attemptsEl = document.getElementById("attempts");
+    resetBtn = document.getElementById("resetBtn");
+    resetBestBtn = document.getElementById("resetBestBtn");
+    pad.addEventListener("click", onPadClick);
+    resetBtn.addEventListener("click", resetAttempts);
+    resetBestBtn.addEventListener("click", resetBest);
+    loadBest();
+    renderBest();
+    renderAttempts();
+    setState("idle");
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Minesweeper — Arcadia</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Inter,system-ui,sans-serif;background:#0A0A12;color:#ECECF5;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;-webkit-user-select:none;user-select:none}
+  h1{font-family:Syne,sans-serif;font-weight:800;font-size:22px;margin-bottom:4px}
+  .hint{color:#9a9ab5;font-size:12px;margin-bottom:12px}
+  .hud{display:flex;gap:14px;align-items:center;margin-bottom:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:8px 14px;border-radius:10px}
+  .hud .m{display:flex;align-items:center;gap:6px;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+  .hud .m svg{width:16px;height:16px}
+  #grid{display:grid;grid-template-columns:repeat(10,30px);gap:2px;background:rgba(255,255,255,.04);padding:6px;border-radius:10px;border:1px solid rgba(255,255,255,.08)}
+  .c{width:30px;height:30px;background:#1c1c33;border-radius:5px;display:grid;place-items:center;font-weight:700;font-size:15px;cursor:pointer;border:1px solid rgba(255,255,255,.05);transition:background .1s}
+  .c:hover{background:#262648}
+  .c.rev{background:#0f0f1c;cursor:default}
+  .c.rev.bomb{background:#f43f5e}
+  .c.flag{color:#f43f5e}
+  .c[data-n="1"]{color:#22D3EE}.c[data-n="2"]{color:#10B981}.c[data-n="3"]{color:#f43f5e}.c[data-n="4"]{color:#A855F7}.c[data-n="5"]{color:#F59E0B}.c[data-n="6"]{color:#14B8A6}.c[data-n="7"]{color:#ECECF5}.c[data-n="8"]{color:#9a9ab5}
+  .btn{margin-top:14px;padding:10px 18px;border-radius:10px;background:linear-gradient(90deg,#7C3AED,#9333ea);color:#fff;font-weight:600;border:none;cursor:pointer;font-size:14px}
+  .btn:hover{filter:brightness(1.1)}
+  .ov{position:fixed;inset:0;background:rgba(10,10,18,.85);display:none;place-items:center;backdrop-filter:blur(4px)}
+  .ov.show{display:grid}
+  .ov .box{text-align:center;padding:28px 36px;background:#14142a;border:1px solid rgba(255,255,255,.12);border-radius:16px}
+  .ov h2{font-family:Syne,sans-serif;font-size:28px;margin-bottom:6px}
+  .ov p{color:#9a9ab5;margin-bottom:16px}
+</style>
+</head>
+<body>
+  <h1>Minesweeper</h1>
+  <p class="hint">Left-click reveal · Right-click / long-press to flag · 15 mines</p>
+  <div class="hud">
+    <div class="m"><svg viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2"><circle cx="12" cy="13" r="6"/><path d="M12 3v3M5 8l2 2M19 8l-2 2"/></svg><span id="mines">15</span></div>
+    <div class="m"><svg viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="timer">0:00</span></div>
+  </div>
+  <div id="grid"></div>
+  <button class="btn" id="restart">New game</button>
+  <div class="ov" id="ov"><div class="box"><h2 id="ovt">Game over</h2><p id="ovm"></p><button class="btn" id="ovr">Play again</button></div></div>
+<script>
+(function(){
+  var W=10,H=10,MINES=15,grid=[],revealed=[],flagged=[],first=true,dead=false,won=false,t0=null,ti=null;
+  var el=document.getElementById('grid'),minesEl=document.getElementById('mines'),timerEl=document.getElementById('timer');
+  var ov=document.getElementById('ov'),ovt=document.getElementById('ovt'),ovm=document.getElementById('ovm');
+  function init(){
+    grid=[];revealed=[];flagged=[];first=true;dead=false;won=false;t0=null;
+    if(ti)clearInterval(ti);timerEl.textContent='0:00';
+    for(var y=0;y<H;y++){grid[y]=[];revealed[y]=[];flagged[y]=[];for(var x=0;x<W;x++){grid[y][x]=0;revealed[y][x]=false;flagged[y][x]=false;}}
+    el.innerHTML='';
+    for(var y=0;y<H;y++){for(var x=0;x<W;x++){var c=document.createElement('div');c.className='c';c.dataset.x=x;c.dataset.y=y;
+      c.addEventListener('click',onLeft);c.addEventListener('contextmenu',onRight);var sx=x,sy=y;
+      var pt;c.addEventListener('touchstart',function(e){e.preventDefault();pt=Date.now();},{passive:false});
+      c.addEventListener('touchend',function(e){e.preventDefault();if(Date.now()-pt>350){onRightAt(sx,sy);}else{onLeftAt(sx,sy);}},{passive:false});
+      el.appendChild(c);}}
+    updateMines();
+  }
+  function place(sx,sy){
+    var placed=0;while(placed<MINES){var x=Math.floor(Math.random()*W),y=Math.floor(Math.random()*H);
+      if(grid[y][x]===-1)continue;if(Math.abs(x-sx)<=1&&Math.abs(y-sy)<=1)continue;grid[y][x]=-1;placed++;}
+    for(var y=0;y<H;y++)for(var x=0;x<W;x++){if(grid[y][x]===-1)continue;var n=0;for(dy=-1;dy<=1;dy++)for(dx=-1;dx<=1;dx++){var nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;if(grid[ny][nx]===-1)n++;}grid[y][x]=n;}
+  }
+  function onLeft(e){e.preventDefault();onLeftAt(+this.dataset.x,+this.dataset.y);}
+  function onRight(e){e.preventDefault();onRightAt(+this.dataset.x,+this.dataset.y);}
+  function onLeftAt(x,y){
+    if(dead||won)return;if(flagged[y][x])return;
+    if(first){place(x,y);first=false;startTimer();}
+    reveal(x,y);checkWin();render();updateMines();
+  }
+  function onRightAt(x,y){if(dead||won)return;if(revealed[y][x])return;if(first)return;flagged[y][x]=!flagged[y][x];render();updateMines();}
+  function reveal(x,y){
+    if(x<0||y<0||x>=W||y>=H)return;if(revealed[y][x]||flagged[y][x])return;
+    revealed[y][x]=true;
+    if(grid[y][x]===-1){dead=true;revealAll();endGame(false);return;}
+    if(grid[y][x]===0){for(var dy=-1;dy<=1;dy++)for(var dx=-1;dx<=1;dx++){if(dx===0&&dy===0)continue;reveal(x+dx,y+dy);}}
+  }
+  function revealAll(){for(var y=0;y<H;y++)for(var x=0;x<W;x++)if(grid[y][x]===-1)revealed[y][x]=true;}
+  function checkWin(){var safe=0;for(var y=0;y<H;y++)for(var x=0;x<W;x++){if(grid[y][x]!==-1&&revealed[y][x])safe++;}if(safe===W*H-MINES){won=true;endGame(true);}}
+  function startTimer(){t0=Date.now();ti=setInterval(function(){var s=Math.floor((Date.now()-t0)/1000);timerEl.textContent=Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);},250);}
+  function updateMines(){var f=0;for(var y=0;y<H;y++)for(var x=0;x<W;x++)if(flagged[y][x])f++;minesEl.textContent=Math.max(0,MINES-f);}
+  function render(){
+    var cells=el.children;
+    for(var y=0;y<H;y++)for(var x=0;x<W;x++){var c=cells[y*W+x];c.className='c';c.textContent='';c.removeAttribute('data-n');
+      if(flagged[y][x]&&!revealed[y][x]){c.classList.add('flag');c.textContent='\u2691';}
+      if(revealed[y][x]){c.classList.add('rev');if(grid[y][x]===-1){c.classList.add('bomb');c.textContent='\u25CF';}else if(grid[y][x]>0){c.textContent=grid[y][x];c.setAttribute('data-n',grid[y][x]);}}}
+  }
+  function endGame(win){if(ti)clearInterval(ti);setTimeout(function(){ov.classList.add('show');ovt.textContent=win?'You win':'Boom';ovt.style.color=win?'#22D3EE':'#f43f5e';ovm.textContent=win?'Cleared in '+timerEl.textContent:'You hit a mine.';},win?200:300);}
+  document.getElementById('restart').onclick=function(){ov.classList.remove('show');init();};
+  document.getElementById('ovr').onclick=function(){ov.classList.remove('show');init();};
+  init();
+})();
+</script>
+</body>
+</html>

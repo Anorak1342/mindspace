@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Run 3 — Arcadia</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{font-family:Inter,system-ui,sans-serif;background:#0A0A12;color:#ECECF5;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  #wrap{position:relative;width:100%;max-width:900px;aspect-ratio:16/10;margin:auto}
+  canvas{width:100%;height:100%;display:block;background:#0A0A12;border-radius:14px;border:1px solid rgba(255,255,255,.08)}
+  .hud{position:absolute;top:12px;left:14px;right:14px;display:flex;justify-content:space-between;pointer-events:none}
+  .hud .s{background:rgba(10,10,18,.7);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 12px;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;backdrop-filter:blur(6px)}
+  .hud .s span{color:#9a9ab5;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-right:6px}
+  .ov{position:absolute;inset:0;display:grid;place-items:center;background:rgba(10,10,18,.82);backdrop-filter:blur(4px);border-radius:14px;text-align:center}
+  .ov.hide{display:none}
+  .ov h2{font-family:Syne,sans-serif;font-size:30px;margin-bottom:6px}
+  .ov p{color:#9a9ab5;margin-bottom:8px;font-size:14px}
+  .btn{padding:12px 22px;border-radius:11px;background:linear-gradient(90deg,#7C3AED,#9333ea);color:#fff;font-weight:600;border:none;cursor:pointer;font-size:15px}
+  .btn:hover{filter:brightness(1.1)}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c" width="900" height="562"></canvas>
+  <div class="hud"><div class="s"><span>Distance</span><b id="sc">0</b></div><div class="s"><span>Best</span><b id="bs">0</b></div></div>
+  <div class="ov" id="st"><div><h2>Run 3</h2><p>Endless space runner. Jump the gaps, dodge the walls.</p><p style="margin-bottom:14px;font-size:12px">Space / Up / click — jump (double-jump in air)</p><button class="btn" id="start">Start</button></div></div>
+  <div class="ov hide" id="go"><div><h2 style="color:#f43f5e">Fell</h2><p id="gos">Best: 0</p><button class="btn" id="again" style="margin-top:8px">Retry</button></div></div>
+</div>
+<script>
+(function(){
+var cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=900,H=562;
+var scEl=document.getElementById('sc'),bsEl=document.getElementById('bs'),stEl=document.getElementById('st'),goEl=document.getElementById('go'),gosEl=document.getElementById('gos');
+var best=+localStorage.getItem('arcadiaRun3Best')||0;bsEl.textContent=best;
+var G=H-90;
+var player,plat,speed,score,running,dead,scrollX,jumps;
+function makeLevel(){
+  var arr=[];var x=0;
+  while(x<6000){
+    var r=Math.random();
+    var w=120+Math.random()*120;
+    arr.push({x:x,w:w});
+    if(r<0.5){x+=w+60+Math.random()*70;} // gap
+    else if(r<0.75){x+=w+30;arr.push({x:x,w:50,x2:true});x+=50+50;} // high wall
+    else{x+=w+20;}
+  }
+  return arr;
+}
+function reset(){
+  player={x:200,y:G-30,vy:0,r:18,jumps:0};speed=5;score=0;scrollX=0;dead=false;running=true;plat=makeLevel();
+  stEl.classList.add('hide');goEl.classList.add('hide');
+}
+function jump(){if(player.jumps<2){player.vy=-11;player.jumps++;}}
+function upd(){
+  if(!running)return;
+  scrollX+=speed;score=Math.floor(scrollX/8);speed=5+Math.min(5,score/500);
+  player.vy+=0.6;player.y+=player.vy;
+  // ground collision: find platform under player
+  var onPlat=false;
+  for(var i=0;i<plat.length;i++){var p=plat[i];var px=p.x-scrollX;
+    if(px<player.x+player.r && px+p.w>player.x-player.r){
+      if(player.vy>=0 && player.y+player.r>=G-p.x2*0+0 && player.y+player.r<=G+8 && !p.x2){player.y=G-player.r;player.vy=0;player.jumps=0;onPlat=true;}
+      else if(p.x2 && player.vy>=0 && player.y+player.r>=G-70 && player.y+player.r<=G-70+10 && px<player.x+player.r && px+p.w>player.x-player.r){player.y=G-70-player.r;player.vy=0;player.jumps=0;onPlat=true;}
+    }
+  }
+  // fall off bottom
+  if(player.y>H+40){die();return;}
+  scEl.textContent=score;
+}
+function die(){dead=true;running=false;if(score>best){best=score;localStorage.setItem('arcadiaRun3Best',best);}bsEl.textContent=best;gosEl.textContent='Best: '+best;goEl.classList.remove('hide');}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0f0f1c');g.addColorStop(1,'#0A0A12');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // stars
+  ctx.fillStyle='rgba(255,255,255,.5)';
+  for(var i=0;i<40;i++){var sx=(i*97-scrollX*0.15)%W;var sy=(i*53)%H;if(sx<0)sx+=W;ctx.fillRect(sx,sy,2,2);}
+  // platforms
+  plat.forEach(function(p){var px=p.x-scrollX;if(px+p.w<-10||px>W+10)return;
+    if(p.x2){ctx.fillStyle='#7C3AED';ctx.shadowColor='#7C3AED';ctx.shadowBlur=8;ctx.fillRect(px,G-70,p.w,12);ctx.shadowBlur=0;}
+    else{ctx.fillStyle='#1c1c33';ctx.fillRect(px,G,p.w,40);ctx.fillStyle='#22D3EE';ctx.fillRect(px,G,p.w,3);ctx.shadowColor='#22D3EE';ctx.shadowBlur=6;ctx.fillRect(px,G,p.w,3);ctx.shadowBlur=0;}
+  });
+  // player
+  ctx.save();ctx.translate(player.x,player.y);
+  ctx.fillStyle='#7C3AED';ctx.shadowColor='#7C3AED';ctx.shadowBlur=16;ctx.beginPath();ctx.arc(0,0,player.r,0,7);ctx.fill();
+  ctx.shadowBlur=0;ctx.fillStyle='#22D3EE';ctx.beginPath();ctx.arc(-4,-4,5,0,7);ctx.fill();
+  ctx.restore();
+}
+function loop(){if(running)upd();draw();requestAnimationFrame(loop);}
+function act(e){e.preventDefault();if(!running&&!dead){reset();return;}if(running)jump();}
+window.addEventListener('keydown',function(e){if(e.key===' '||e.key==='ArrowUp'||e.key==='w'){e.preventDefault();if(running)jump();else if(!dead)reset();}});
+cv.addEventListener('mousedown',act);cv.addEventListener('touchstart',act,{passive:false});
+document.getElementById('start').onclick=reset;
+document.getElementById('again').onclick=reset;
+loop();
+})();
+</script>
+</body>
+</html>
