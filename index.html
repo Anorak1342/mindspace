@@ -97,9 +97,25 @@ body{background:radial-gradient(ellipse at 8% 0%,#e3eaff,transparent 40%),radial
 /* Personal Layout Studio */
 .layout-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 18px;align-items:start}.layout-grid>section{min-width:0;margin:0}.layout-grid>section.layout-half{grid-column:span 1}.layout-grid>section.layout-full{grid-column:1/-1}.layout-grid.layout-editing>section{outline:2px dashed #8a78df;outline-offset:7px;border-radius:12px;cursor:grab}.layout-grid.layout-editing>section.layout-dragging{opacity:.45}.layout-grid.layout-editing>section.layout-drop-target{outline-color:#278c70;background:#d9f4e922}@media(max-width:760px){.layout-grid{grid-template-columns:1fr;gap:22px}.layout-grid>section.layout-half,.layout-grid>section.layout-full{grid-column:1/-1}}
 .layout-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px}.layout-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px;padding:11px 12px;background:#f6f8fc;border:1px solid var(--line);border-radius:12px;margin:8px 0}.layout-row strong{font-size:13px}.layout-row small{display:block;color:var(--muted);font-size:10px}.layout-row select{max-width:110px;padding:7px;border:1px solid var(--line);border-radius:8px;background:white;color:#30364b}.layout-row button{padding:7px 9px;border-radius:8px;background:#e9edf6;color:#30364b}.layout-hint{font-size:12px;color:var(--muted);margin:8px 0 14px}
+
+/* Personal profile, colour themes and daily reflections */
+.profile-open{display:flex;align-items:center;gap:8px;padding:5px 10px 5px 5px;border:1px solid var(--line);border-radius:99px;background:#fff;color:var(--text);font-weight:750;font-size:12px}
+.profile-avatar{height:34px;width:34px;border-radius:50%;display:grid;place-items:center;background:var(--profile-accent,#dff4eb);font-size:19px}
+.profile-card{padding:17px;border:1px solid var(--line);border-radius:16px;background:var(--panel);margin:12px 0}
+.profile-preview{display:flex;align-items:center;gap:13px}.profile-preview .profile-avatar{height:56px;width:56px;font-size:27px}
+.profile-preview strong{font-size:17px}.profile-preview p{margin:2px 0;color:var(--muted);font-size:12px}
+.profile-fields{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.profile-fields .field{min-width:0}.profile-fields input,.profile-fields textarea,.daily-entry textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#f8faff;color:#20263a}
+.profile-fields textarea{min-height:70px;resize:vertical}
+.theme-swatches{display:flex;gap:9px;flex-wrap:wrap;margin:10px 0}
+.theme-swatch{height:35px;width:35px;border-radius:50%;border:3px solid white;box-shadow:0 0 0 1px var(--line);padding:0}
+.theme-swatch[aria-pressed="true"]{box-shadow:0 0 0 2px var(--text)}
+.color-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}.color-pair label{display:grid;gap:6px;color:var(--muted);font-size:11px}.color-pair input{width:100%;height:40px;border:1px solid var(--line);border-radius:9px;background:white;padding:4px}
+.daily-entry textarea{min-height:86px;resize:vertical}.daily-history{display:grid;gap:8px;margin-top:12px}.daily-history article{padding:10px 12px;border-radius:11px;background:#f6f8fc;border:1px solid var(--line)}.daily-history time{font-size:10px;color:var(--muted)}.daily-history p{margin:3px 0 0;font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:520px){.profile-fields,.color-pair{grid-template-columns:1fr}.profile-open #profileName{display:none}}
 </style>
 </head><body><div class="app">
-<header class="topbar"><div class="brand"><div class="logo">m</div><div>mindspace<small>make room to learn</small></div></div><div class="top-right"><button class="secondary" id="layoutStudio" type="button">▦ Customise layout</button><span class="pill">✦ Your personal study space</span><div class="avatar">M</div></div></header>
+<header class="topbar"><div class="brand"><div class="logo">m</div><div>mindspace<small>make room to learn</small></div></div><div class="top-right"><button class="secondary" id="layoutStudio" type="button">▦ Customise layout</button><button class="profile-open" id="profileOpen" type="button"><span class="profile-avatar" id="headerAvatar">🙂</span><span id="profileName">My profile</span></button></div></header>
 <main id="mainContent" class="layout-grid"><section class="hero" data-layout-id="welcome" data-layout-title="Welcome banner"><div class="welcome"><div class="eyebrow">YOUR SPACE TO FOCUS</div><h1>A little progress<br>goes a long way.</h1><p>Pick up where you left off, make a new deck, or give your brain a five-minute reset.</p><button class="primary" id="startStudy">✦ Start studying</button> <button class="secondary" id="newDeckHero">＋ New deck</button></div><aside class="hero-side"><div><div class="side-label">YOUR WEEK AT A GLANCE</div><div class="streak"><div class="streak-icon">✺</div><div><strong id="streakNum">1 day</strong><span>Showing up counts.</span></div></div></div><div class="week" id="week"></div></aside></section>
 <section data-layout-id="school" data-layout-title="School learning"><div class="section-head"><div><h2>School learning</h2><p>Quick links to your online school platforms.</p></div></div><div class="school-links">
 <a class="school-link" href="https://app.educationperfect.com/learning/dashboard" target="_blank" rel="noopener noreferrer"><div>Education Perfect<span>Lessons, activities and revision</span></div><span class="school-arrow" aria-hidden="true">↗</span></a>
@@ -210,6 +226,57 @@ function layoutDrop(e){e.preventDefault();const from=e.dataTransfer.getData("tex
 function layoutDragEnd(e){layoutSections().forEach(el=>el.classList.remove("layout-dragging","layout-drop-target"));currentLayout.order=layoutSections().map(el=>el.dataset.layoutId)}
 $("#layoutStudio").onclick=layoutEditor;
 applyLayout();
+
+
+/* Profile data and daily mood sentence are private to this browser. */
+const profileDefaults={name:"My profile",avatar:"🙂",bio:"A little space that's completely yours.",accent:"#35ae88",background:"#f4f7fb",preset:"mint"};
+const profilePresets={
+ mint:{accent:"#35ae88",background:"#f4f7fb"},
+ ocean:{accent:"#3986c9",background:"#f1f6fc"},
+ lavender:{accent:"#8a78df",background:"#f5f2fc"},
+ sunset:{accent:"#df805e",background:"#fcf4ef"},
+ rose:{accent:"#d56d9b",background:"#fcf2f7"},
+ midnight:{accent:"#a18af0",background:"#202238"}
+};
+function readProfile(){try{return {...profileDefaults,...JSON.parse(localStorage.getItem("ms-profile")||"{}")}}catch(e){return {...profileDefaults}}}
+let userProfile=readProfile();
+function applyProfile(){
+ const p=userProfile,root=document.documentElement;
+ root.style.setProperty("--mint",p.accent);
+ root.style.setProperty("--profile-accent",p.accent);
+ root.style.setProperty("--bg",p.background);
+ const dark=p.background.toLowerCase()==="#202238";
+ if(dark){
+  root.style.setProperty("--panel","#292c46");root.style.setProperty("--panel2","#343854");root.style.setProperty("--text","#f4f3ff");root.style.setProperty("--muted","#b8b5d0");root.style.setProperty("--line","#454965");
+  document.body.style.background="radial-gradient(ellipse at 8% 0%,#39385d,transparent 40%),radial-gradient(ellipse at 95% 8%,#244c50,transparent 32%),var(--bg)";
+  document.body.style.color="#f4f3ff";
+ }else{
+  root.style.setProperty("--panel","#ffffff");root.style.setProperty("--panel2","#e9eef7");root.style.setProperty("--text","#20263a");root.style.setProperty("--muted","#68728b");root.style.setProperty("--line","#dce3ef");
+  document.body.style.background="radial-gradient(ellipse at 8% 0%,#e3eaff,transparent 40%),radial-gradient(ellipse at 95% 8%,#ddf6ec,transparent 32%),var(--bg)";
+  document.body.style.color="#20263a";
+ }
+ root.style.setProperty("--mint",p.accent);
+ document.querySelectorAll(".primary").forEach(b=>{b.style.background=p.accent});
+ const av=$("#headerAvatar"),name=$("#profileName");if(av)av.textContent=p.avatar||"🙂";if(name)name.textContent=p.name||"My profile";
+}
+function readDaily(){try{return JSON.parse(localStorage.getItem("ms-daily-reflections")||"{}")}catch(e){return {}}}
+function profileEditor(){
+ const p=userProfile,today=new Date().toLocaleDateString("en-CA"),entries=readDaily(),todayEntry=entries[today]||{mood:"🙂",sentence:""};
+ const swatches=Object.entries(profilePresets).map(([key,v])=>'<button type="button" class="theme-swatch" data-theme="'+key+'" aria-label="'+key+' theme" aria-pressed="'+(p.preset===key)+'" style="background:'+v.accent+'"></button>').join("");
+ const history=Object.keys(entries).sort().reverse().slice(0,7).map(date=>'<article><time>'+date+'</time><p>'+escapeProfileText(entries[date].mood||"")+" "+escapeProfileText(entries[date].sentence||"")+'</p></article>').join("");
+ modal("Your personal profile",'<div class="profile-card"><div class="profile-preview"><div class="profile-avatar" id="profilePreviewAvatar">'+escapeProfileText(p.avatar)+'</div><div><strong id="profilePreviewName">'+escapeProfileText(p.name)+'</strong><p id="profilePreviewBio">'+escapeProfileText(p.bio)+'</p></div></div></div><div class="profile-fields"><div class="field"><label>Display name</label><input id="editProfileName" maxlength="24" value="'+escapeProfileText(p.name)+'" placeholder="Your name"></div><div class="field"><label>Choose an avatar</label><input id="editProfileAvatar" maxlength="4" value="'+escapeProfileText(p.avatar)+'" placeholder="🙂"></div><div class="field" style="grid-column:1/-1"><label>Short bio</label><textarea id="editProfileBio" maxlength="100" placeholder="A little about you...">'+escapeProfileText(p.bio)+'</textarea></div></div><div class="profile-card"><strong>Choose your main colours</strong><p style="font-size:12px;color:var(--muted);margin:4px 0">Pick a palette or set your own accent and background.</p><div class="theme-swatches">'+swatches+'</div><div class="color-pair"><label>Accent colour<input type="color" id="profileAccent" value="'+p.accent+'"></label><label>Background colour<input type="color" id="profileBackground" value="'+p.background+'"></label></div></div><div class="profile-card daily-entry"><strong>Today's feeling</strong><p style="font-size:12px;color:var(--muted);margin:4px 0 10px">One sentence to capture how today feels. Only you can see this on this device.</p><div class="field"><label>Choose a mood</label><select id="dailyMood" style="padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:#20263a"><option>🙂</option><option>😄</option><option>😌</option><option>😐</option><option>😔</option><option>😣</option><option>😴</option><option>🤩</option><option>😤</option><option>🥰</option></select></div><textarea id="dailySentence" maxlength="180" placeholder="Today I feel...">'+escapeProfileText(todayEntry.sentence)+'</textarea><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:9px"><small id="dailyCount" style="color:var(--muted)">0 / 180</small><button class="primary" id="saveDaily">Save today's sentence</button></div></div><div class="profile-card"><strong>Recent reflections</strong><div class="daily-history">'+(history||'<p style="font-size:12px;color:var(--muted)">Your saved daily sentences will appear here.</p>')+'</div></div><div class="modal-actions"><button class="primary" id="saveProfile">Save profile</button><button class="secondary" id="closeProfile">Close</button></div>');
+ const syncPreview=()=>{$("#profilePreviewName").textContent=$("#editProfileName").value||"My profile";$("#profilePreviewBio").textContent=$("#editProfileBio").value;$("#profilePreviewAvatar").textContent=$("#editProfileAvatar").value||"🙂"};
+ ["editProfileName","editProfileBio","editProfileAvatar"].forEach(id=>$("#"+id).addEventListener("input",syncPreview));
+ const count=()=>$("#dailyCount").textContent=$("#dailySentence").value.length+" / 180";count();$("#dailySentence").addEventListener("input",count);
+ $("#dailyMood").value=todayEntry.mood||"🙂";
+ $("#saveDaily").onclick=()=>{const sentence=$("#dailySentence").value.trim();if(!sentence){toast("Write a sentence first.");return}const data=readDaily();data[today]={mood:$("#dailyMood").value,sentence};localStorage.setItem("ms-daily-reflections",JSON.stringify(data));toast("Today's reflection has been saved.");profileEditor()};
+ $("#saveProfile").onclick=()=>{userProfile={...userProfile,name:$("#editProfileName").value.trim()||"My profile",avatar:$("#editProfileAvatar").value.trim()||"🙂",bio:$("#editProfileBio").value.trim(),accent:$("#profileAccent").value,background:$("#profileBackground").value};userProfile.preset="custom";localStorage.setItem("ms-profile",JSON.stringify(userProfile));applyProfile();toast("Your profile has been saved.");closeModal()};
+ $("#closeProfile").onclick=closeModal;
+ $("#modalBody").querySelectorAll("[data-theme]").forEach(b=>b.onclick=()=>{const key=b.dataset.theme,v=profilePresets[key];userProfile.preset=key;$("#profileAccent").value=v.accent;$("#profileBackground").value=v.background;$("#modalBody").querySelectorAll("[data-theme]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)))});
+}
+function escapeProfileText(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+$("#profileOpen").onclick=profileEditor;
+applyProfile();
 
 function toast(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2100)}
 function renderDecks(){
