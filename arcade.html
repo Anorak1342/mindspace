@@ -496,7 +496,7 @@ document.getElementById("personal-record-form")?.addEventListener("submit",()=>r
   minimal:{order:["overview","all-games-page","favourites","recent","daily","records","collections"],hidden:["daily","records"]}
  };
  const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||"null")||fallback}catch(e){return fallback}};
- let layout=read("ms-arcade-layout",{order:[...keys],hidden:[]});
+ let layout=read("ms-arcade-layout",{order:[...keys],hidden:[]});\n try{if(localStorage.getItem("ms-arcade-layout-version")!=="classic-reset-1"){layout={order:[...keys],hidden:[]};localStorage.setItem("ms-arcade-layout",JSON.stringify(layout));localStorage.setItem("ms-arcade-layout-version","classic-reset-1");}}catch(e){}
  let profile=read("ms-arcade-profile",{name:"My profile",avatar:"🙂",bio:""});
  const today=(()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")})();
  const daily=read("ms-arcade-daily",{});
