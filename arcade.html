@@ -120,57 +120,14 @@ body.tab-away #away-cover{display:flex}
 :root[data-arcade-theme="void"]{--bg:#090611;--panel:#171126;--line:#49346b;--text:#f3edff;--muted:#aa9bc8;--mint:#c29aff;--gold:#f2c46d}
 :root[data-arcade-theme="royal"]{--bg:#100d19;--panel:#20182d;--line:#5d4775;--text:#fff7e8;--muted:#bca9cc;--mint:#d3b1ff;--gold:#f4ce75}
 :root[data-arcade-theme="celestial"]{--bg:#0d0c19;--panel:#19172a;--line:#62543e;--text:#fff8e7;--muted:#c4b89a;--mint:#ffe2a0;--gold:#f7c95c}
-
-/* Arcade-only personalisation */
-#arcade-personalise{position:fixed;inset:0;z-index:200000;background:#000c;display:none;align-items:center;justify-content:center;padding:18px}
-#arcade-personalise.open{display:flex}
-#arcade-personalise .personal-card{width:min(620px,100%);max-height:90vh;overflow:auto;background:#121614;border:1px solid #45564c;border-radius:14px;padding:22px;color:#f5f2ed;box-shadow:0 24px 90px #000b}
-#arcade-personalise h2{margin:0 0 8px;font-size:23px}
-#arcade-personalise p{color:#aab5ae;font-size:13px}
-#arcade-personalise label{display:grid;gap:6px;color:#b8c2bb;font-size:12px;margin:12px 0}
-#arcade-personalise input,#arcade-personalise select,#arcade-personalise textarea{width:100%;padding:10px;background:#1b211d;color:#f5f2ed;border:1px solid #465248;border-radius:7px;font:inherit}
-#arcade-personalise input[type=color]{height:42px;padding:4px}
-#arcade-personalise textarea{min-height:75px;resize:vertical}
-#arcade-personalise .arcade-layout-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid #303a33;font-size:13px}
-#arcade-personalise button{cursor:pointer;border:1px solid #465248;border-radius:6px;padding:8px 11px;background:#222b25;color:#f5f2ed;font-weight:700}
-#arcade-personalise .arcade-save{background:var(--mint);color:#08140e;border-color:var(--mint)}
-#arcade-personalise .arcade-modal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
-#arcade-personalise .arcade-modal-actions button{flex:1}
-@media(max-width:600px){#arcade-customise,#arcade-profile{font-size:11px;padding:7px 9px}}
 </style>
 <script type="module">import {applyTheme} from "./player-system.js";applyTheme();</script><script src="mindspace-lock.js" defer></script>
 </head>
 <body><section id="arcade-first-visit" role="dialog" aria-modal="true" aria-labelledby="arcade-welcome-title">
 <div class="arcade-welcome-card"><div class="eyebrow">WELCOME TO MINDSPACE ARCADE</div><h1 id="arcade-welcome-title">Ready to play?</h1><p class="arcade-welcome-intro">A big collection of games, without the hunting around.</p>
 <div class="arcade-quick-tutorial"><div><span>1</span><strong>Find a game</strong><small>Use the search bar or genre filter.</small></div><div><span>2</span><strong>Press Play</strong><small>Choose a game card to launch it.</small></div><div><span>3</span><strong>Keep your favourites</strong><small>Star games to find them quickly next time.</small></div></div>
-<button type="button" id="enter-arcade">LET'S PLAY <span aria-hidden="true">→</span></button><small class="arcade-welcome-foot">This quick guide only appears the first time you visit on this browser.</small></div></section>
-<div id="arcade-personalise" aria-modal="true" role="dialog" aria-labelledby="arcade-personal-title">
- <div class="personal-card">
-  <h2 id="arcade-personal-title">Customise your Arcade</h2>
-  <p>These settings affect the Arcade only. Your main Mindspace homepage stays unchanged.</p>
-  <div id="arcade-custom-panel">
-   <label>Starting layout
-    <select id="arcade-preset"><option value="">Choose a preset…</option><option value="classic">Classic</option><option value="gamer">Gamer</option><option value="library">Library first</option><option value="minimal">Minimal</option></select>
-   </label>
-   <div id="arcade-layout-rows"></div>
-   <label>Arcade accent colour <input type="color" id="arcade-accent" value="#83e6bd"></label>
-   <label>Arcade background colour <input type="color" id="arcade-background" value="#090909"></label>
-  </div>
-  <div id="arcade-profile-panel" hidden>
-   <label>Display name <input id="arcade-name" maxlength="24" placeholder="Your name"></label>
-   <label>Avatar emoji <input id="arcade-avatar" maxlength="4" placeholder="🙂"></label>
-   <label>Short bio <input id="arcade-bio" maxlength="100" placeholder="A little about you"></label>
-   <label>Today's mood
-    <select id="arcade-mood"><option>🙂</option><option>😄</option><option>😌</option><option>😐</option><option>😔</option><option>😣</option><option>😴</option><option>🤩</option><option>😤</option><option>🥰</option></select>
-   </label>
-   <label>One sentence for today <textarea id="arcade-daily" maxlength="180" placeholder="Today I feel…"></textarea></label>
-   <p id="arcade-profile-note">Your profile and daily reflection are saved in this browser, for the Arcade only.</p>
-  </div>
-  <div class="arcade-modal-actions"><button class="arcade-save" id="arcade-personal-save" type="button">Save changes</button><button id="arcade-personal-close" type="button">Close</button></div>
- </div>
-</div>
-<main class="wrap">
-<header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><nav class="toplinks"><button class="back" id="blank-launch" type="button" hidden>↗ Open blank tab</button><button class="back" id="arcade-customise" type="button">⚙ Customise arcade</button><button class="back" id="arcade-profile" type="button">🙂 My profile</button><button class="back" id="tab-privacy" type="button">⌘ Tab privacy</button></nav></header>
+<button type="button" id="enter-arcade">LET'S PLAY <span aria-hidden="true">→</span></button><small class="arcade-welcome-foot">This quick guide only appears the first time you visit on this browser.</small></div></section><main class="wrap">
+<header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><nav class="toplinks"><button class="back" id="blank-launch" type="button" hidden>↗ Open blank tab</button><button class="back" id="tab-privacy" type="button">⌘ Tab privacy</button></nav></header>
 <aside class="arcade-sidebar" aria-label="Arcade navigation">
   <div class="sidebar-heading">ARCADE MENU</div>
   <a class="side-link active" href="#overview" data-page="overview"><span>⌂</span> Overview</a>
@@ -481,84 +438,4 @@ document.getElementById("personal-record-form")?.addEventListener("submit",()=>r
  show(aliases[initial]||initial||"overview",false);
  window.addEventListener("hashchange",()=>show(aliases[location.hash.slice(1)]||location.hash.slice(1),false));
 })();
-</script>
-<script>
-(()=> {
- const $=id=>document.getElementById(id);
- const modal=$("arcade-personalise");
- if(!modal)return;
- const keys=["overview","daily","all-games-page","recent","favourites","records","collections"];
- const labels={overview:"Overview",daily:"Game of the day", "all-games-page":"All games",recent:"Recently played",favourites:"Favourites",records:"Personal records",collections:"Collections"};
- const presets={
-  classic:{order:[...keys],hidden:[]},
-  gamer:{order:["overview","all-games-page","daily","favourites","recent","collections","records"],hidden:[]},
-  library:{order:["all-games-page","favourites","recent","collections","records","overview","daily"],hidden:[]},
-  minimal:{order:["overview","all-games-page","favourites","recent","daily","records","collections"],hidden:["daily","records"]}
- };
- const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||"null")||fallback}catch(e){return fallback}};
- let layout=read("ms-arcade-layout",{order:[...keys],hidden:[]});\n try{if(localStorage.getItem("ms-arcade-layout-version")!=="classic-reset-1"){layout={order:[...keys],hidden:[]};localStorage.setItem("ms-arcade-layout",JSON.stringify(layout));localStorage.setItem("ms-arcade-layout-version","classic-reset-1");}}catch(e){}
- let profile=read("ms-arcade-profile",{name:"My profile",avatar:"🙂",bio:""});
- const today=(()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")})();
- const daily=read("ms-arcade-daily",{});
- const normalise=()=>{layout.order=layout.order.filter((x,i,a)=>keys.includes(x)&&a.indexOf(x)===i);keys.forEach(x=>{if(!layout.order.includes(x))layout.order.push(x)});layout.hidden=layout.hidden.filter(x=>keys.includes(x));};
- function applyLayout(){
-  normalise();
-  const sidebar=document.querySelector(".arcade-sidebar"),content=document.querySelector(".arcade-content");
-  layout.order.forEach(id=>{const nav=sidebar?.querySelector('[data-page="'+id+'"]'),page=content?.querySelector('[data-page-view="'+id+'"]');if(nav)sidebar.appendChild(nav);if(page)content.appendChild(page);});
-  keys.forEach(id=>{const hidden=layout.hidden.includes(id),nav=sidebar?.querySelector('[data-page="'+id+'"]');if(nav)nav.hidden=hidden;});
- }
- function renderRows(){
-  const host=$("arcade-layout-rows");if(!host)return;
-  host.innerHTML=layout.order.map((id,i)=>'<div class="arcade-layout-row"><span>'+labels[id]+'</span><button type="button" data-move="'+id+'" data-delta="-1" '+(i===0?'disabled':'')+'>↑</button><button type="button" data-move="'+id+'" data-delta="1" '+(i===layout.order.length-1?'disabled':'')+'>'+ (layout.hidden.includes(id)?"Show":"↓")+'</button><button type="button" data-hide="'+id+'">'+(layout.hidden.includes(id)?"Show":"Hide")+'</button></div>').join("");
-  host.querySelectorAll("[data-move]").forEach(b=>b.addEventListener("click",()=>{const i=layout.order.indexOf(b.dataset.move),j=i+Number(b.dataset.delta);if(j<0||j>=layout.order.length)return;[layout.order[i],layout.order[j]]=[layout.order[j],layout.order[i]];renderRows()}));
-  host.querySelectorAll("[data-hide]").forEach(b=>b.addEventListener("click",()=>{const id=b.dataset.hide;layout.hidden=layout.hidden.includes(id)?layout.hidden.filter(x=>x!==id):[...layout.hidden,id];renderRows()}));
- }
- function open(which){
-  $("arcade-custom-panel").hidden=which!=="custom";
-  $("arcade-profile-panel").hidden=which!=="profile";
-  $("arcade-personal-title").textContent=which==="custom"?"Customise your Arcade":"Your Arcade profile";
-  if(which==="custom"){
-   $("arcade-accent").value=localStorage.getItem("ms-arcade-accent")||"#83e6bd";
-   $("arcade-background").value=localStorage.getItem("ms-arcade-background")||"#090909";
-   renderRows();
-  }else{
-   $("arcade-name").value=profile.name||"";
-   $("arcade-avatar").value=profile.avatar||"🙂";
-   $("arcade-bio").value=profile.bio||"";
-   $("arcade-mood").value=daily[today]?.mood||"🙂";
-   $("arcade-daily").value=daily[today]?.sentence||"";
-  }
-  modal.classList.add("open");
- }
- $("arcade-customise").addEventListener("click",()=>open("custom"));
- $("arcade-profile").addEventListener("click",()=>open("profile"));
- $("arcade-preset").addEventListener("change",e=>{if(presets[e.target.value]){layout=JSON.parse(JSON.stringify(presets[e.target.value]));renderRows()}});
- $("arcade-personal-close").addEventListener("click",()=>modal.classList.remove("open"));
- modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("open")});
- $("arcade-personal-save").addEventListener("click",()=>{
-  if(!$("arcade-profile-panel").hidden){
-   profile={name:$("arcade-name").value.trim()||"My profile",avatar:$("arcade-avatar").value.trim()||"🙂",bio:$("arcade-bio").value.trim()};
-   daily[today]={mood:$("arcade-mood").value,sentence:$("arcade-daily").value.trim()};
-   localStorage.setItem("ms-arcade-profile",JSON.stringify(profile));
-   localStorage.setItem("ms-arcade-daily",JSON.stringify(daily));
-   $("arcade-profile").textContent=(profile.avatar||"🙂")+" "+profile.name;
-  }else{
-   localStorage.setItem("ms-arcade-layout",JSON.stringify(layout));
-   const accent=$("arcade-accent").value,bg=$("arcade-background").value;
-   localStorage.setItem("ms-arcade-accent",accent);localStorage.setItem("ms-arcade-background",bg);
-   document.documentElement.style.setProperty("--mint",accent);
-   document.documentElement.style.setProperty("--bg",bg);
-   document.body.style.background=bg;
-   applyLayout();
-  }
-  modal.classList.remove("open");
- });
- const accent=localStorage.getItem("ms-arcade-accent"),bg=localStorage.getItem("ms-arcade-background");
- if(accent)document.documentElement.style.setProperty("--mint",accent);
- if(bg){document.documentElement.style.setProperty("--bg",bg);document.body.style.background=bg;}
- applyLayout();
- const p=profile;$("arcade-profile").textContent=(p.avatar||"🙂")+" "+(p.name||"My profile");
-})();
-</script>
-</body></html>
-<!-- Fresh Pages deployment trigger: keep the Classic arcade layout reset intact. -->
+</script></body></html>
