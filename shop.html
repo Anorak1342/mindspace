@@ -61,7 +61,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <body><main class="wrap">
 <header><div class="brand">mindspace <span>✳ SHOP</span></div><a class="back" href="./arcade.html">← Back to arcade</a></header>
 <div class="eyebrow">THE MINDSPACE COLLECTION</div><h1>Make it yours.</h1>
-<p class="intro">Collect themes and avatars, then equip your favourites. Mindcoins buy shop items. Exclusive rewards are earned through player levels and cannot be purchased.</p>
+<p class="intro">Collect themes and equip your favourites. Mindcoins buy shop items. Exclusive rewards are earned through player levels and cannot be purchased.</p>
 <div class="wallet">
  <div class="wallet-card coins"><small>YOUR MINDCOINS</small><strong id="coins">0 ◈</strong></div>
  <div class="wallet-card tokens"><small>EXCLUSIVE TOKENS</small><strong id="tokens">0 ✦</strong></div>
@@ -69,11 +69,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
 </div>
 <div id="status" role="status" aria-live="polite"></div>
 <section><div class="section-head"><div><div class="eyebrow">CHANGE THE ATMOSPHERE</div><h2>Themes</h2></div><p>Equip a new look anytime.</p></div><div class="grid" id="themes"></div></section>
-<section><div class="section-head"><div><div class="eyebrow">YOUR PLAYER IDENTITY</div><h2>Avatars</h2></div><p>Pick your profile character.</p></div><div class="grid" id="avatars"></div><details class="sprite-gallery"><summary>View the complete original avatar artwork</summary><img src="./assets/mindspace-avatars.webp" alt="Complete Mindspace pixel avatar sprite sheet"></details></section>
+
 <p class="notice">Mindcoins are earned through Mindspace activities. You currently earn 10 for launching a game, 8 for a study session, and smaller amounts for other activities. Exclusive Tokens are awarded once at levels 5, 10, 15, 20 and every five levels after that.</p>
 </main>
 <script type="module">
-import {ready,getCurrentStats,purchaseShopItem,setTheme,setSelectedAvatar,redeemSecretCode} from "./player-system.js";
+import {ready,getCurrentStats,purchaseShopItem,setTheme,redeemSecretCode} from "./player-system.js";
 const themes=[
 {id:"midnight",name:"Midnight",rarity:"Common",price:0,desc:"The classic dark Mindspace look.",emoji:"🌙",currency:"free"},
 {id:"neon",name:"Neon Circuit",rarity:"Rare",price:450,desc:"Electric colour and arcade energy.",emoji:"⚡"},
@@ -84,40 +84,7 @@ const themes=[
 {id:"royal",name:"Royal Archive",rarity:"Exclusive",desc:"A regal gold-and-violet theme.",emoji:"👑",currency:"exclusive"},
 {id:"celestial",name:"Celestial",rarity:"Exclusive",desc:"A star-forged golden theme.",emoji:"✨",currency:"exclusive"}
 ];
-const avatars=[
-{id:"default",name:"Mindspace",rarity:"Common",price:0,desc:"The original Mindspace player avatar.",currency:"free",sprite:0},
-{id:"headphones",name:"Headphones",rarity:"Rare",price:250,desc:"Music on. World off.",currency:"mindcoins",sprite:1},
-{id:"king",name:"King",rarity:"Legendary",price:1200,desc:"Rule your corner of the arcade.",currency:"mindcoins",sprite:2},
-{id:"ninja",name:"Ninja",rarity:"Premium",price:500,desc:"Quiet, quick and precise.",currency:"mindcoins",sprite:3},
-{id:"hooded-astronaut",name:"Hooded Astronaut",rarity:"Premium",price:550,desc:"A traveller between worlds.",currency:"mindcoins",sprite:4},
-{id:"green-monster",name:"Green Monster",rarity:"Rare",price:300,desc:"A friendly face from somewhere strange.",currency:"mindcoins",sprite:5},
-{id:"purple-hair",name:"Purple Hair",rarity:"Rare",price:300,desc:"Bright style, bold energy.",currency:"mindcoins",sprite:6},
-{id:"agent",name:"Agent",rarity:"Premium",price:600,desc:"A mysterious arcade operative.",currency:"mindcoins",sprite:7},
-{id:"white-hair-hero",name:"White-Hair Hero",rarity:"Rare",price:350,desc:"A cool-headed challenger.",currency:"mindcoins",sprite:8},
-{id:"penguin",name:"Penguin",rarity:"Rare",price:300,desc:"Small penguin. Big plans.",currency:"mindcoins",sprite:9},
-{id:"astronaut",name:"Astronaut",rarity:"Premium",price:550,desc:"Ready for launch.",currency:"mindcoins",sprite:10},
-{id:"wizard",name:"Wizard",rarity:"Legendary",price:1000,desc:"A little magic goes a long way.",currency:"mindcoins",sprite:11},
-{id:"red-scarf-rogue",name:"Red Scarf Rogue",rarity:"Rare",price:350,desc:"A quick-footed wanderer.",currency:"mindcoins",sprite:12},
-{id:"fox",name:"Fox",rarity:"Rare",price:250,desc:"Quick, clever and curious.",currency:"mindcoins",sprite:13},
-{id:"alien",name:"Alien",rarity:"Rare",price:300,desc:"A visitor from another arcade.",currency:"mindcoins",sprite:14},
-{id:"skull",name:"Skull",rarity:"Premium",price:650,desc:"A spooky arcade classic.",currency:"mindcoins",sprite:15},
-{id:"demon",name:"Demon",rarity:"Exclusive",price:0,desc:"A rare identity earned with an Exclusive Token.",currency:"exclusive",sprite:16},
-{id:"princess",name:"Princess",rarity:"Premium",price:600,desc:"Royal style with a fearless streak.",currency:"mindcoins",sprite:17},
-{id:"raccoon",name:"Raccoon",rarity:"Rare",price:300,desc:"The night-shift collector.",currency:"mindcoins",sprite:18},
-{id:"robot",name:"Robot",rarity:"Premium",price:500,desc:"A digital companion with style.",currency:"mindcoins",sprite:19},
-{id:"slime",name:"Slime",rarity:"Rare",price:250,desc:"Squishy, shiny and surprisingly brave.",currency:"mindcoins",sprite:20},
-{id:"panda",name:"Panda",rarity:"Rare",price:300,desc:"Calm face. Competitive spirit.",currency:"mindcoins",sprite:21},
-{id:"dragon",name:"Dragon",rarity:"Exclusive",price:0,desc:"A legendary creature for a legendary player.",currency:"exclusive",sprite:22},
-{id:"shark",name:"Shark",rarity:"Premium",price:550,desc:"Make a splash on the leaderboard.",currency:"mindcoins",sprite:23},
-{id:"soldier",name:"Soldier",rarity:"Premium",price:600,desc:"Always ready for the next round.",currency:"mindcoins",sprite:24},
-{id:"masked-rogue",name:"Masked Rogue",rarity:"Rare",price:350,desc:"A mysterious challenger.",currency:"mindcoins",sprite:25},
-{id:"ghost",name:"Ghost",rarity:"Exclusive",price:0,desc:"A rare identity reserved for level rewards.",currency:"exclusive",sprite:26},
-{id:"shadow",name:"Shadow",rarity:"Legendary",price:1000,desc:"A mysterious figure from the dark.",currency:"mindcoins",sprite:27},
-{id:"royal-hero",name:"Royal Hero",rarity:"Exclusive",price:0,desc:"A royal avatar for your collection.",currency:"exclusive",sprite:28},
-{id:"cyberpunk",name:"Cyberpunk",rarity:"Legendary",price:1100,desc:"Neon streets. Arcade legend.",currency:"mindcoins",sprite:29},
-{id:"cat-hood",name:"Cat Hood",rarity:"Rare",price:300,desc:"A little feline flair.",currency:"mindcoins",sprite:30},
-{id:"forest-ranger",name:"Forest Ranger",rarity:"Premium",price:600,desc:"Guardian of the pixel wilds.",currency:"mindcoins",sprite:31}
-];
+
 let stats;
 const owned=id=>(stats.ownedShopItems||[]).includes(id);
 function rarityClass(r){return r.toLowerCase()}
@@ -126,7 +93,6 @@ function draw(){
  document.getElementById("tokens").textContent=(stats.exclusiveTokens||0)+" ✦";
  document.getElementById("level").textContent=stats.level||1;
  document.getElementById("themes").innerHTML=themes.map(x=>card(x,"theme")).join("");
- document.getElementById("avatars").innerHTML=avatars.map(x=>card(x,"avatar")).join("");
 }
 function card(x,type){
  const id=type+"-"+x.id,has=owned(id),active=type==="theme"?document.documentElement.dataset.arcadeTheme===x.id:stats.selectedAvatar===x.id;
@@ -139,7 +105,7 @@ document.addEventListener("click",async e=>{
  const buy=e.target.closest("[data-buy]"),equip=e.target.closest("[data-equip]");
  try{
   if(buy){buy.disabled=true;await purchaseShopItem(buy.dataset.buy,Number(buy.dataset.price),buy.dataset.currency);document.getElementById("status").textContent="Unlocked! It's yours permanently."; }
-  if(equip){equip.disabled=true;if(equip.dataset.equip==="theme")setTheme(equip.dataset.id);else await setSelectedAvatar(equip.dataset.id);document.getElementById("status").textContent="Equipped successfully.";}
+  if(equip){equip.disabled=true;setTheme(equip.dataset.id);document.getElementById("status").textContent="Theme equipped successfully.";}
  }catch(err){document.getElementById("status").textContent=err.message; if(buy)buy.disabled=false;if(equip)equip.disabled=false;}
  stats=getCurrentStats();draw();
 });
