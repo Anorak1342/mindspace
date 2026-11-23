@@ -32,6 +32,17 @@ html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#090909;col
   const cover = document.getElementById("loading-cover");
   const bar = document.getElementById("unity-progress-bar-full");
   const spinner = document.querySelector(".spinner");
+  // Offline environment data expected by the original Unity/Yandex integration.
+  // Keep this local: no Yandex SDK, ads, or external account services are loaded.
+  window.environmentData = {
+    language: "en", domain: "default_domain", deviceType: "desktop",
+    isMobile: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
+    isDesktop: !/iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
+    isTablet: false, isTV: false, appID: "offline_app",
+    browserLang: navigator.language || "en", payload: null,
+    promptCanShow: false, reviewCanShow: false,
+    platform: navigator.platform, browser: "Browser"
+  };
   const config = {
     dataUrl: build + "/yandexBrotli.data.br",
     frameworkUrl: build + "/yandexBrotli.framewor.js",
