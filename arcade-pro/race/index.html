@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090909">
+<title>Race | Mindspace Arcade</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scbr-build-k4@1.0.0/style.css">
+<style>
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#090909;color:#f5f2ed;font-family:system-ui,sans-serif}
+#unity-container{position:absolute;inset:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+#unity-canvas{width:100%;height:100%;max-width:100vw;max-height:100vh;object-fit:contain;outline:none;background:#090909}
+#loading-cover{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:#090909 center/cover no-repeat}
+#unity-loading-bar{width:min(340px,75vw);text-align:center}
+#unity-progress-bar-empty{height:8px;background:#343434;border-radius:20px;overflow:hidden}
+#unity-progress-bar-full{height:100%;width:0;background:#83e6bd;transition:width .15s}
+.spinner{width:30px;height:30px;margin:0 auto 18px;border:3px solid #444;border-top-color:#83e6bd;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#game-top{position:absolute;z-index:10;top:12px;left:12px;display:flex;gap:8px;align-items:center}
+#game-top a,#fullscreen{color:#fff;background:#111d;border:1px solid #ffffff38;border-radius:6px;padding:9px 12px;text-decoration:none;font:700 12px system-ui;cursor:pointer;backdrop-filter:blur(8px)}
+@media(max-width:600px){#game-top{top:7px;left:7px}#game-top a,#fullscreen{padding:8px 10px}}
+</style>
+</head>
+<body>
+<div id="game-top"><a href="../../arcade.html#all-games-page">← Mindspace Arcade</a><button id="fullscreen" type="button">Fullscreen</button></div>
+<div id="unity-container" class="unity-desktop"><canvas id="unity-canvas" tabindex="-1"></canvas></div>
+<div id="loading-cover"><div id="unity-loading-bar"><div class="spinner"></div><div id="unity-progress-bar-empty"><div id="unity-progress-bar-full"></div></div><p>Loading Race…</p></div></div>
+<script>
+(() => {
+  const build = "https://cdn.jsdelivr.net/npm/scbr-build-k4@1.0.0/Build";
+  const canvas = document.getElementById("unity-canvas");
+  const cover = document.getElementById("loading-cover");
+  const bar = document.getElementById("unity-progress-bar-full");
+  const spinner = document.querySelector(".spinner");
+  const config = {
+    dataUrl: build + "/yandexBrotli.data.br",
+    frameworkUrl: build + "/yandexBrotli.framewor.js",
+    streamingAssetsUrl: "StreamingAssets",
+    companyName: "Brain massage",
+    productName: "Supercar Battle Royale",
+    productVersion: "0.0.197"
+  };
+  const parts = ["yandexBrotli.wasm.br.part1","yandexBrotli.wasm.br.part2"];
+  async function loadGame() {
+    try {
+      const chunks = [];
+      for (const part of parts) {
+        const response = await fetch(build + "/" + part);
+        if (!response.ok) throw new Error("Could not load game engine file: " + part);
+        chunks.push(await response.arrayBuffer());
+      }
+      config.codeUrl = URL.createObjectURL(new Blob(chunks,{type:"application/octet-stream"}));
+      const loader = document.createElement("script");
+      loader.src = build + "/yandexBrotli.loader.js";
+      loader.onerror = () => { cover.innerHTML = "<p>Race could not load. Please refresh and try again.</p>"; };
+      loader.onload = () => {
+        createUnityInstance(canvas,config,p => { bar.style.width = (p*100)+"%"; })
+          .then(() => { cover.style.display = "none"; })
+          .catch(error => { console.error(error); cover.innerHTML = "<p>Race failed to start. Please refresh and try again.</p>"; });
+      };
+      document.body.appendChild(loader);
+    } catch (error) {
+      console.error(error);
+      cover.innerHTML = "<p>Race could not load. Please refresh and try again.</p>";
+    }
+  }
+  window.addEventListener("pointerdown",() => { window.focus(); canvas.focus(); });
+  document.addEventListener("contextmenu",e => e.preventDefault());
+  document.getElementById("fullscreen").addEventListener("click",() => {
+    const target = document.getElementById("unity-container");
+    if (!document.fullscreenElement) (target.requestFullscreen || target.webkitRequestFullscreen)?.call(target);
+    else (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+  });
+  loadGame();
+})();
+</script>
+</body>
+</html>
