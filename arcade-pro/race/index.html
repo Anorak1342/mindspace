@@ -26,6 +26,49 @@ html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#090909;col
 <div id="unity-container" class="unity-desktop"><canvas id="unity-canvas" tabindex="-1"></canvas></div>
 <div id="loading-cover"><div id="unity-loading-bar"><div class="spinner"></div><div id="unity-progress-bar-empty"><div id="unity-progress-bar-full"></div></div><p>Loading Race…</p></div></div>
 <script>
+// The Unity framework reads these as global lexical bindings, not window properties.
+// Declare them before loading the Unity loader/framework.
+let environmentData = {
+  language: "en", domain: "default_domain", deviceType: "desktop",
+  isMobile: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
+  isDesktop: !/iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
+  isTablet: false, isTV: false, appID: "offline_app",
+  browserLang: navigator.language || "en", payload: null,
+  promptCanShow: false, reviewCanShow: false,
+  platform: navigator.platform, browser: "Browser"
+};
+let cloudSaves = "noData";
+let playerData = "noData";
+let paymentsData = "none";
+let player = null;
+let payments = null;
+let initGame = false;
+let nowFullAdOpen = false;
+let ysdk = null;
+function GetPayments() { return Promise.resolve("none"); }
+function SaveCloud() { console.warn("SaveCloud is unavailable in offline Mindspace mode"); }
+function LoadCloud() { return Promise.resolve("noData"); }
+function InitPlayer() { return Promise.resolve("noData"); }
+function FullAdShow() { console.warn("Full-screen ads are disabled"); }
+function RewardedShow() { console.warn("Rewarded ads are disabled"); }
+function StickyAdActivity() {}
+function Review() {}
+function PromptShow() {}
+function InitLeaderboards() {}
+function GetLeaderboardScores() {}
+function SetLeaderboardScores() {}
+function ConsumePurchase() {}
+function ConsumePurchases() {}
+function InitLeaderboard() {}
+function BuyPayments() { return Promise.resolve("none"); }
+function InitGame() {
+  initGame = true;
+  if (nowFullAdOpen && typeof myGameInstance !== "undefined" && myGameInstance) {
+    myGameInstance.SendMessage("YandexGame", "OpenFullAd");
+  }
+}
+</script>
+<script>
 (() => {
   const build = "https://cdn.jsdelivr.net/npm/scbr-build-k4@1.0.0/Build";
   const canvas = document.getElementById("unity-canvas");
