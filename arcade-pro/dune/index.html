@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#090909">
+<title>Dune | Mindspace Arcade</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:system-ui,sans-serif}
+#unity-container{position:absolute;inset:0;width:100%;height:100%}#unity-canvas{width:100%!important;height:100%!important;outline:none;display:block;background:#000}
+#loading-cover{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:#17120d url("https://cdn.jsdelivr.net/gh/z799gs/550o8@main/Images/background.png") center/cover no-repeat}
+#loading-panel{width:min(360px,78vw);padding:24px;text-align:center;background:#090909c9;border:1px solid #ffffff26;border-radius:12px;backdrop-filter:blur(8px)}
+#unity-progress-bar-empty{height:8px;background:#444;border-radius:20px;overflow:hidden;margin-top:16px}#unity-progress-bar-full{height:100%;width:5%;background:#e6b76c;transition:width .15s}
+.spinner{width:30px;height:30px;margin:0 auto 16px;border:3px solid #555;border-top-color:#e6b76c;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+#game-top{position:absolute;z-index:10;top:12px;left:12px;display:flex;gap:8px}
+#game-top a,#fullscreen{color:#fff;background:#111d;border:1px solid #ffffff40;border-radius:7px;padding:9px 12px;text-decoration:none;font:700 12px system-ui;cursor:pointer;backdrop-filter:blur(8px)}
+@media(max-width:600px){#game-top{top:7px;left:7px}#game-top a,#fullscreen{padding:8px 10px}}
+</style>
+</head>
+<body>
+<div id="unity-container"><canvas id="unity-canvas" tabindex="-1"></canvas></div>
+<div id="game-top"><a href="../../arcade.html#all-games-page">← Mindspace Arcade</a><button id="fullscreen" type="button">Fullscreen</button></div>
+<div id="loading-cover"><div id="loading-panel"><div class="spinner"></div><strong>Loading Dune…</strong><div id="unity-progress-bar-empty"><div id="unity-progress-bar-full"></div></div></div></div>
+<script>
+(() => {
+  const BUILD = "https://cdn.jsdelivr.net/gh/z799gs/550o8@6e9dd3cff9f43dccbde8dcb246d76a0ade6a5237/Build";
+  const DATA = "https://cdn.jsdelivr.net/gh/z799gs/550o8@e1d08f37432f1e0915e9f4ca243c6b54ef848837/Build";
+  const WASM = "https://cdn.jsdelivr.net/gh/z799gs/550o8@c572d0918d334c7e0cd95db122265259d6a7b94a/Build";
+  const canvas=document.getElementById("unity-canvas");
+  const cover=document.getElementById("loading-cover");
+  const progress=document.getElementById("unity-progress-bar-full");
+  let instance=null;
+  const NO_DATA="no data";
+  const config={
+    dataUrl:DATA+"/Dune.data.br",
+    frameworkUrl:BUILD+"/Dune.framework.js",
+    streamingAssetsUrl:"StreamingAssets",
+    companyName:"DefaultCompany",
+    productName:"CloneDuneDEV",
+    productVersion:"1.0"
+  };
+  const wasmParts=["Dune.wasm.br.part1","Dune.wasm.br.part2","Dune.wasm.br.part3","Dune.wasm.br.part4","Dune.wasm.br.part5","Dune.wasm.br.part6"];
+  function send(method,arg){if(instance)instance.SendMessage("YG2Instance",method,arg);}
+  window.YG2Instance=(method,arg)=>send(method,arg);
+  window.InitGame=()=>setTimeout(()=>send("InitSDKComplete"),500);
+  window.RequestingEnvironmentData=()=>send("SetEnvirData",JSON.stringify({language:"en",domain:"default_domain",deviceType:"desktop",isMobile:/iPhone|iPad|iPod|Android/i.test(navigator.userAgent),isDesktop:!(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)),isTablet:false,isTV:false,appID:"offline_app",browserLang:navigator.language||"en",payload:null,platform:navigator.platform,browser:"Browser"}));
+  window.InitPlayer=()=>send("SetAuth",JSON.stringify({playerAuth:"resolved",playerName:"Player",playerId:"mindspace_local",playerPhoto:"null",payingStatus:"unknown"}));
+  window.LoadCloud=()=>send("SetLoadSaves",NO_DATA);
+  window.SaveCloud=()=>{};
+  window.GetStats=()=>send("ReceiveStats",NO_DATA);
+  window.SetStats=()=>{};
+  window.InitPayments=()=>send("PaymentsEntries",NO_DATA);
+  window.BuyPayments=(id)=>send("OnPurchaseFailed",id);
+  window.ConsumePurchase=()=>{};window.ConsumePurchases=()=>{};
+  window.SetLeaderboard=()=>{};
+  window.GetLeaderboard=(name)=>send("LeaderboardEntries",JSON.stringify({technoName:name,entries:"no data",ranks:[],photos:[],names:[],scores:[],uniqueIDs:[]}));
+  window.OpenAuthDialog=()=>window.InitPlayer();
+  window.InterAdvShow=()=>{send("OpenInterAdv");setTimeout(()=>send("CloseInterAdv","true"),300)};
+  window.RewardedAdvShow=(id)=>{send("OpenRewardedAdv");setTimeout(()=>{send("CloseRewardedAdv");send("RewardAdv",id)},300)};
+  function initFakeSdk(){window.RequestingEnvironmentData();window.InitPlayer();window.LoadCloud();window.GetStats();window.InitPayments();}
+  async function load(){
+    try{
+      const chunks=[];
+      for(const part of wasmParts){
+        const response=await fetch(WASM+"/"+part);
+        if(!response.ok)throw new Error("Unable to load "+part+" ("+response.status+")");
+        chunks.push(await response.arrayBuffer());
+      }
+      config.codeUrl=URL.createObjectURL(new Blob(chunks,{type:"application/octet-stream"}));
+      const loader=document.createElement("script");
+      loader.src=BUILD+"/Dune.loader.js";
+      loader.onerror=()=>{cover.innerHTML="<div id='loading-panel'>Dune could not load its game engine. Please refresh and try again.</div>"};
+      loader.onload=()=>{
+        if(typeof createUnityInstance!=="function"){cover.innerHTML="<div id='loading-panel'>Dune's game engine did not start correctly.</div>";return;}
+        createUnityInstance(canvas,config,p=>{progress.style.width=(100*Math.max(p,.05))+"%"}).then(unity=>{
+          instance=unity;cover.style.display="none";initFakeSdk();
+        }).catch(error=>{console.error(error);cover.innerHTML="<div id='loading-panel'>Dune failed to start. Please refresh and try again.</div>"});
+      };
+      document.body.appendChild(loader);
+    }catch(error){console.error(error);cover.innerHTML="<div id='loading-panel'>Dune could not load. Please refresh and try again.</div>"}
+  }
+  function focus(){window.focus();canvas.focus()}
+  window.addEventListener("pointerdown",focus);window.addEventListener("touchstart",focus);
+  document.getElementById("fullscreen").addEventListener("click",()=>{const target=document.getElementById("unity-container");if(!document.fullscreenElement)(target.requestFullscreen||target.webkitRequestFullscreen)?.call(target);else(document.exitFullscreen||document.webkitExitFullscreen)?.call(document)});
+  load();
+})();
+</script>
+</body>
+</html>
