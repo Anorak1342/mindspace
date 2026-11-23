@@ -22,6 +22,82 @@
 <div id="game-top"><a href="../../arcade.html#all-games-page">← Mindspace Arcade</a><button id="fullscreen" type="button">Fullscreen</button></div>
 <div id="loading-cover"><div id="loading-panel"><div class="spinner"></div><strong>Loading Dune…</strong><div id="unity-progress-bar-empty"><div id="unity-progress-bar-full"></div></div></div></div>
 <script>
+// Unity's framework expects these names as global lexical bindings.
+// Keep the original Yandex bridge available with local, no-ad fallbacks.
+var NO_DATA = "no data";
+var environmentData = JSON.stringify({
+  language:"en", domain:"default_domain", deviceType:"desktop",
+  isMobile:/iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
+  isDesktop:!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
+  isTablet:false, isTV:false, appID:"offline_app",
+  browserLang:navigator.language||"en", payload:null,
+  platform:navigator.platform, browser:"Browser"
+});
+var cloudSaves = NO_DATA;
+var playerData = NO_DATA;
+var paymentsData = NO_DATA;
+var statsSaves = NO_DATA;
+var player = null;
+var payments = null;
+var initGame = false;
+var ygGameInstance = null;
+var ysdk = null;
+var isPausedGame = false;
+
+function LogStyledMessage(message, style) {
+  if (style) console.log("%c" + message, style);
+  else console.log("%c" + message, "color:#FFDF73;background:#454545;padding:2px 5px");
+}
+function YG2Instance(method, arg) {
+  if (ygGameInstance) ygGameInstance.SendMessage("YG2Instance", method, arg);
+}
+function InitGame() {
+  initGame = true;
+  setTimeout(function() {
+    if (ygGameInstance) ygGameInstance.SendMessage("YG2Instance", "InitSDKComplete");
+  }, 500);
+}
+function RequestingEnvironmentData() {
+  YG2Instance("SetEnvirData", environmentData);
+  return Promise.resolve(environmentData);
+}
+function InitPlayer() {
+  playerData = JSON.stringify({
+    playerAuth:"resolved", playerName:"Player",
+    playerId:"mindspace_local", playerPhoto:"null", payingStatus:"unknown"
+  });
+  YG2Instance("SetAuth", playerData);
+  return Promise.resolve(playerData);
+}
+function LoadCloud() { YG2Instance("SetLoadSaves", NO_DATA); return Promise.resolve(NO_DATA); }
+function SaveCloud() {}
+function GetStats() { YG2Instance("ReceiveStats", NO_DATA); return Promise.resolve(NO_DATA); }
+function SetStats() {}
+function InitPayments() { YG2Instance("PaymentsEntries", NO_DATA); }
+function BuyPayments(id) { YG2Instance("OnPurchaseFailed", id); }
+function ConsumePurchase() {}
+function ConsumePurchases() {}
+function SetLeaderboard() {}
+function GetLeaderboard(name) {
+  YG2Instance("LeaderboardEntries", JSON.stringify({
+    technoName:name, entries:"no data", ranks:[], photos:[],
+    names:[], scores:[], uniqueIDs:[]
+  }));
+}
+function OpenAuthDialog() { return InitPlayer(); }
+function InterAdvShow() {
+  YG2Instance("OpenInterAdv");
+  setTimeout(function(){ YG2Instance("CloseInterAdv", "true"); }, 300);
+}
+function RewardedAdvShow(id) {
+  YG2Instance("OpenRewardedAdv");
+  setTimeout(function(){
+    YG2Instance("CloseRewardedAdv");
+    YG2Instance("RewardAdv", id);
+  }, 300);
+}
+</script>
+<script>
 (() => {
   const BUILD = "https://cdn.jsdelivr.net/gh/z799gs/550o8@6e9dd3cff9f43dccbde8dcb246d76a0ade6a5237/Build";
   const DATA = "https://cdn.jsdelivr.net/gh/z799gs/550o8@e1d08f37432f1e0915e9f4ca243c6b54ef848837/Build";
@@ -89,7 +165,7 @@
       loader.onload=()=>{
         if(typeof createUnityInstance!=="function"){cover.innerHTML="<div id='loading-panel'>Dune's game engine did not start correctly.</div>";return;}
         createUnityInstance(canvas,config,p=>{progress.style.width=(100*Math.max(p,.05))+"%"}).then(unity=>{
-          instance=unity;cover.style.display="none";initFakeSdk();
+          instance=unity;ygGameInstance=unity;cover.style.display="none";initFakeSdk();
         }).catch(error=>{console.error(error);cover.innerHTML="<div id='loading-panel'>Dune failed to start. Please refresh and try again.</div>"});
       };
       document.body.appendChild(loader);
