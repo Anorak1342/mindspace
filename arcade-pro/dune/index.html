@@ -37,7 +37,8 @@
     streamingAssetsUrl:"StreamingAssets",
     companyName:"DefaultCompany",
     productName:"CloneDuneDEV",
-    productVersion:"1.0"
+    productVersion:"1.0",
+    decompressionFallback:true
   };
   const wasmParts=["Dune.wasm.br.part1","Dune.wasm.br.part2","Dune.wasm.br.part3","Dune.wasm.br.part4","Dune.wasm.br.part5","Dune.wasm.br.part6"];
   function send(method,arg){if(instance)instance.SendMessage("YG2Instance",method,arg);}
