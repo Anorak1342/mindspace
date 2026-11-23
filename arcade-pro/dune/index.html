@@ -31,6 +31,21 @@
   const progress=document.getElementById("unity-progress-bar-full");
   let instance=null;
   const NO_DATA="no data";
+  // Local compatibility shims for the removed Yandex Games SDK.
+  // The game remains offline and does not load adverts or payment services.
+  window.LogStyledMessage = function(message, style) {
+    if (style) console.log("%c" + message, style);
+    else console.log("%c" + message, "color:#FFDF73;background:#454545;padding:2px 5px");
+  };
+  const fakeEnvironmentData = {
+    language:"en", domain:"default_domain", deviceType:"desktop",
+    isMobile:/iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
+    isDesktop:!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
+    isTablet:false, isTV:false, appID:"offline_app",
+    browserLang:navigator.language||"en", payload:null,
+    platform:navigator.platform, browser:"Browser"
+  };
+  window.environmentData = JSON.stringify(fakeEnvironmentData);
   const config={
     dataUrl:DATA+"/Dune.data.br",
     frameworkUrl:BUILD+"/Dune.framework.js",
