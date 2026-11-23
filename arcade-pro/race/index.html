@@ -43,6 +43,40 @@ html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#090909;col
     promptCanShow: false, reviewCanShow: false,
     platform: navigator.platform, browser: "Browser"
   };
+
+  // Offline Yandex Games compatibility values used by the original build.
+  // These globals replace cloud saves, player accounts, payments and ads with safe no-op defaults.
+  window.cloudSaves = "noData";
+  window.playerData = "noData";
+  window.paymentsData = "none";
+  window.player = null;
+  window.payments = null;
+  window.initGame = false;
+  window.nowFullAdOpen = false;
+  window.ysdk = null;
+
+  window.GetPayments = () => Promise.resolve("none");
+  window.SaveCloud = () => console.warn("SaveCloud is unavailable in offline Mindspace mode");
+  window.LoadCloud = () => Promise.resolve("noData");
+  window.InitPlayer = () => Promise.resolve("noData");
+  window.FullAdShow = () => console.warn("Full-screen ads are disabled");
+  window.RewardedShow = () => console.warn("Rewarded ads are disabled");
+  window.StickyAdActivity = () => {};
+  window.Review = () => {};
+  window.PromptShow = () => {};
+  window.InitLeaderboards = () => {};
+  window.GetLeaderboardScores = () => {};
+  window.SetLeaderboardScores = () => {};
+  window.ConsumePurchase = () => {};
+  window.ConsumePurchases = () => {};
+  window.InitLeaderboard = () => {};
+  window.BuyPayments = () => Promise.resolve("none");
+  window.InitGame = () => {
+    window.initGame = true;
+    if (window.nowFullAdOpen && window.myGameInstance) {
+      window.myGameInstance.SendMessage("YandexGame", "OpenFullAd");
+    }
+  };
   const config = {
     dataUrl: build + "/yandexBrotli.data.br",
     frameworkUrl: build + "/yandexBrotli.framewor.js",
