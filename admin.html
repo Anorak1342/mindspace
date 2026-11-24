@@ -25,17 +25,53 @@
 <div class="panel"><div class="bar"><div style="flex:1"><h2 style="margin:0">Users</h2><p class="muted" style="margin:4px 0 0">Email addresses are visible only through this protected admin function.</p></div><button id="refresh" class="secondary">↻ Refresh</button></div>
 <div class="bar" style="margin-top:16px"><input id="search" type="search" placeholder="Search by email or display name" aria-label="Search users"><span class="muted" id="shownCount"></span></div>
 <div id="userList" class="userlist"><p class="muted">Loading users…</p></div><div id="actionError" class="error"></div>
-</div></section>
+</div><div class="panel" id="guestAccessPanel"><div class="eyebrow">ARCADE ACCESS</div><h2 style="margin:5px 0">Guest-accessible games</h2><p class="muted">Tick the games visitors can play without signing in. Every unticked game requires a Mindspace account. Signed-in players can play all games.</p><div class="bar" style="margin:14px 0"><input id="gameAccessSearch" type="search" placeholder="Find a game…" aria-label="Find a game"><button id="saveGuestAccess" class="primary" type="button">Save guest access</button></div><div id="guestAccessStatus" class="status" role="status">Loading game list…</div><div id="guestGameList" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:14px"></div></div>
+</section>
 </main>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
 import {getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
 import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-functions.js";
+import {getFirestore,doc,getDoc,setDoc} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 const firebaseConfig={apiKey:"AIzaSyDymemJH4sSueC3PtiRsFlzdO_sR3yf2u4",authDomain:"mindspace-59b2d.firebaseapp.com",projectId:"mindspace-59b2d",storageBucket:"mindspace-59b2d.firebasestorage.app",messagingSenderId:"17331225260",appId:"1:17331225260:web:251d323c504ef116465509"};
-const app=initializeApp(firebaseConfig),auth=getAuth(app),functions=getFunctions(app,"us-central1");
+const app=initializeApp(firebaseConfig),auth=getAuth(app),functions=getFunctions(app,"us-central1"),db=getFirestore(app);
 const call=(name)=>httpsCallable(functions,name);
 const $=id=>document.getElementById(id);let users=[];
 function errorText(e){return e?.message||"Something went wrong."}
+let arcadeGames=[],guestHrefs=new Set();
+async function loadGuestAccess(){
+ const status=$("guestAccessStatus");status.textContent="Loading games and current guest settings…";
+ try{
+  const [page,settings]=await Promise.all([fetch("./arcade.html").then(r=>{if(!r.ok)throw new Error("Could not load arcade.html");return r.text()}),getDoc(doc(db,"arcadeSettings","guestAccess"))]);
+  const parsed=new DOMParser().parseFromString(page,"text/html");
+  arcadeGames=[...parsed.querySelectorAll(".game")].map(card=>({name:card.querySelector("h2")?.textContent?.trim()||"Unnamed game",href:card.querySelector(".play")?.getAttribute("href")})).filter(g=>g.href);
+  guestHrefs=new Set(settings.exists()&&Array.isArray(settings.data().guestGameHrefs)?settings.data().guestGameHrefs:[]);
+  renderGuestGames();status.textContent=arcadeGames.length+" games found. Unticked games are locked for guests.";
+ }catch(e){status.textContent="Could not load guest access settings: "+errorText(e);}
+}
+function renderGuestGames(){
+ const root=$("guestGameList"),q=$("gameAccessSearch").value.trim().toLowerCase();root.innerHTML="";
+ for(const game of arcadeGames.filter(g=>g.name.toLowerCase().includes(q))){
+  const label=document.createElement("label");label.style.cssText="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#11131e;font-size:13px";
+  const input=document.createElement("input");input.type="checkbox";input.checked=guestHrefs.has(game.href);input.dataset.href=game.href;input.style.cssText="width:17px;height:17px;accent-color:#9df3d0";
+  const span=document.createElement("span");span.textContent=game.name;label.append(input,span);root.append(label);
+ }
+}
+$("gameAccessSearch").addEventListener("input",renderGuestGames);
+$("saveGuestAccess").onclick=async()=>{
+ const button=$("saveGuestAccess"),status=$("guestAccessStatus");button.disabled=true;status.textContent="Saving…";
+ try{
+  const selected=[...$("guestGameList").querySelectorAll("input[type=checkbox]:checked")].map(x=>x.dataset.href);
+  const q=$("gameAccessSearch").value.trim().toLowerCase();
+  const visible=new Set(arcadeGames.filter(g=>g.name.toLowerCase().includes(q)).map(g=>g.href));
+  const merged=new Set([...guestHrefs].filter(h=>!visible.has(h)));
+  selected.forEach(h=>merged.add(h));
+  await setDoc(doc(db,"arcadeSettings","guestAccess"),{guestGameHrefs:[...merged],updatedAt:new Date().toISOString()});
+  guestHrefs=merged;status.textContent="Saved. "+merged.size+" games are available to guests.";
+ }catch(e){status.textContent="Could not save: "+errorText(e);}
+ finally{button.disabled=false;}
+};
+
 function showError(id,e){$(id).textContent=errorText(e)}
 async function loadUsers(){ $("userList").innerHTML='<p class="muted">Loading accounts…</p>'; $("actionError").textContent="";
  try{const result=await call("adminListUsers")({});users=result.data.users||[];render();}
@@ -56,7 +92,7 @@ $("signIn").onclick=async()=>{ $("loginError").textContent="";try{await signInWi
 $("signOut").onclick=()=>signOut(auth);$("refresh").onclick=loadUsers;$("search").oninput=render;
 onAuthStateChanged(auth,async user=>{if(!user){$("loginPanel").classList.remove("hidden");$("dashboard").classList.add("hidden");return;}
  $("loginPanel").classList.add("hidden");$("dashboard").classList.remove("hidden");$("adminIdentity").textContent=user.displayName||"Admin";$("adminEmail").textContent=user.email||"";
- try{await call("initializeMindspaceAdmin")({});await user.getIdToken(true);await loadUsers();}
+ try{await call("initializeMindspaceAdmin")({});await user.getIdToken(true);await loadUsers();await loadGuestAccess();}
  catch(e){showError("actionError",e);$("userList").innerHTML='<p class="muted">Admin setup is not complete. Check the setup instructions and verify the admin email address.</p>';}}
 );
 </script></body></html>
