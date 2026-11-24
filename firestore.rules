@@ -200,7 +200,9 @@ service cloud.firestore {
       allow get: if settingId == 'guestAccess';
       allow list: if false;
       allow create, update: if settingId == 'guestAccess'
-        && request.auth != null && request.auth.token.admin == true;
+        && request.auth != null
+        && request.auth.token.email == 'leo337657@gmail.com'
+        && request.auth.token.email_verified == true;
       allow delete: if false;
     }
 
