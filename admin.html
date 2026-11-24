@@ -92,7 +92,9 @@ $("signIn").onclick=async()=>{ $("loginError").textContent="";try{await signInWi
 $("signOut").onclick=()=>signOut(auth);$("refresh").onclick=loadUsers;$("search").oninput=render;
 onAuthStateChanged(auth,async user=>{if(!user){$("loginPanel").classList.remove("hidden");$("dashboard").classList.add("hidden");return;}
  $("loginPanel").classList.add("hidden");$("dashboard").classList.remove("hidden");$("adminIdentity").textContent=user.displayName||"Admin";$("adminEmail").textContent=user.email||"";
- try{await call("initializeMindspaceAdmin")({});await user.getIdToken(true);await loadUsers();await loadGuestAccess();}
- catch(e){showError("actionError",e);$("userList").innerHTML='<p class="muted">Admin setup is not complete. Check the setup instructions and verify the admin email address.</p>';}}
+ if((user.email||"").toLowerCase()!=="leo337657@gmail.com"||!user.emailVerified){$("guestAccessStatus").textContent="Sign in with the verified Mindspace administrator email to manage guest access.";return;}
+ await loadGuestAccess();
+ try{await call("initializeMindspaceAdmin")({});await user.getIdToken(true);await loadUsers();}
+ catch(e){showError("actionError",e);$("userList").innerHTML='<p class="muted">Chat moderation functions are unavailable. Guest game settings can still be managed above.</p>';}}
 );
 </script></body></html>
