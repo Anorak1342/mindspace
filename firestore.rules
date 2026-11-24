@@ -194,6 +194,16 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+
+    // Public arcade guest-access list. Only the verified Mindspace admin can change it.
+    match /arcadeSettings/{settingId} {
+      allow get: if settingId == 'guestAccess';
+      allow list: if false;
+      allow create, update: if settingId == 'guestAccess'
+        && request.auth != null && request.auth.token.admin == true;
+      allow delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
