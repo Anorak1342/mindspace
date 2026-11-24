@@ -463,9 +463,9 @@ function applyGameAccess(){
  });
  const daily=document.getElementById("daily-link");
  if(daily){
-  const target=[...originals.entries()].find(([href])=>href===daily.dataset.originalHref);
   if(!daily.dataset.originalHref)daily.dataset.originalHref=daily.getAttribute("href");
-  const open=signedIn||allowed.has(daily.dataset.originalHref);
+  const target=[...originals.entries()].find(([href])=>new URL(href,location.href).href===new URL(daily.dataset.originalHref,location.href).href);
+  const open=signedIn||!!(target&&allowed.has(target[0]));
   daily.href=open?daily.dataset.originalHref:accountUrl;
   if(!daily.dataset.originalText)daily.dataset.originalText=daily.textContent;
   daily.textContent=open?daily.dataset.originalText:"🔒 SIGN IN TO PLAY TODAY'S PICK";
