@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta id="viewport" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Football Bros · Mindspace</title>
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;background:#000;color:orange;overflow:hidden}
+#openfl-content{background:#000;width:100%;height:100%}
+#game2{width:100%;height:100%}
+</style>
+<script>
+var aCo = "";
+(function () {
+  var HOST = 'footballbros.io';
+
+  function lock(obj) {
+    ['hostName', 'hostNameFull'].forEach(function (k) {
+      try {
+        Object.defineProperty(obj, k, {
+          configurable: true,
+          get: function () { return HOST; },
+          set: function () {}
+        });
+      } catch (e) { try { obj[k] = HOST; } catch (e2) {} }
+    });
+  }
+  var tries = 0;
+  (function wait() {
+    if (window.Main && typeof window.Main === 'function') { lock(window.Main); return; }
+    if (window.Main && typeof window.Main === 'object') { lock(window.Main); }
+    if (++tries < 600) setTimeout(wait, 20);
+  })();
+
+  var PROBE = /^https?:\/\/fb\.[^/]+\/?\?.*ping=true/i;
+  var LIST = /docs\.google\.com\/spreadsheets/i;
+  var xOpen = XMLHttpRequest.prototype.open, xSend = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.open = function (method, url) {
+    var u = String(url || '');
+    this.__skip = PROBE.test(u) || LIST.test(u);
+    return xOpen.apply(this, arguments);
+  };
+  XMLHttpRequest.prototype.send = function () {
+    if (this.__skip) return;
+    return xSend.apply(this, arguments);
+  };
+
+  var d = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+  if (d && d.set) {
+    try {
+      Object.defineProperty(HTMLImageElement.prototype, 'src', {
+        configurable: true,
+        enumerable: d.enumerable,
+        get: d.get,
+        set: function (v) {
+          if (/^https?:\/\/fb\.[^/]+\/site\.png/i.test(String(v || ''))) {
+            var img = this;
+            setTimeout(function () {
+              try { if (typeof img.onerror === 'function') img.onerror(new Event('error')); } catch (e) {}
+            }, 0);
+            return;
+          }
+          return d.set.call(this, v);
+        }
+      });
+    } catch (e) {}
+  }
+
+  window.open = function () { return null; };
+
+  var AC = window.AudioContext || window.webkitAudioContext;
+  if (AC) {
+    var pool = [];
+    function W() { var c = new AC(arguments[0]); pool.push(c); return c; }
+    W.prototype = AC.prototype;
+    try {
+      window.AudioContext = W;
+      if (window.webkitAudioContext) window.webkitAudioContext = W;
+    } catch (e) {}
+    function wake() {
+      for (var i = 0; i < pool.length; i++) {
+        try { if (pool[i].state === 'suspended') pool[i].resume(); } catch (e) {}
+      }
+    }
+    ['pointerdown', 'keydown', 'touchstart'].forEach(function (t) { window.addEventListener(t, wake, true); });
+  }
+})();
+</script>
+<script src="FootballBros.js?th=309"></script>
+<script>
+window.addEventListener("touchmove", function (e) { e.preventDefault(); }, { capture: false, passive: false });
+if (typeof window.devicePixelRatio != 'undefined' && window.devicePixelRatio > 2) {
+  var mv = document.getElementById("viewport");
+  if (mv) mv.setAttribute('content', 'width=device-width, initial-scale=' + (2 / window.devicePixelRatio) + ', user-scalable=no');
+}
+window.addEventListener('keydown', function (e) {
+  if ((e.keyCode == 32 || e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 9) && e.target == document.body) e.preventDefault();
+});
+</script>
+</head>
+<body>
+<noscript>Enable JavaScript to play.</noscript>
+<div id="loading" style="position:absolute;z-index:15;top:60%;left:50%;transform:translate(-50%,0);background:#000;display:none;visibility:hidden"></div>
+<div id="game2">
+<div id="openfl-content" style="width:100%;float:left;cursor:default"></div>
+<div id="preroll" style="width:960px;height:540px;display:none;position:absolute;top:50%;left:50%;z-index:100;transform:translate(-50%,-50%)"></div>
+  <div id="footballbros-io_160x600" style="width: 0px; height: 600px; visibility: hidden; display: none; position: absolute; top: 30px; left: 30px; z-index: 100; overflow: hidden;"></div>
+  <div id="footballbros-io_160x600_2" style="width: 0px; height: 600px; visibility: hidden; display: none; position: absolute; top: 30px; left: 30px; z-index: 100; overflow: hidden;"></div>
+  <div id="footballbros-io_300x250" style="width:336px;height:280px;visibility:hidden;display:none;position:absolute;top:30px;left:30px;z-index:100;overflow:hidden"></div>
+  <div id="footballbros-io_300x250_2" style="width:336px;height:280px;visibility:hidden;display:none;position:absolute;top:30px;left:30px;z-index:100;overflow:hidden"></div>
+  <div id="footballbros-io_336x280" style="visibility:hidden;width:336px;height:600px;display:none;position:absolute;left:30px;z-index:100;overflow:hidden"></div>
+  <div id="footballbros-io_336x280_2" style="visibility:hidden;width:336px;height:600px;display:none;position:absolute;left:30px;z-index:100;overflow:hidden"></div>
+  <div id="footballbros-io_728x90" style="visibility:hidden;width:728px;height:90px;display:none;position:absolute;top:30px;left:30px;z-index:100;overflow:hidden"></div>
+  <div id="footballbros-io_728x90_m" style="visibility:hidden;width:728px;height:90px;display:none;position:absolute;top:30px;left:30px;z-index:100;overflow:hidden"></div>
+  <div id="footballbros-io_970x250" style="visibility:hidden;width:970px;height:250px;display:none;position:absolute;top:30px;left:30px;z-index:100;text-align:center;overflow:hidden"></div>
+</div>
+<script>
+var SAVE_KEY = "fb_save_v1";
+var userData = "";
+try { userData = localStorage.getItem(SAVE_KEY) || ""; } catch (e) { userData = ""; }
+
+function saveGameData(gameData) {
+  userData = gameData;
+  try { localStorage.setItem(SAVE_KEY, gameData); } catch (e) {}
+}
+function loadGameData() { return userData; }
+function loadGameDataAsync() {
+  try { userData = localStorage.getItem(SAVE_KEY) || ""; } catch (e) {}
+  if (typeof Main != "undefined" && Main.LoadDataComplete) { try { Main.LoadDataComplete(); } catch (e) {} }
+}
+function isUserLoggedIn() { return false; }
+function triggerSignIn() {}
+function signOut() {
+  if (typeof Main != "undefined" && Main.SignOutComplete) { try { Main.SignOutComplete(); } catch (e) {} }
+}
+
+function SendEvent() {}
+function EmailSignup() {}
+function GamePlayStart() {}
+function GamePlayStop() {}
+function HappyTime() {}
+function ShowAd1() { return; }
+function ShowAd2() { return; }
+function ShowAd3() { return; }
+function ShowAd4() { return; }
+function ShowAd5() { return; }
+function ShowAd6() { return; }
+function ShowAd7() { return; }
+function ShowAd8() { return; }
+function ShowAd9() { return; }
+function ShowAd10() { return; }
+function ShowAd11() { return; }
+function ShowVideo(theUnitName) {
+  if (typeof Main != "undefined" && Main.DoneVideoAd) { try { Main.DoneVideoAd(true); } catch (e) {} }
+  return;
+}
+
+var scrollerMessage = "   WELCOME BACK TO FOOTBALL BROS! PICK YOUR PLAY AND GO!";
+
+var el = document.getElementById("openfl-content");
+if (el) {
+  el.addEventListener('blur', function () { el.focus(); });
+  el.addEventListener('focusout', function () { el.focus(); });
+}
+setInterval(function () {
+  if (document.activeElement && document.activeElement.tagName == "IFRAME") {
+    document.activeElement.blur();
+    if (el) el.focus();
+  }
+}, 30);
+</script>
+<script>lime.embed("FootballBros", "openfl-content", 0, 0, { parameters: {} });</script>
+</body>
+</html>
