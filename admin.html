@@ -38,14 +38,14 @@ const app=initializeApp(firebaseConfig),auth=getAuth(app),functions=getFunctions
 const call=(name)=>httpsCallable(functions,name);
 const $=id=>document.getElementById(id);let users=[];
 function errorText(e){return e?.message||"Something went wrong."}
-let arcadeGames=[],guestHrefs=new Set();
+let arcadeGames=[],guestHrefs=new Set(),selectedGuestHrefs=new Set();
 async function loadGuestAccess(){
  const status=$("guestAccessStatus");status.textContent="Loading games and current guest settings…";
  try{
   const [page,settings]=await Promise.all([fetch("./arcade.html").then(r=>{if(!r.ok)throw new Error("Could not load arcade.html");return r.text()}),getDoc(doc(db,"arcadeSettings","guestAccess"))]);
   const parsed=new DOMParser().parseFromString(page,"text/html");
   arcadeGames=[...parsed.querySelectorAll(".game")].map(card=>({name:card.querySelector("h2")?.textContent?.trim()||"Unnamed game",href:card.querySelector(".play")?.getAttribute("href")})).filter(g=>g.href);
-  guestHrefs=new Set(settings.exists()&&Array.isArray(settings.data().guestGameHrefs)?settings.data().guestGameHrefs:[]);
+  guestHrefs=new Set(settings.exists()&&Array.isArray(settings.data().guestGameHrefs)?settings.data().guestGameHrefs:[]);selectedGuestHrefs=new Set(guestHrefs);
   renderGuestGames();status.textContent=arcadeGames.length+" games found. Unticked games are locked for guests.";
  }catch(e){status.textContent="Could not load guest access settings: "+errorText(e);}
 }
@@ -53,7 +53,7 @@ function renderGuestGames(){
  const root=$("guestGameList"),q=$("gameAccessSearch").value.trim().toLowerCase();root.innerHTML="";
  for(const game of arcadeGames.filter(g=>g.name.toLowerCase().includes(q))){
   const label=document.createElement("label");label.style.cssText="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#11131e;font-size:13px";
-  const input=document.createElement("input");input.type="checkbox";input.checked=guestHrefs.has(game.href);input.dataset.href=game.href;input.style.cssText="width:17px;height:17px;accent-color:#9df3d0";
+  const input=document.createElement("input");input.type="checkbox";input.checked=selectedGuestHrefs.has(game.href);input.dataset.href=game.href;input.addEventListener('change',()=>{if(input.checked)selectedGuestHrefs.add(game.href);else selectedGuestHrefs.delete(game.href)});input.style.cssText="width:17px;height:17px;accent-color:#9df3d0";
   const span=document.createElement("span");span.textContent=game.name;label.append(input,span);root.append(label);
  }
 }
@@ -61,13 +61,8 @@ $("gameAccessSearch").addEventListener("input",renderGuestGames);
 $("saveGuestAccess").onclick=async()=>{
  const button=$("saveGuestAccess"),status=$("guestAccessStatus");button.disabled=true;status.textContent="Saving…";
  try{
-  const selected=[...$("guestGameList").querySelectorAll("input[type=checkbox]:checked")].map(x=>x.dataset.href);
-  const q=$("gameAccessSearch").value.trim().toLowerCase();
-  const visible=new Set(arcadeGames.filter(g=>g.name.toLowerCase().includes(q)).map(g=>g.href));
-  const merged=new Set([...guestHrefs].filter(h=>!visible.has(h)));
-  selected.forEach(h=>merged.add(h));
-  await setDoc(doc(db,"arcadeSettings","guestAccess"),{guestGameHrefs:[...merged],updatedAt:new Date().toISOString()});
-  guestHrefs=merged;status.textContent="Saved. "+merged.size+" games are available to guests.";
+  await setDoc(doc(db,"arcadeSettings","guestAccess"),{guestGameHrefs:[...selectedGuestHrefs],updatedAt:new Date().toISOString()});
+  guestHrefs=new Set(selectedGuestHrefs);status.textContent="Saved. "+guestHrefs.size+" games are available to guests.";
  }catch(e){status.textContent="Could not save: "+errorText(e);}
  finally{button.disabled=false;}
 };
