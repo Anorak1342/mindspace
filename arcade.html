@@ -127,7 +127,7 @@ body.tab-away #away-cover{display:flex}
 <div class="arcade-welcome-card"><div class="eyebrow">WELCOME TO MINDSPACE ARCADE</div><h1 id="arcade-welcome-title">Ready to play?</h1><p class="arcade-welcome-intro">A big collection of games, without the hunting around.</p>
 <div class="arcade-quick-tutorial"><div><span>1</span><strong>Find a game</strong><small>Use the search bar or genre filter.</small></div><div><span>2</span><strong>Press Play</strong><small>Choose a game card to launch it.</small></div><div><span>3</span><strong>Keep your favourites</strong><small>Star games to find them quickly next time.</small></div></div>
 <button type="button" id="enter-arcade">LET'S PLAY <span aria-hidden="true">→</span></button><small class="arcade-welcome-foot">This quick guide only appears the first time you visit on this browser.</small></div></section><main class="wrap">
-<header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><nav class="toplinks"><button class="back" id="blank-launch" type="button" hidden>↗ Open blank tab</button><button class="back" id="tab-privacy" type="button">⌘ Tab privacy</button><a class="back" id="account-access" href="./account.html?return=arcade">Sign in</a><a class="back hidden" id="admin-access" href="./admin.html">Manage access</a></nav></header>
+<header class="top"><div class="brand">mindspace <span>✳ ARCADE</span></div><nav class="toplinks"><button class="back" id="blank-launch" type="button" hidden>↗ Open blank tab</button><button class="back" id="tab-privacy" type="button">⌘ Tab privacy</button><a class="back hidden" id="admin-access" href="./admin.html">Manage access</a></nav></header>
 <aside class="arcade-sidebar" aria-label="Arcade navigation">
   <div class="sidebar-heading">ARCADE MENU</div>
   <a class="side-link active" href="#overview" data-page="overview"><span>⌂</span> Overview</a>
@@ -444,52 +444,5 @@ document.getElementById("personal-record-form")?.addEventListener("submit",()=>r
  window.addEventListener("hashchange",()=>show(aliases[location.hash.slice(1)]||location.hash.slice(1),false));
 })();
 </script>
-<script type="module">
-import {initializeApp,getApps} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
-import {getAuth,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
-import {getFirestore,doc,getDoc} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
-const config={apiKey:"AIzaSyDymemJH4sSueC3PtiRsFlzdO_sR3yf2u4",authDomain:"mindspace-59b2d.firebaseapp.com",projectId:"mindspace-59b2d",storageBucket:"mindspace-59b2d.firebasestorage.app",messagingSenderId:"17331225260",appId:"1:17331225260:web:251d323c504ef116465509"};
-const app=getApps().length?getApps()[0]:initializeApp(config),auth=getAuth(app),db=getFirestore(app);
-const account=document.getElementById("account-access"),adminLink=document.getElementById("admin-access");
-const accountUrl="./account.html?return=arcade";
-let allowed=new Set(),signedIn=false;
-function applyGameAccess(){
- const originals=new Map();
- document.querySelectorAll(".game .play").forEach(link=>{
-  if(!link.dataset.originalHref){link.dataset.originalHref=link.getAttribute("href");link.dataset.originalText=link.textContent;}
-  originals.set(link.dataset.originalHref,link);
-  const open=signedIn||allowed.has(link.dataset.originalHref);
-  link.href=open?link.dataset.originalHref:accountUrl;
-  link.textContent=open?link.dataset.originalText:"🔒 SIGN IN TO PLAY";
-  link.setAttribute("aria-label",open?link.dataset.originalText:"Sign in to unlock "+(link.closest(".game")?.querySelector("h2")?.textContent||"this game"));
-  link.classList.toggle("gold",!open);
- });
- const daily=document.getElementById("daily-link");
- if(daily){
-  if(!daily.dataset.originalHref)daily.dataset.originalHref=daily.getAttribute("href");
-  const target=[...originals.entries()].find(([href])=>new URL(href,location.href).href===new URL(daily.dataset.originalHref,location.href).href);
-  const open=signedIn||!!(target&&allowed.has(target[0]));
-  daily.href=open?daily.dataset.originalHref:accountUrl;
-  if(!daily.dataset.originalText)daily.dataset.originalText=daily.textContent;
-  daily.textContent=open?daily.dataset.originalText:"🔒 SIGN IN TO PLAY TODAY'S PICK";
- }
- account.textContent=signedIn?"Account ✓":"Sign in";
- account.href=accountUrl;
- if(signedIn){
-  account.onclick=event=>{event.preventDefault();if(confirm("Sign out of Mindspace?"))signOut(auth).then(()=>location.reload());};
-  account.title="Click to sign out";
- }else{account.onclick=null;account.title="Sign in to unlock every game";}
-}
-onAuthStateChanged(auth,async user=>{
- signedIn=!!user;adminLink.hidden=!(user&&(user.email||"").toLowerCase()==="leo337657@gmail.com");allowed=new Set();
- if(!signedIn){
-  try{
-   const snap=await getDoc(doc(db,"arcadeSettings","guestAccess"));
-   const values=snap.exists()&&Array.isArray(snap.data().guestGameHrefs)?snap.data().guestGameHrefs:[];
-   allowed=new Set(values.filter(x=>typeof x==="string"));
-  }catch(error){console.warn("Guest access settings could not be loaded. Games remain locked until settings are available.",error);}
- }
- applyGameAccess();
-});
-</script>
+<!-- Guest play is enabled for every arcade game. Account sign-in is optional. -->
 </body></html>
